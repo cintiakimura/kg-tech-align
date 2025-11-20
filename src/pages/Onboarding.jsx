@@ -4,16 +4,21 @@ import { base44 } from "@/api/base44Client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X } from 'lucide-react';
 import CompanyForm from '../components/onboarding/CompanyForm';
 import CarForm from '../components/onboarding/CarForm';
+import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 export default function Onboarding() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("welcome");
   const [isAddingCar, setIsAddingCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
+  const [isConfiguringVideos, setIsConfiguringVideos] = useState(false);
+  const [videoUrls, setVideoUrls] = useState({ demo: '', setup: '' });
 
   // Fetch Company Profile
   const { data: companyProfileList, isLoading: isLoadingCompany } = useQuery({
@@ -27,6 +32,37 @@ export default function Onboarding() {
     queryKey: ['carProfiles'],
     queryFn: () => base44.entities.CarProfile.list(),
   });
+
+  // Fetch Onboarding Content
+  const { data: onboardingContentList, isLoading: isLoadingContent } = useQuery({
+    queryKey: ['onboardingContent'],
+    queryFn: () => base44.entities.OnboardingContent.list({}, { limit: 1 }),
+  });
+  const onboardingContent = onboardingContentList?.[0];
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleSaveVideoUrls = async () => {
+    try {
+        if (onboardingContent?.id) {
+            await base44.entities.OnboardingContent.update(onboardingContent.id, {
+                demo_video_url: videoUrls.demo,
+                setup_video_url: videoUrls.setup
+            });
+        } else {
+            await base44.entities.OnboardingContent.create({
+                demo_video_url: videoUrls.demo,
+                setup_video_url: videoUrls.setup
+            });
+        }
+        queryClient.invalidateQueries(['onboardingContent']);
+        setIsConfiguringVideos(false);
+    } catch (error) {
+        console.error("Failed to save video URLs", error);
+    }
+  };
 
   const handleDeleteCar = async (id) => {
     if (window.confirm("Are you sure you want to delete this car profile?")) {
@@ -42,20 +78,30 @@ export default function Onboarding() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight">Client Onboarding</h1>
-            <p className="text-muted-foreground mt-1">Complete your profile and set up your fleet.</p>
-        </div>
-        {companyProfile && (
-            <div className="flex items-center gap-2 text-sm bg-[#00C600]/10 text-[#00C600] px-3 py-1 rounded-full border border-[#00C600]/20">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{companyProfile.company_name} Connected</span>
-            </div>
-        )}
-      </div>
+      {/* Printable Report (Hidden by default, visible on print) */}
+      <PrintableReport companyProfile={companyProfile} carProfiles={carProfiles} />
 
-      <Tabs defaultValue="welcome" value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {/* Main App Content (Hidden on print) */}
+      <div className="print:hidden space-y-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Client Onboarding</h1>
+                <p className="text-muted-foreground mt-1">Complete your profile and set up your fleet.</p>
+            </div>
+            <div className="flex items-center gap-3">
+                {companyProfile && (
+                    <div className="flex items-center gap-2 text-sm bg-[#00C600]/10 text-[#00C600] px-3 py-1 rounded-full border border-[#00C600]/20">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>{companyProfile.company_name} Connected</span>
+                    </div>
+                )}
+                <Button variant="outline" onClick={handlePrint} className="gap-2">
+                    <Printer className="w-4 h-4" /> Export Report
+                </Button>
+            </div>
+          </div>
+
+          <Tabs defaultValue="welcome" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 lg:w-[400px] bg-white dark:bg-[#2a2a2a]">
           <TabsTrigger value="welcome" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
             <MonitorPlay className="w-4 h-4 mr-2" /> Welcome
@@ -70,18 +116,77 @@ export default function Onboarding() {
 
         {/* WELCOME TAB */}
         <TabsContent value="welcome" className="mt-6 space-y-6">
+            <div className="flex justify-end mb-2">
+                <Dialog open={isConfiguringVideos} onOpenChange={(open) => {
+                    if (open && onboardingContent) {
+                        setVideoUrls({ 
+                            demo: onboardingContent.demo_video_url || '', 
+                            setup: onboardingContent.setup_video_url || '' 
+                        });
+                    }
+                    setIsConfiguringVideos(open);
+                }}>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-xs text-gray-500">
+                            <Settings className="w-3 h-3 mr-1" /> Configure Videos
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Configure Onboarding Videos</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Demo Video URL</label>
+                                <Input 
+                                    value={videoUrls.demo} 
+                                    onChange={(e) => setVideoUrls(prev => ({...prev, demo: e.target.value}))} 
+                                    placeholder="https://youtube.com/..."
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Setup Video URL</label>
+                                <Input 
+                                    value={videoUrls.setup} 
+                                    onChange={(e) => setVideoUrls(prev => ({...prev, setup: e.target.value}))} 
+                                    placeholder="https://youtube.com/..."
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsConfiguringVideos(false)}>Cancel</Button>
+                            <Button onClick={handleSaveVideoUrls} className="bg-[#00C600] text-white">Save Changes</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Demo Video Card */}
                 <Card className="overflow-hidden border-none shadow-lg bg-white dark:bg-[#2a2a2a]">
                     <div className="aspect-video bg-black relative group cursor-pointer">
-                        <img 
-                            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop" 
-                            alt="Demo Video Thumbnail" 
-                            className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
-                        </div>
-                        <div className="absolute bottom-4 left-4">
+                        {onboardingContent?.demo_video_url ? (
+                            <iframe 
+                                src={onboardingContent.demo_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                                className="w-full h-full" 
+                                title="Demo Video"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                        ) : (
+                            <>
+                                <img 
+                                    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop" 
+                                    alt="Demo Video Thumbnail" 
+                                    className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
+                                </div>
+                            </>
+                        )}
+                        <div className="absolute bottom-4 left-4 pointer-events-none">
                             <span className="bg-[#00C600] text-white text-xs px-2 py-1 rounded">DEMO</span>
                         </div>
                     </div>
@@ -91,17 +196,31 @@ export default function Onboarding() {
                     </CardHeader>
                 </Card>
 
+                {/* Setup Video Card */}
                 <Card className="overflow-hidden border-none shadow-lg bg-white dark:bg-[#2a2a2a]">
                     <div className="aspect-video bg-black relative group cursor-pointer">
-                        <img 
-                            src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1000&auto=format&fit=crop" 
-                            alt="Setup Video Thumbnail" 
-                            className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
-                        </div>
-                        <div className="absolute bottom-4 left-4">
+                        {onboardingContent?.setup_video_url ? (
+                            <iframe 
+                                src={onboardingContent.setup_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                                className="w-full h-full" 
+                                title="Setup Video"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                        ) : (
+                            <>
+                                <img 
+                                    src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1000&auto=format&fit=crop" 
+                                    alt="Setup Video Thumbnail" 
+                                    className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
+                                </div>
+                            </>
+                        )}
+                        <div className="absolute bottom-4 left-4 pointer-events-none">
                             <span className="bg-[#00C600] text-white text-xs px-2 py-1 rounded">TUTORIAL</span>
                         </div>
                     </div>
@@ -238,6 +357,7 @@ export default function Onboarding() {
             )}
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
