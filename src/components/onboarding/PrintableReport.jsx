@@ -50,7 +50,7 @@ export default function PrintableReport({ companyProfile, carProfiles }) {
       {carProfiles && carProfiles.length > 0 && (
         <div>
           <h2 className="text-xl font-bold border-b-2 border-black mb-6 pb-1 flex items-center gap-2">
-            <Car className="w-5 h-5" /> Fleet Information ({carProfiles.length} Vehicles)
+            <Car className="w-5 h-5" /> {t('tab_fleet')} ({carProfiles.length})
           </h2>
           
           <div className="space-y-8">
@@ -62,34 +62,34 @@ export default function PrintableReport({ companyProfile, carProfiles }) {
                 
                 <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                        <span className="font-semibold block text-xs text-gray-500">Engine</span>
+                        <span className="font-semibold block text-xs text-gray-500">{t('engine_model')}</span>
                         <span className="text-sm">{car.engine_model || '-'}</span>
                     </div>
                     <div>
-                        <span className="font-semibold block text-xs text-gray-500">Transmission</span>
+                        <span className="font-semibold block text-xs text-gray-500">{t('transmission')}</span>
                         <span className="text-sm">{car.transmission_type || '-'}</span>
                     </div>
                     <div>
-                        <span className="font-semibold block text-xs text-gray-500">Brakes</span>
+                        <span className="font-semibold block text-xs text-gray-500">{t('brakes_type')}</span>
                         <span className="text-sm">{car.brakes_type || '-'}</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <span className="font-semibold block text-xs text-gray-500 mb-1">Photos Provided</span>
+                        <span className="font-semibold block text-xs text-gray-500 mb-1">{t('required_photos')}</span>
                         <ul className="list-disc list-inside text-xs">
-                            {car.image_connector_front && <li>Connector Front</li>}
-                            {car.image_lever_side && <li>Lever Side</li>}
-                            {car.image_ecu_part_number && <li>ECU Part #</li>}
-                            {car.image_ecu_front && <li>ECU Front</li>}
+                            {car.image_connector_front && <li>{t('conn_front')}</li>}
+                            {car.image_lever_side && <li>{t('lever_side')}</li>}
+                            {car.image_ecu_part_number && <li>{t('ecu_part')}</li>}
+                            {car.image_ecu_front && <li>{t('ecu_front')}</li>}
                         </ul>
                     </div>
                     <div>
-                        <span className="font-semibold block text-xs text-gray-500 mb-1">Documents Provided</span>
+                        <span className="font-semibold block text-xs text-gray-500 mb-1">{t('tech_docs')}</span>
                         <ul className="list-disc list-inside text-xs">
-                            {car.file_electrical_scheme && <li>Electrical Scheme</li>}
-                            {car.file_sensors_actuators && <li>Sensors List</li>}
+                            {car.file_electrical_scheme && <li>{t('elec_scheme')}</li>}
+                            {car.file_sensors_actuators && <li>{t('sensors_list')}</li>}
                         </ul>
                     </div>
                 </div>
