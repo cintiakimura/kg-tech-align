@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from '../LanguageContext';
 
 export default function CompanyForm({ onComplete, initialData }) {
+  const { t } = useLanguage();
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
     defaultValues: initialData || {}
   });
@@ -34,15 +36,15 @@ export default function CompanyForm({ onComplete, initialData }) {
   return (
     <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="px-0 pt-0">
-            <CardTitle className="text-2xl font-bold">Company Information</CardTitle>
-            <CardDescription>Please provide your company details for invoicing purposes.</CardDescription>
+            <CardTitle className="text-2xl font-bold">{t('company_info')}</CardTitle>
+            <CardDescription>{t('company_desc')}</CardDescription>
         </CardHeader>
         <CardContent className="px-0">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-[#00C600]" /> Company Name
+                            <Building2 className="w-4 h-4 text-[#00C600]" /> {t('company_name')}
                         </label>
                         <Input 
                             {...register("company_name", { required: "Company name is required" })} 
@@ -54,7 +56,7 @@ export default function CompanyForm({ onComplete, initialData }) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-[#00C600]" /> Tax / VAT ID
+                            <FileText className="w-4 h-4 text-[#00C600]" /> {t('tax_id')}
                         </label>
                         <Input 
                             {...register("tax_id")} 
@@ -65,7 +67,7 @@ export default function CompanyForm({ onComplete, initialData }) {
 
                     <div className="space-y-2 md:col-span-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-[#00C600]" /> Billing Address
+                            <MapPin className="w-4 h-4 text-[#00C600]" /> {t('billing_address')}
                         </label>
                         <Input 
                             {...register("address")} 
@@ -76,7 +78,7 @@ export default function CompanyForm({ onComplete, initialData }) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-[#00C600]" /> Contact Email
+                            <Mail className="w-4 h-4 text-[#00C600]" /> {t('contact_email')}
                         </label>
                         <Input 
                             {...register("contact_email", { 
@@ -90,7 +92,7 @@ export default function CompanyForm({ onComplete, initialData }) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-[#00C600]" /> Phone Number
+                            <Phone className="w-4 h-4 text-[#00C600]" /> {t('phone_number')}
                         </label>
                         <Input 
                             {...register("phone")} 
@@ -106,7 +108,7 @@ export default function CompanyForm({ onComplete, initialData }) {
                         disabled={isSubmitting}
                         className="bg-[#00C600] hover:bg-[#00b300] text-white min-w-[140px]"
                     >
-                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save & Continue"}
+                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save_continue')}
                     </Button>
                 </div>
             </form>

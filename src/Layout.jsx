@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Menu, X } from 'lucide-react';
+import { Moon, Sun, Menu, X, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { base44 } from "@/api/base44Client";
+import { LanguageProvider, useLanguage } from './components/LanguageContext';
 
-export default function Layout({ children }) {
+function LayoutContent({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [user, setUser] = useState(null);
+  const { language, changeLanguage, t } = useLanguage();
   const location = useLocation();
 
   useEffect(() => {
@@ -61,7 +69,21 @@ export default function Layout({ children }) {
             </div>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-100'}`}>
+                    <Globe className="h-4 w-4" />
+                    <span className="uppercase">{language}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => changeLanguage('en')}>English</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('es')}>Español</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => changeLanguage('de')}>Deutsch</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -113,5 +135,13 @@ export default function Layout({ children }) {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function Layout(props) {
+  return (
+    <LanguageProvider>
+      <LayoutContent {...props} />
+    </LanguageProvider>
   );
 }

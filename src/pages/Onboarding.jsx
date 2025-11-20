@@ -11,8 +11,10 @@ import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useLanguage } from '../components/LanguageContext';
 
 export default function Onboarding() {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("welcome");
   const [isAddingCar, setIsAddingCar] = useState(false);
@@ -104,13 +106,13 @@ export default function Onboarding() {
           <Tabs defaultValue="welcome" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 lg:w-[400px] bg-white dark:bg-[#2a2a2a]">
           <TabsTrigger value="welcome" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <MonitorPlay className="w-4 h-4 mr-2" /> Welcome
+            <MonitorPlay className="w-4 h-4 mr-2" /> {t('tab_welcome')}
           </TabsTrigger>
           <TabsTrigger value="company" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <Building2 className="w-4 h-4 mr-2" /> Company
+            <Building2 className="w-4 h-4 mr-2" /> {t('tab_company')}
           </TabsTrigger>
           <TabsTrigger value="fleet" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <Car className="w-4 h-4 mr-2" /> Fleet
+            <Car className="w-4 h-4 mr-2" /> {t('tab_fleet')}
           </TabsTrigger>
         </TabsList>
 
@@ -128,16 +130,16 @@ export default function Onboarding() {
                 }}>
                     <DialogTrigger asChild>
                         <Button variant="ghost" size="sm" className="text-xs text-gray-500">
-                            <Settings className="w-3 h-3 mr-1" /> Configure Videos
+                            <Settings className="w-3 h-3 mr-1" /> {t('configure_videos')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Configure Onboarding Videos</DialogTitle>
+                            <DialogTitle>{t('configure_videos')}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Demo Video URL</label>
+                                <label className="text-sm font-medium">{t('demo_url')}</label>
                                 <Input 
                                     value={videoUrls.demo} 
                                     onChange={(e) => setVideoUrls(prev => ({...prev, demo: e.target.value}))} 
@@ -145,7 +147,7 @@ export default function Onboarding() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Setup Video URL</label>
+                                <label className="text-sm font-medium">{t('setup_url')}</label>
                                 <Input 
                                     value={videoUrls.setup} 
                                     onChange={(e) => setVideoUrls(prev => ({...prev, setup: e.target.value}))} 
@@ -154,8 +156,8 @@ export default function Onboarding() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsConfiguringVideos(false)}>Cancel</Button>
-                            <Button onClick={handleSaveVideoUrls} className="bg-[#00C600] text-white">Save Changes</Button>
+                            <Button variant="outline" onClick={() => setIsConfiguringVideos(false)}>{t('cancel')}</Button>
+                            <Button onClick={handleSaveVideoUrls} className="bg-[#00C600] text-white">{t('save_changes')}</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -191,8 +193,8 @@ export default function Onboarding() {
                         </div>
                     </div>
                     <CardHeader>
-                        <CardTitle>Platform Overview</CardTitle>
-                        <CardDescription>Watch how our solution integrates with your workflow.</CardDescription>
+                        <CardTitle>{t('platform_overview')}</CardTitle>
+                        <CardDescription>{t('platform_desc')}</CardDescription>
                     </CardHeader>
                 </Card>
 
@@ -225,15 +227,15 @@ export default function Onboarding() {
                         </div>
                     </div>
                     <CardHeader>
-                        <CardTitle>Installation & Setup</CardTitle>
-                        <CardDescription>Step-by-step guide to installing the connector.</CardDescription>
+                        <CardTitle>{t('install_setup')}</CardTitle>
+                        <CardDescription>{t('install_desc')}</CardDescription>
                     </CardHeader>
                 </Card>
             </div>
             
             <div className="flex justify-end">
                 <Button onClick={() => setActiveTab("company")} className="bg-[#00C600] hover:bg-[#00b300] text-white">
-                    Get Started <CheckCircle2 className="w-4 h-4 ml-2" />
+                    {t('get_started')} <CheckCircle2 className="w-4 h-4 ml-2" />
                 </Button>
             </div>
         </TabsContent>
@@ -276,9 +278,9 @@ export default function Onboarding() {
             ) : (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold">Your Vehicles</h2>
+                        <h2 className="text-xl font-semibold">{t('your_vehicles')}</h2>
                         <Button onClick={() => setIsAddingCar(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white">
-                            <Plus className="w-4 h-4 mr-2" /> Add New Vehicle
+                            <Plus className="w-4 h-4 mr-2" /> {t('add_vehicle')}
                         </Button>
                     </div>
 
@@ -294,12 +296,12 @@ export default function Onboarding() {
                                 <div className="w-16 h-16 bg-gray-100 dark:bg-[#333] rounded-full flex items-center justify-center mb-4">
                                     <Car className="w-8 h-8 text-gray-400" />
                                 </div>
-                                <h3 className="text-lg font-semibold mb-1">No vehicles added yet</h3>
+                                <h3 className="text-lg font-semibold mb-1">{t('no_vehicles')}</h3>
                                 <p className="text-muted-foreground mb-6 max-w-sm">
-                                    Create a profile for each car to manage specific configurations and documents.
+                                    {t('no_vehicles_desc')}
                                 </p>
                                 <Button onClick={() => setIsAddingCar(true)} variant="outline" className="border-[#00C600] text-[#00C600] hover:bg-[#00C600] hover:text-white">
-                                    <Plus className="w-4 h-4 mr-2" /> Add Your First Car
+                                    <Plus className="w-4 h-4 mr-2" /> {t('add_first_car')}
                                 </Button>
                             </CardContent>
                         </Card>

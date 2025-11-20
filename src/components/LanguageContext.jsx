@@ -1,0 +1,211 @@
+import React, { createContext, useState, useContext, useEffect } from 'react';
+
+const LanguageContext = createContext();
+
+const translations = {
+  en: {
+    nav_title: "KG Solutions",
+    onboarding_title: "Client Onboarding",
+    onboarding_desc: "Complete your profile and set up your fleet.",
+    connected: "Connected",
+    export_report: "Export Report",
+    tab_welcome: "Welcome",
+    tab_company: "Company",
+    tab_fleet: "Fleet",
+    platform_overview: "Platform Overview",
+    platform_desc: "Watch how our solution integrates with your workflow.",
+    install_setup: "Installation & Setup",
+    install_desc: "Step-by-step guide to installing the connector.",
+    get_started: "Get Started",
+    company_info: "Company Information",
+    company_desc: "Please provide your company details for invoicing purposes.",
+    company_name: "Company Name",
+    tax_id: "Tax / VAT ID",
+    billing_address: "Billing Address",
+    contact_email: "Contact Email",
+    phone_number: "Phone Number",
+    save_continue: "Save & Continue",
+    car_profile: "Car Profile",
+    car_desc: "Add a new vehicle to your fleet.",
+    back: "Back",
+    vehicle_specs: "Vehicle Specifications",
+    brand: "Brand",
+    model: "Model",
+    engine_model: "Engine Model",
+    transmission: "Transmission",
+    brakes_type: "Brakes Type",
+    required_photos: "Required Photos",
+    photos_desc: "Please upload clear photos for verification.",
+    conn_front: "Connector Front View",
+    lever_side: "Lever Side View",
+    ecu_part: "ECU Part Number",
+    ecu_front: "ECU Front View",
+    extra_photo: "Additional Photo",
+    tech_docs: "Technical Documents",
+    elec_scheme: "Electrical Scheme",
+    elec_desc: "Upload PDF or Image of the electrical scheme",
+    sensors_list: "Sensors & Actuators List",
+    sensors_desc: "Upload list of sensors and actuators",
+    cancel: "Cancel",
+    save_car: "Save Car Profile",
+    your_vehicles: "Your Vehicles",
+    add_vehicle: "Add New Vehicle",
+    no_vehicles: "No vehicles added yet",
+    no_vehicles_desc: "Create a profile for each car to manage specific configurations and documents.",
+    add_first_car: "Add Your First Car",
+    configure_videos: "Configure Videos",
+    demo_url: "Demo Video URL",
+    setup_url: "Setup Video URL",
+    save_changes: "Save Changes",
+    upload_click: "Click to upload",
+    uploading: "Uploading...",
+    file_uploaded: "File uploaded",
+    view_file: "View file"
+  },
+  es: {
+    nav_title: "Soluciones KG",
+    onboarding_title: "Incorporación de Clientes",
+    onboarding_desc: "Complete su perfil y configure su flota.",
+    connected: "Conectado",
+    export_report: "Exportar Informe",
+    tab_welcome: "Bienvenida",
+    tab_company: "Empresa",
+    tab_fleet: "Flota",
+    platform_overview: "Resumen de Plataforma",
+    platform_desc: "Vea cómo nuestra solución se integra con su flujo de trabajo.",
+    install_setup: "Instalación y Configuración",
+    install_desc: "Guía paso a paso para instalar el conector.",
+    get_started: "Comenzar",
+    company_info: "Información de la Empresa",
+    company_desc: "Proporcione los detalles de su empresa para la facturación.",
+    company_name: "Nombre de la Empresa",
+    tax_id: "ID Fiscal / IVA",
+    billing_address: "Dirección de Facturación",
+    contact_email: "Email de Contacto",
+    phone_number: "Número de Teléfono",
+    save_continue: "Guardar y Continuar",
+    car_profile: "Perfil del Vehículo",
+    car_desc: "Añada un nuevo vehículo a su flota.",
+    back: "Volver",
+    vehicle_specs: "Especificaciones del Vehículo",
+    brand: "Marca",
+    model: "Modelo",
+    engine_model: "Modelo de Motor",
+    transmission: "Transmisión",
+    brakes_type: "Tipo de Frenos",
+    required_photos: "Fotos Requeridas",
+    photos_desc: "Por favor suba fotos claras para verificación.",
+    conn_front: "Vista Frontal Conector",
+    lever_side: "Vista Lateral Palanca",
+    ecu_part: "Número de Parte ECU",
+    ecu_front: "Vista Frontal ECU",
+    extra_photo: "Foto Adicional",
+    tech_docs: "Documentos Técnicos",
+    elec_scheme: "Esquema Eléctrico",
+    elec_desc: "Suba PDF o Imagen del esquema eléctrico",
+    sensors_list: "Lista de Sensores",
+    sensors_desc: "Suba lista de sensores y actuadores",
+    cancel: "Cancelar",
+    save_car: "Guardar Perfil",
+    your_vehicles: "Sus Vehículos",
+    add_vehicle: "Añadir Vehículo",
+    no_vehicles: "Aún no hay vehículos",
+    no_vehicles_desc: "Cree un perfil para cada auto para gestionar configuraciones y documentos.",
+    add_first_car: "Añada su Primer Auto",
+    configure_videos: "Configurar Videos",
+    demo_url: "URL Video Demo",
+    setup_url: "URL Video Configuración",
+    save_changes: "Guardar Cambios",
+    upload_click: "Click para subir",
+    uploading: "Subiendo...",
+    file_uploaded: "Archivo subido",
+    view_file: "Ver archivo"
+  },
+  de: {
+    nav_title: "KG Lösungen",
+    onboarding_title: "Kunden-Onboarding",
+    onboarding_desc: "Vervollständigen Sie Ihr Profil und richten Sie Ihre Flotte ein.",
+    connected: "Verbunden",
+    export_report: "Bericht Exportieren",
+    tab_welcome: "Willkommen",
+    tab_company: "Firma",
+    tab_fleet: "Flotte",
+    platform_overview: "Plattformübersicht",
+    platform_desc: "Sehen Sie, wie unsere Lösung in Ihren Workflow integriert wird.",
+    install_setup: "Installation & Einrichtung",
+    install_desc: "Schritt-für-Schritt-Anleitung zur Installation des Steckers.",
+    get_started: "Loslegen",
+    company_info: "Firmeninformationen",
+    company_desc: "Bitte geben Sie Ihre Firmendaten für die Rechnungsstellung an.",
+    company_name: "Firmenname",
+    tax_id: "Steuer-ID / USt-ID",
+    billing_address: "Rechnungsadresse",
+    contact_email: "Kontakt E-Mail",
+    phone_number: "Telefonnummer",
+    save_continue: "Speichern & Weiter",
+    car_profile: "Fahrzeugprofil",
+    car_desc: "Fügen Sie Ihrer Flotte ein neues Fahrzeug hinzu.",
+    back: "Zurück",
+    vehicle_specs: "Fahrzeugspezifikationen",
+    brand: "Marke",
+    model: "Modell",
+    engine_model: "Motormodell",
+    transmission: "Getriebe",
+    brakes_type: "Bremsentyp",
+    required_photos: "Erforderliche Fotos",
+    photos_desc: "Bitte laden Sie klare Fotos zur Überprüfung hoch.",
+    conn_front: "Stecker Frontansicht",
+    lever_side: "Hebel Seitenansicht",
+    ecu_part: "ECU Teilenummer",
+    ecu_front: "ECU Frontansicht",
+    extra_photo: "Zusätzliches Foto",
+    tech_docs: "Technische Dokumente",
+    elec_scheme: "Schaltplan",
+    elec_desc: "Laden Sie PDF oder Bild des Schaltplans hoch",
+    sensors_list: "Sensorenliste",
+    sensors_desc: "Laden Sie die Liste der Sensoren und Aktoren hoch",
+    cancel: "Abbrechen",
+    save_car: "Auto Speichern",
+    your_vehicles: "Ihre Fahrzeuge",
+    add_vehicle: "Fahrzeug Hinzufügen",
+    no_vehicles: "Noch keine Fahrzeuge",
+    no_vehicles_desc: "Erstellen Sie ein Profil für jedes Auto, um Konfigurationen zu verwalten.",
+    add_first_car: "Erstes Auto Hinzufügen",
+    configure_videos: "Videos Konfigurieren",
+    demo_url: "Demo Video URL",
+    setup_url: "Einrichtungs-Video URL",
+    save_changes: "Änderungen Speichern",
+    upload_click: "Klicken zum Hochladen",
+    uploading: "Wird hochgeladen...",
+    file_uploaded: "Datei hochgeladen",
+    view_file: "Datei ansehen"
+  }
+};
+
+export const LanguageProvider = ({ children }) => {
+  const [language, setLanguage] = useState('en');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && translations[savedLang]) {
+      setLanguage(savedLang);
+    }
+  }, []);
+
+  const changeLanguage = (lang) => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+  };
+
+  const t = (key) => {
+    return translations[language][key] || key;
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, changeLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => useContext(LanguageContext);

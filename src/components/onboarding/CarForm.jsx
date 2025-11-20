@@ -8,8 +8,10 @@ import { Loader2, Plus, Car, Settings, Zap, ArrowLeft, Trash2 } from 'lucide-rea
 import FileUpload from './FileUpload';
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
+import { useLanguage } from '../LanguageContext';
 
 export default function CarForm({ onCancel, onSuccess, initialData }) {
+  const { t } = useLanguage();
   const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: initialData || {
         transmission_type: "Automatic"
@@ -35,11 +37,11 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
     <Card className="border-none shadow-none bg-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
         <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
             <div>
-                <CardTitle className="text-2xl font-bold">Car Profile</CardTitle>
-                <CardDescription>Add a new vehicle to your fleet.</CardDescription>
+                <CardTitle className="text-2xl font-bold">{t('car_profile')}</CardTitle>
+                <CardDescription>{t('car_desc')}</CardDescription>
             </div>
             <Button variant="ghost" onClick={onCancel} size="sm" className="text-gray-500">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                <ArrowLeft className="w-4 h-4 mr-2" /> {t('back')}
             </Button>
         </CardHeader>
         <CardContent className="px-0">
@@ -47,25 +49,25 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                 {/* Car Details Section */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
-                        <Car className="w-5 h-5" /> Vehicle Specifications
+                        <Car className="w-5 h-5" /> {t('vehicle_specs')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Brand <span className="text-[#00C600]">*</span></label>
+                            <label className="text-sm font-medium">{t('brand')} <span className="text-[#00C600]">*</span></label>
                             <Input {...register("brand", { required: "Brand is required" })} placeholder="e.g. Toyota" className={InputStyle} />
                             {errors.brand && <span className="text-xs text-red-500">{errors.brand.message}</span>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Model <span className="text-[#00C600]">*</span></label>
+                            <label className="text-sm font-medium">{t('model')} <span className="text-[#00C600]">*</span></label>
                             <Input {...register("model", { required: "Model is required" })} placeholder="e.g. Camry" className={InputStyle} />
                             {errors.model && <span className="text-xs text-red-500">{errors.model.message}</span>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Engine Model</label>
+                            <label className="text-sm font-medium">{t('engine_model')}</label>
                             <Input {...register("engine_model")} placeholder="e.g. V6 3.5L" className={InputStyle} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Transmission</label>
+                            <label className="text-sm font-medium">{t('transmission')}</label>
                             <Controller
                                 name="transmission_type"
                                 control={control}
@@ -86,7 +88,7 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Brakes Type</label>
+                            <label className="text-sm font-medium">{t('brakes_type')}</label>
                             <Input {...register("brakes_type")} placeholder="e.g. Disc/Drum" className={InputStyle} />
                         </div>
                     </div>
@@ -95,52 +97,52 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                 {/* Images Section */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
-                        <Zap className="w-5 h-5" /> Required Photos
+                        <Zap className="w-5 h-5" /> {t('required_photos')}
                     </h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Please upload clear photos for verification.
+                        {t('photos_desc')}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <Controller
                             name="image_connector_front"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="Connector Front View" value={field.value} onChange={field.onChange} required />
+                                <FileUpload label={t('conn_front')} value={field.value} onChange={field.onChange} required />
                             )}
                         />
                         <Controller
                             name="image_lever_side"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="Lever Side View" value={field.value} onChange={field.onChange} required />
+                                <FileUpload label={t('lever_side')} value={field.value} onChange={field.onChange} required />
                             )}
                         />
                         <Controller
                             name="image_ecu_part_number"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="ECU Part Number" value={field.value} onChange={field.onChange} required />
+                                <FileUpload label={t('ecu_part')} value={field.value} onChange={field.onChange} required />
                             )}
                         />
                         <Controller
                             name="image_ecu_front"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="ECU Front View" value={field.value} onChange={field.onChange} required />
+                                <FileUpload label={t('ecu_front')} value={field.value} onChange={field.onChange} required />
                             )}
                         />
                         <Controller
                             name="image_extra_1"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="Additional Photo 1" value={field.value} onChange={field.onChange} />
+                                <FileUpload label={`${t('extra_photo')} 1`} value={field.value} onChange={field.onChange} />
                             )}
                         />
                         <Controller
                             name="image_extra_2"
                             control={control}
                             render={({ field }) => (
-                                <FileUpload label="Additional Photo 2" value={field.value} onChange={field.onChange} />
+                                <FileUpload label={`${t('extra_photo')} 2`} value={field.value} onChange={field.onChange} />
                             )}
                         />
                     </div>
@@ -149,7 +151,7 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                 {/* Documents Section */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
-                        <Settings className="w-5 h-5" /> Technical Documents
+                        <Settings className="w-5 h-5" /> {t('tech_docs')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Controller
@@ -157,11 +159,11 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                             control={control}
                             render={({ field }) => (
                                 <FileUpload 
-                                    label="Electrical Scheme" 
+                                    label={t('elec_scheme')} 
                                     value={field.value} 
                                     onChange={field.onChange} 
                                     accept=".pdf,.png,.jpg,.jpeg"
-                                    helperText="Upload PDF or Image of the electrical scheme"
+                                    helperText={t('elec_desc')}
                                 />
                             )}
                         />
@@ -170,11 +172,11 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                             control={control}
                             render={({ field }) => (
                                 <FileUpload 
-                                    label="Sensors & Actuators List" 
+                                    label={t('sensors_list')} 
                                     value={field.value} 
                                     onChange={field.onChange} 
                                     accept=".pdf,.csv,.xlsx,.png,.jpg"
-                                    helperText="Upload list of sensors and actuators"
+                                    helperText={t('sensors_desc')}
                                 />
                             )}
                         />
@@ -183,14 +185,14 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
 
                 <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-800">
                     <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-                        Cancel
+                        {t('cancel')}
                     </Button>
                     <Button 
                         type="submit" 
                         disabled={isSubmitting}
                         className="bg-[#00C600] hover:bg-[#00b300] text-white min-w-[140px]"
                     >
-                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Car Profile"}
+                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save_car')}
                     </Button>
                 </div>
             </form>

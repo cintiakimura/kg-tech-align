@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, X, CheckCircle, Loader2, FileText, Image as ImageIcon } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
+import { useLanguage } from '../LanguageContext';
 
 export default function FileUpload({ 
   label, 
@@ -11,6 +12,7 @@ export default function FileUpload({
   helperText,
   required = false
 }) {
+  const { t } = useLanguage();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -63,12 +65,12 @@ export default function FileUpload({
             {isUploading ? (
               <div className="flex flex-col items-center gap-2 text-[#00C600]">
                 <Loader2 className="w-6 h-6 animate-spin" />
-                <span className="text-xs font-medium">Uploading...</span>
+                <span className="text-xs font-medium">{t('uploading') || 'Uploading...'}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400 group-hover:text-[#00C600] transition-colors">
                 {isImage ? <ImageIcon className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
-                <span className="text-xs font-medium">Click to upload</span>
+                <span className="text-xs font-medium">{t('upload_click') || 'Click to upload'}</span>
               </div>
             )}
           </div>
@@ -91,10 +93,10 @@ export default function FileUpload({
           
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate text-gray-900 dark:text-gray-100">
-              File uploaded
+              {t('file_uploaded') || 'File uploaded'}
             </p>
             <a href={value} target="_blank" rel="noreferrer" className="text-xs text-[#00C600] hover:underline">
-              View file
+              {t('view_file') || 'View file'}
             </a>
           </div>
 
