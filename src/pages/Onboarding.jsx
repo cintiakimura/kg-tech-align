@@ -12,35 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLanguage } from '../components/LanguageContext';
-import { useEffect } from 'react';
 
 export default function Onboarding() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("welcome");
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-          await base44.auth.redirectToLogin();
-        }
-      } catch (e) {
-        console.error("Auth check failed", e);
-      } finally {
-        setIsLoadingAuth(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  if (isLoadingAuth) {
-    return <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00C600]"></div>
-    </div>;
-  }
   const [isAddingCar, setIsAddingCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
   const [isConfiguringVideos, setIsConfiguringVideos] = useState(false);

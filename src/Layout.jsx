@@ -92,27 +92,12 @@ function LayoutContent({ children }) {
               >
                 {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
-              {user ? (
+              {user && (
                  <div className="flex items-center gap-3">
                     <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#00C600] text-black' : 'bg-[#00C600] text-white'} font-bold`}>
                         {user.email[0].toUpperCase()}
                     </div>
-                    <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => base44.auth.logout()}
-                        className="text-sm"
-                    >
-                        Logout
-                    </Button>
                  </div>
-              ) : (
-                 <Button 
-                    onClick={() => base44.auth.redirectToLogin()}
-                    className="bg-[#00C600] hover:bg-[#00b300] text-white"
-                 >
-                    Login
-                 </Button>
               )}
             </div>
           </div>
