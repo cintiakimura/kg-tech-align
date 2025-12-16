@@ -93,11 +93,18 @@ function LayoutContent({ children }) {
                 {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
               {user && (
-                 <div className="flex items-center gap-3">
-                    <div className={`h-8 w-8 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#00C600] text-black' : 'bg-[#00C600] text-white'} font-bold`}>
-                        {user.email[0].toUpperCase()}
-                    </div>
-                 </div>
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <button className={`h-8 w-8 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#00C600] text-black' : 'bg-[#00C600] text-white'} font-bold cursor-pointer hover:opacity-80 transition-opacity`}>
+                         {user.email[0].toUpperCase()}
+                     </button>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem onClick={() => base44.auth.logout()}>
+                       {t('logout')}
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenu>
               )}
             </div>
           </div>

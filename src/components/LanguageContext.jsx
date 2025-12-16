@@ -60,7 +60,11 @@ const translations = {
     upload_click: "Click to upload",
     uploading: "Uploading...",
     file_uploaded: "File uploaded",
-    view_file: "View file"
+    view_file: "View file",
+    delete_car_confirmation: "Are you sure you want to delete this car profile?",
+    docs: "Docs",
+    photos: "Photos",
+    logout: "Logout"
   },
   es: {
     nav_title: "Soluciones KG",
@@ -119,7 +123,11 @@ const translations = {
     upload_click: "Click para subir",
     uploading: "Subiendo...",
     file_uploaded: "Archivo subido",
-    view_file: "Ver archivo"
+    view_file: "Ver archivo",
+    delete_car_confirmation: "¿Está seguro de que desea eliminar este perfil de vehículo?",
+    docs: "Documentos",
+    photos: "Fotos",
+    logout: "Cerrar sesión"
   },
   de: {
     nav_title: "KG Lösungen",
@@ -178,7 +186,11 @@ const translations = {
     upload_click: "Klicken zum Hochladen",
     uploading: "Wird hochgeladen...",
     file_uploaded: "Datei hochgeladen",
-    view_file: "Datei ansehen"
+    view_file: "Datei ansehen",
+    delete_car_confirmation: "Möchten Sie dieses Fahrzeugprofil wirklich löschen?",
+    docs: "Dokumente",
+    photos: "Fotos",
+    logout: "Abmelden"
   }
 };
 

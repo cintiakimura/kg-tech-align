@@ -67,7 +67,7 @@ export default function Onboarding() {
   };
 
   const handleDeleteCar = async (id) => {
-    if (window.confirm("Are you sure you want to delete this car profile?")) {
+    if (window.confirm(t('delete_car_confirmation'))) {
         await base44.entities.CarProfile.delete(id);
         queryClient.invalidateQueries(['carProfiles']);
     }
@@ -87,14 +87,14 @@ export default function Onboarding() {
       <div className="print:hidden space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Client Onboarding</h1>
-                <p className="text-muted-foreground mt-1">Complete your profile and set up your fleet.</p>
+                <h1 className="text-3xl font-bold tracking-tight">{t('onboarding_title')}</h1>
+                <p className="text-muted-foreground mt-1">{t('onboarding_desc')}</p>
             </div>
             <div className="flex items-center gap-3">
                 {companyProfile && (
                     <div className="flex items-center gap-2 text-sm bg-[#00C600]/10 text-[#00C600] px-3 py-1 rounded-full border border-[#00C600]/20">
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>{companyProfile.company_name} Connected</span>
+                        <span>{companyProfile.company_name} {t('connected')}</span>
                     </div>
                 )}
                 <Button variant="outline" onClick={handlePrint} className="gap-2">
@@ -343,11 +343,11 @@ export default function Onboarding() {
                                         <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
                                             <div className="flex items-center gap-1">
                                                 <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                                Docs
+                                                {t('docs')}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                                Photos
+                                                {t('photos')}
                                             </div>
                                         </div>
                                     </CardContent>
