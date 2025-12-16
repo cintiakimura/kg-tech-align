@@ -97,9 +97,19 @@ export default function Onboarding() {
                         <span>{companyProfile.company_name} {t('connected')}</span>
                     </div>
                 )}
-                <Button variant="outline" onClick={handlePrint} className="gap-2">
-                    <Printer className="w-4 h-4" /> Export Report
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={handlePrint} className="gap-2">
+                        <Printer className="w-4 h-4" /> Export Report
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        className="gap-2 opacity-50 cursor-not-allowed"
+                        disabled
+                        title="Enable Backend Functions to download files as ZIP"
+                    >
+                        <Printer className="w-4 h-4" /> Download ZIP
+                    </Button>
+                </div>
             </div>
           </div>
 
