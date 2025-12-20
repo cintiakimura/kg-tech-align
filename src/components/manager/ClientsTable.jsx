@@ -17,8 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Car, FileText, ExternalLink, Mail, Phone, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 
+import { useNavigate } from 'react-router-dom';
+
 function ClientRow({ clientEmail, company, cars }) {
     const [isOpen, setIsOpen] = useState(false);
+    const navigate = useNavigate();
 
     const hasCompany = !!company;
     const carCount = cars.length;
@@ -36,8 +39,14 @@ function ClientRow({ clientEmail, company, cars }) {
                         </CollapsibleTrigger>
                     </TableCell>
                     <TableCell className="font-medium">
-                        <div className="flex flex-col">
-                            <span className="text-sm font-semibold">{company?.company_name || 'N/A'}</span>
+                        <div className="flex flex-col group cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/ClientDetails?email=${encodeURIComponent(clientEmail)}`);
+                        }}>
+                            <span className="text-sm font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1">
+                                {company?.company_name || 'N/A'} 
+                                <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </span>
                             <span className="text-xs text-muted-foreground">{clientEmail}</span>
                         </div>
                     </TableCell>
