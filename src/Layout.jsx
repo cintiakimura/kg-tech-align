@@ -100,6 +100,13 @@ function LayoutContent({ children }) {
                      </button>
                    </DropdownMenuTrigger>
                    <DropdownMenuContent align="end">
+                     {user.role === 'admin' && (
+                         <DropdownMenuItem asChild>
+                             <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                Manager Dashboard
+                             </Link>
+                         </DropdownMenuItem>
+                     )}
                      <DropdownMenuItem onClick={() => base44.auth.logout()}>
                        {t('logout')}
                      </DropdownMenuItem>
