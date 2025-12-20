@@ -163,6 +163,22 @@ Brakes: ${car.brakes_type || 'N/A'}
     setIsAddingCar(true);
   };
 
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+    try {
+        // Handle standard YouTube URLs including shorts, mobile, etc.
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
+        const match = url.match(youtubeRegex);
+        
+        if (match && match[1]) {
+            return `https://www.youtube.com/embed/${match[1]}`;
+        }
+    } catch (e) {
+        console.error("Error parsing video URL", e);
+    }
+    return url;
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Printable Report (Hidden by default, visible on print) */}
@@ -265,7 +281,7 @@ Brakes: ${car.brakes_type || 'N/A'}
                     <div className="aspect-video bg-black relative group cursor-pointer">
                         {onboardingContent?.demo_video_url ? (
                             <iframe 
-                                src={onboardingContent.demo_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                                src={getEmbedUrl(onboardingContent.demo_video_url)} 
                                 className="w-full h-full" 
                                 title="Demo Video"
                                 frameBorder="0"
@@ -299,7 +315,7 @@ Brakes: ${car.brakes_type || 'N/A'}
                     <div className="aspect-video bg-black relative group cursor-pointer">
                         {onboardingContent?.setup_video_url ? (
                             <iframe 
-                                src={onboardingContent.setup_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')} 
+                                src={getEmbedUrl(onboardingContent.setup_video_url)} 
                                 className="w-full h-full" 
                                 title="Setup Video"
                                 frameBorder="0"
