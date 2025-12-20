@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X } from 'lucide-react';
+import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X, Download, Loader2 } from 'lucide-react';
 import CompanyForm from '../components/onboarding/CompanyForm';
 import CarForm from '../components/onboarding/CarForm';
 import PrintableReport from '../components/onboarding/PrintableReport';
@@ -12,6 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { useLanguage } from '../components/LanguageContext';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { toast } from "sonner";
 
 export default function Onboarding() {
   const { t } = useLanguage();
@@ -21,6 +24,7 @@ export default function Onboarding() {
   const [editingCar, setEditingCar] = useState(null);
   const [isConfiguringVideos, setIsConfiguringVideos] = useState(false);
   const [videoUrls, setVideoUrls] = useState({ demo: '', setup: '' });
+  const [isZipping, setIsZipping] = useState(false);
 
   // Fetch Company Profile
   const { data: companyProfileList, isLoading: isLoadingCompany } = useQuery({
@@ -44,6 +48,87 @@ export default function Onboarding() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadZip = async () => {
+    if (!carProfiles || carProfiles.length === 0) {
+        toast.error(t('no_vehicles'));
+        return;
+    }
+
+    setIsZipping(true);
+    const zip = new JSZip();
+
+    try {
+        // Add company info if available
+        if (companyProfile) {
+            const companyInfo = `
+Company Name: ${companyProfile.company_name}
+Tax ID: ${companyProfile.tax_id || 'N/A'}
+Address: ${companyProfile.address || 'N/A'}
+Email: ${companyProfile.contact_email || 'N/A'}
+Phone: ${companyProfile.phone || 'N/A'}
+            `.trim();
+            zip.file("company_info.txt", companyInfo);
+        }
+
+        // Process each car
+        const carsFolder = zip.folder("fleet");
+        
+        for (const car of carProfiles) {
+            const carFolderName = `${car.brand}_${car.model}_${car.id.slice(-4)}`.replace(/[^a-z0-9]/gi, '_');
+            const carFolder = carsFolder.folder(carFolderName);
+
+            // Car details text file
+            const carDetails = `
+Brand: ${car.brand}
+Model: ${car.model}
+Engine: ${car.engine_model || 'N/A'}
+Transmission: ${car.transmission_type || 'N/A'}
+Brakes: ${car.brakes_type || 'N/A'}
+            `.trim();
+            carFolder.file("details.txt", carDetails);
+
+            // Helper to fetch and add file to zip
+            const addFileToZip = async (url, filename) => {
+                if (!url) return;
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    carFolder.file(filename, blob);
+                } catch (e) {
+                    console.error(`Failed to download ${filename}`, e);
+                }
+            };
+
+            // Add photos
+            await Promise.all([
+                addFileToZip(car.image_connector_front, "connector_front.jpg"),
+                addFileToZip(car.image_lever_side, "lever_side.jpg"),
+                addFileToZip(car.image_ecu_part_number, "ecu_part_number.jpg"),
+                addFileToZip(car.image_ecu_front, "ecu_front.jpg"),
+                addFileToZip(car.image_extra_1, "extra_1.jpg"),
+                addFileToZip(car.image_extra_2, "extra_2.jpg"),
+                // Add docs - try to keep original extension or default to pdf/jpg based on url if possible, 
+                // but for simplicity we'll just download the blob. 
+                // To get correct extension we might need to parse URL or content-type, 
+                // but let's assume they are identifiable files or just save with generic name if unknown.
+                // Actually, let's try to guess extension from URL
+                addFileToZip(car.file_electrical_scheme, `electrical_scheme${car.file_electrical_scheme?.split('.').pop().match(/^[a-z0-9]+$/i) ? '.' + car.file_electrical_scheme.split('.').pop() : '.pdf'}`),
+                addFileToZip(car.file_sensors_actuators, `sensors_actuators${car.file_sensors_actuators?.split('.').pop().match(/^[a-z0-9]+$/i) ? '.' + car.file_sensors_actuators.split('.').pop() : '.pdf'}`)
+            ]);
+        }
+
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, `onboarding_export_${new Date().toISOString().split('T')[0]}.zip`);
+        toast.success(t('zip_ready'));
+
+    } catch (error) {
+        console.error("ZIP creation failed", error);
+        toast.error(t('download_error'));
+    } finally {
+        setIsZipping(false);
+    }
   };
 
   const handleSaveVideoUrls = async () => {
@@ -103,11 +188,12 @@ export default function Onboarding() {
                     </Button>
                     <Button 
                         variant="outline" 
-                        className="gap-2 opacity-50 cursor-not-allowed"
-                        disabled
-                        title="Enable Backend Functions to download files as ZIP"
+                        onClick={handleDownloadZip}
+                        disabled={isZipping}
+                        className="gap-2"
                     >
-                        <Printer className="w-4 h-4" /> Download ZIP
+                        {isZipping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        {isZipping ? t('preparing_zip') : t('download_zip')}
                     </Button>
                 </div>
             </div>

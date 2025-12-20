@@ -64,7 +64,11 @@ const translations = {
     delete_car_confirmation: "Are you sure you want to delete this car profile?",
     docs: "Docs",
     photos: "Photos",
-    logout: "Logout"
+    logout: "Logout",
+    download_zip: "Download ZIP",
+    preparing_zip: "Preparing ZIP...",
+    zip_ready: "ZIP Downloaded",
+    download_error: "Download Failed"
   },
   es: {
     nav_title: "Soluciones KG",
@@ -127,7 +131,11 @@ const translations = {
     delete_car_confirmation: "¿Está seguro de que desea eliminar este perfil de vehículo?",
     docs: "Documentos",
     photos: "Fotos",
-    logout: "Cerrar sesión"
+    logout: "Cerrar sesión",
+    download_zip: "Descargar ZIP",
+    preparing_zip: "Preparando ZIP...",
+    zip_ready: "ZIP Descargado",
+    download_error: "Error de descarga"
   },
   de: {
     nav_title: "KG Lösungen",
@@ -190,7 +198,11 @@ const translations = {
     delete_car_confirmation: "Möchten Sie dieses Fahrzeugprofil wirklich löschen?",
     docs: "Dokumente",
     photos: "Fotos",
-    logout: "Abmelden"
+    logout: "Abmelden",
+    download_zip: "ZIP herunterladen",
+    preparing_zip: "ZIP vorbereiten...",
+    zip_ready: "ZIP heruntergeladen",
+    download_error: "Download fehlgeschlagen"
   }
 };
 
