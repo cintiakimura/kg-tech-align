@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, Loader2, Package, Paperclip } from "lucide-react";
+import { Search, ShoppingCart, Loader2, Package, Paperclip, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -43,6 +43,20 @@ export default function Catalogue() {
             toast.error("Failed to add to request");
         }
     });
+
+    const handleImageUpload = async (id, file) => {
+        if (!file) return;
+        const toastId = toast.loading("Uploading image...");
+        try {
+            const { file_url } = await base44.integrations.Core.UploadFile({ file });
+            await base44.entities.Catalogue.update(id, { image_url: file_url });
+            toast.success("Image updated", { id: toastId });
+            queryClient.invalidateQueries(['catalogue']);
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to upload", { id: toastId });
+        }
+    };
 
     const filteredItems = catalogue?.filter(item => {
         // Search by visible attributes only since PN is secret
@@ -87,9 +101,25 @@ export default function Catalogue() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredItems.map((item) => (
-                        <Card key={item.id} className="overflow-hidden flex h-48 hover:shadow-md transition-all">
+                        <Card key={item.id} className="overflow-hidden flex h-48 hover:shadow-md transition-all relative group">
+                            {/* Admin Image Upload */}
+                            {user.role === 'admin' && (
+                                <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <label className="cursor-pointer bg-gray-900/10 hover:bg-gray-900/20 p-1.5 rounded-full transition-colors block backdrop-blur-sm" title="Upload new image">
+                                        <input 
+                                            type="file" 
+                                            className="hidden" 
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(item.id, e.target.files[0])}
+                                            onClick={(e) => e.target.value = null} // Allow re-uploading same file
+                                        />
+                                        <Camera className="w-4 h-4 text-gray-700" />
+                                    </label>
+                                </div>
+                            )}
+
                             {/* Left: Clean Product Image */}
-                            <div className="w-48 bg-white p-4 flex items-center justify-center border-r shrink-0">
+                            <div className="w-48 bg-white p-4 flex items-center justify-center border-r shrink-0 relative">
                                 {item.image_url ? (
                                     <img 
                                         src={item.image_url} 

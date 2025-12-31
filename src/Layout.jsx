@@ -219,10 +219,27 @@ function LayoutContent({ children }) {
           --primary-green: #00C600;
           --bg-dark: #212121;
         }
+
+        @font-face {
+          font-family: 'Akkurat';
+          src: url('https://db.onlinewebfonts.com/t/50f9015c7b3917dc9894e43f49293a77.woff2') format('woff2'); 
+          font-weight: normal;
+          font-style: normal;
+        }
+
+        body, h1, h2, h3, h4, h5, h6, button, input, select, textarea, span, div, p, a {
+          font-family: 'Akkurat', sans-serif !important;
+        }
+
+        /* Force normal font weight for titles and bold classes as requested */
+        h1, h2, h3, h4, h5, h6, .font-bold, .font-semibold {
+          font-weight: normal !important;
+        }
+
         .text-primary-green { color: var(--primary-green); }
         .bg-primary-green { background-color: var(--primary-green); }
         .border-primary-green { border-color: var(--primary-green); }
-        
+
         /* Custom scrollbar for dark mode */
         .dark ::-webkit-scrollbar {
           width: 8px;
