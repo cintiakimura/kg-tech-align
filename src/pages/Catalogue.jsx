@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, Loader2, Package, Paperclip, Camera, LayoutGrid, List } from "lucide-react";
+import { Search, Loader2, Package, Paperclip, Camera, LayoutGrid, List } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -227,7 +227,7 @@ export default function Catalogue() {
                                             onClick={() => addToRequestMutation.mutate(item)}
                                             disabled={addToRequestMutation.isPending}
                                         >
-                                            {addToRequestMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShoppingCart className="w-3 h-3 mr-2" />}
+                                            {addToRequestMutation.isPending && <Loader2 className="w-3 h-3 animate-spin mr-2" />}
                                             {viewMode === 'grid' ? 'Add to request' : 'Add'}
                                         </Button>
                                     )}
