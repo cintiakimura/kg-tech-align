@@ -91,9 +91,9 @@ export default function Catalogue() {
                             </CardHeader>
                             <CardContent className="p-4 py-2 flex-grow space-y-2">
                                 <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                                <div className="flex gap-2 text-xs text-gray-500">
-                                    <span className="bg-gray-100 px-2 py-1 rounded">Pin: {item.pins || '-'}</span>
-                                    <span className="bg-gray-100 px-2 py-1 rounded">Color: {item.color || '-'}</span>
+                                <div className="flex gap-2 text-xs text-gray-500 flex-wrap">
+                                    {item.pins && <span className="bg-gray-100 px-2 py-1 rounded">Pin: {item.pins}</span>}
+                                    {item.color && <span className="bg-gray-100 px-2 py-1 rounded">Color: {item.color}</span>}
                                 </div>
                                 {item.technical_pdf_url && (
                                     <a 

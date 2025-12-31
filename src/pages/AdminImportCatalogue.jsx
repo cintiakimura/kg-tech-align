@@ -33,7 +33,13 @@ export default function AdminImportCatalogue() {
                     part_number: cells[0],
                     description: cells[1]
                 };
-            }).filter(r => r.part_number && r.part_number !== 'Part Number');
+            }).filter(r => 
+                r.part_number && 
+                r.part_number.trim() !== '' && 
+                r.part_number !== 'Part Number' && 
+                r.description && 
+                r.description.trim() !== ''
+            );
             
             addLog(`Found ${rows.length} parts. Starting processing...`);
             
