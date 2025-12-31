@@ -148,11 +148,6 @@ export default function AdminImportCatalogue() {
                     console.error(`Error processing row ${row.part_number}`, rowErr);
                     addLog(`Error processing ${row.part_number}: ${rowErr.message}`);
                 }
-                    
-                } catch (rowErr) {
-                    console.error(`Error processing row ${row.part_number}`, rowErr);
-                    addLog(`Error processing ${row.part_number}`);
-                }
                 
                 completed++;
                 setProgress(Math.round((completed / rows.length) * 100));
