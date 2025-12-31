@@ -39,8 +39,32 @@ function LayoutContent({ children }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      // Check for role
+      // Check for role or pending invitation
       if (!currentUser.user_type && currentUser.role !== 'admin') {
+          // Check if there is an invitation for this email
+          try {
+              const invites = await base44.entities.Invitation.list({ email: currentUser.email, status: 'pending' });
+              if (invites && invites.length > 0) {
+                  const invite = invites[0];
+                  // Apply the invited role
+                  await base44.auth.updateMe({ user_type: invite.target_user_type });
+                  await base44.entities.Invitation.update(invite.id, { status: 'accepted' });
+
+                  // Update local user state
+                  const updated = await base44.auth.me();
+                  setUser(updated);
+
+                  // Redirect based on new role
+                  if (invite.target_user_type === 'manager') navigate('/ManagerDashboard');
+                  else if (invite.target_user_type === 'supplier') navigate('/SupplierDashboard');
+                  else navigate('/Onboarding'); // client
+                  return;
+              }
+          } catch (e) {
+              console.error("Error checking invitations", e);
+          }
+
+          // No invitation found? Show selector (but restricted)
           setShowRoleSelector(true);
       } else {
           // Handle Redirects on Root or Dashboard access
@@ -180,31 +204,26 @@ function LayoutContent({ children }) {
         </div>
       </nav>
 
-      {/* Role Selection Modal */}
+      {/* Role Selection Modal - NOW RESTRICTED TO CLIENT ONLY FOR SELF-SIGNUP */}
       {showRoleSelector && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
             <div className="bg-white dark:bg-[#2a2a2a] p-8 rounded-xl max-w-md w-full shadow-2xl space-y-6 text-center">
                 <h2 className="text-2xl font-bold">Welcome!</h2>
-                <p className="text-muted-foreground">To get started, please select your account type:</p>
-                <div className="grid grid-cols-2 gap-4">
+                <p className="text-muted-foreground">Complete your account setup to continue.</p>
+                <div className="flex flex-col gap-4">
                     <Button 
                         onClick={() => handleRoleSelect('client')} 
-                        className="h-32 flex flex-col gap-2 hover:bg-[#00C600]/10 border-2 border-transparent hover:border-[#00C600] transition-all"
+                        className="h-32 flex flex-col gap-2 hover:bg-[#00C600]/10 border-2 border-transparent hover:border-[#00C600] transition-all w-full"
                         variant="outline"
                     >
                         <span className="text-4xl">🏢</span>
-                        <span className="font-bold">Client</span>
+                        <span className="font-bold">Enter as Client</span>
                         <span className="text-xs text-muted-foreground">I want to order parts</span>
                     </Button>
-                    <Button 
-                        onClick={() => handleRoleSelect('supplier')}
-                        className="h-32 flex flex-col gap-2 hover:bg-blue-500/10 border-2 border-transparent hover:border-blue-500 transition-all"
-                        variant="outline"
-                    >
-                        <span className="text-4xl">🏭</span>
-                        <span className="font-bold">Supplier</span>
-                        <span className="text-xs text-muted-foreground">I want to submit quotes</span>
-                    </Button>
+                    <p className="text-xs text-muted-foreground mt-4">
+                        Are you a Supplier or Manager? <br/>
+                        Please contact the administrator for an invitation.
+                    </p>
                 </div>
             </div>
         </div>
