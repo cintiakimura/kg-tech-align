@@ -2,7 +2,6 @@ import AdminAuditReport from './pages/AdminAuditReport';
 import AdminImportCatalogue from './pages/AdminImportCatalogue';
 import Catalogue from './pages/Catalogue';
 import ClientDetails from './pages/ClientDetails';
-import Home from './pages/Home';
 import ImportCatalogue from './pages/ImportCatalogue';
 import ManagerDashboard from './pages/ManagerDashboard';
 import Onboarding from './pages/Onboarding';
@@ -15,7 +14,6 @@ export const PAGES = {
     "AdminImportCatalogue": AdminImportCatalogue,
     "Catalogue": Catalogue,
     "ClientDetails": ClientDetails,
-    "Home": Home,
     "ImportCatalogue": ImportCatalogue,
     "ManagerDashboard": ManagerDashboard,
     "Onboarding": Onboarding,

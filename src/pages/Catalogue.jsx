@@ -12,7 +12,7 @@ import EditProductModal from "@/components/catalogue/EditProductModal";
 
 export default function Catalogue() {
     const [searchTerm, setSearchTerm] = useState("");
-    const [viewMode, setViewMode] = useState("grid");
+    const [viewMode, setViewMode] = useState("list");
     const [editingProduct, setEditingProduct] = useState(null);
     const queryClient = useQueryClient();
     const [user, setUser] = useState(null);
