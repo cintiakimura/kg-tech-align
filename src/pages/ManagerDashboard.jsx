@@ -35,10 +35,10 @@ export default function ManagerDashboard() {
     enabled: !!isManagerOrAdmin
   });
 
-  // Fetch All Cars (admin/manager can see all)
+  // Fetch All Vehicles (admin/manager can see all)
   const { data: cars, isLoading: isLoadingCars } = useQuery({
-    queryKey: ['allCars'],
-    queryFn: () => base44.entities.CarProfile.list(),
+    queryKey: ['allVehicles'],
+    queryFn: () => base44.entities.Vehicle.list(),
     enabled: !!isManagerOrAdmin
   });
 

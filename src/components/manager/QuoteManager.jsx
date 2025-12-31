@@ -15,26 +15,31 @@ import { format } from "date-fns";
 
 function QuoteCard({ quote, isWinner, onSelect, disabled }) {
     return (
-        <div className={`border rounded p-3 flex justify-between items-center ${isWinner ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
-            <div className="flex-1">
-                <div className="font-semibold text-sm flex items-center gap-2">
-                    {quote.supplier_email}
-                    {isWinner && <Badge className="bg-green-600 h-5 text-[10px]">WINNER</Badge>}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                    <span className="font-medium text-gray-700">Lead Time: {quote.lead_time_days} Days</span>
-                    <span className="mx-2">•</span>
-                    <span>{quote.note || 'No comments'}</span>
-                </div>
-            </div>
-            <div className="flex items-center gap-6">
-                <div className="text-right text-xs text-gray-500">
-                    <div>Price: £{quote.price?.toFixed(2)}</div>
-                    <div>Shipping: £{quote.shipping_cost?.toFixed(2)}</div>
+        <div className={`border rounded p-3 flex flex-col gap-3 ${isWinner ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
+            <div className="flex justify-between items-start">
+                <div className="flex-1">
+                    <div className="font-semibold text-sm flex items-center gap-2">
+                        {quote.supplier_email}
+                        {isWinner && <Badge className="bg-green-600 h-5 text-[10px]">WINNER</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                        <span className="font-medium text-gray-700">Max Lead Time: {quote.lead_time_days} Days</span>
+                        <span className="mx-2">•</span>
+                        <span>{quote.note || 'No comments'}</span>
+                        {quote.pdf_url && (
+                             <a href={quote.pdf_url} target="_blank" className="ml-2 text-blue-600 underline">View PDF</a>
+                        )}
+                    </div>
                 </div>
                 <div className="text-right">
                     <div className="font-bold text-lg">£{quote.total_gbp?.toFixed(2)}</div>
+                    <div className="text-xs text-gray-500">
+                        Parts: £{quote.price?.toFixed(2)} • Ship: £{quote.shipping_cost?.toFixed(2)}
+                    </div>
                 </div>
+            </div>
+            
+            <div className="flex justify-end">
                 {!isWinner && !disabled && (
                     <Button size="sm" onClick={() => onSelect(quote)} className="bg-[#00C600] hover:bg-[#00b300]">
                         Select Winner
@@ -61,11 +66,11 @@ function ShippingModal({ car, quote }) {
             });
             setShipmentResult(result);
             
-            // 2. Update Car Profile
+            // 2. Update Vehicle
             const user = await base44.auth.me();
             const newAuditLog = appendAuditLog(car.audit_log, `Shipped via ${result.carrier} (${result.trackingNumber})`, user.email);
             
-            await base44.entities.CarProfile.update(car.id, {
+            await base44.entities.Vehicle.update(car.id, {
                 status: 'Shipped',
                 tracking_number: result.trackingNumber,
                 carrier: result.carrier,
@@ -161,8 +166,8 @@ export default function QuoteManager({ cars, quotes, companies }) {
                 audit_log: appendAuditLog(quote.audit_log, 'Selected as Winner', user.email)
             });
             
-            // 2. Update Car Profile Status
-            await base44.entities.CarProfile.update(carId, { 
+            // 2. Update Vehicle Status
+            await base44.entities.Vehicle.update(carId, { 
                 status: 'Quote Selected',
                 audit_log: appendAuditLog(cars.find(c => c.id === carId).audit_log, 'Quote Selected', user.email)
             });
@@ -179,7 +184,7 @@ export default function QuoteManager({ cars, quotes, companies }) {
     return (
         <div className="space-y-6">
              {activeCars.map(car => {
-                 const carQuotes = quotes.filter(q => q.car_profile_id === car.id);
+                 const carQuotes = quotes.filter(q => q.vehicle_id === car.id);
                  const hasWinner = carQuotes.some(q => q.status === 'selected');
                  
                  return (
