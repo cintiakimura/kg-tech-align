@@ -57,7 +57,11 @@ export default function ImportCatalogue() {
                     // 3. Search Image
                     // Using LLM to find image URL
                     const searchResult = await base44.integrations.Core.InvokeLLM({
-                        prompt: `Find a high quality product image URL for electronic component "${row.part_number} ${row.description}". Search Digi-Key, Mouser, LCSC. Return ONLY the direct image URL.`,
+                        prompt: `Find a high quality product image URL for electronic component "${row.part_number} ${row.description}". 
+                        Search Digi-Key, Mouser, LCSC, and Manufacturer websites.
+                        CRITICAL: Do not use any image that already has a watermark, logo, or text overlay. 
+                        If the first source has a logo on it, go to the next supplier — keep going until you find a clean one.
+                        Return ONLY the direct image URL.`,
                         add_context_from_internet: true
                     });
                     
