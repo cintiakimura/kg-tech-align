@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Loader2, Package, Paperclip, Camera, LayoutGrid, List } from "lucide-react";
+import { Search, Loader2, Package, Paperclip, Camera, LayoutGrid, List, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import EditProductModal from "@/components/catalogue/EditProductModal";
 
 export default function Catalogue() {
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState("grid");
+    const [editingProduct, setEditingProduct] = useState(null);
     const queryClient = useQueryClient();
     const [user, setUser] = useState(null);
 
@@ -124,9 +126,9 @@ export default function Catalogue() {
                 <div className={`gap-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col'}`}>
                     {filteredItems.map((item) => (
                         <Card key={item.id} className={`overflow-hidden hover:shadow-md transition-all relative group ${viewMode === 'grid' ? 'flex h-48' : 'flex items-center p-2'}`}>
-                            {/* Admin Image Upload */}
+                            {/* Admin Controls */}
                             {user.role === 'admin' && (
-                                <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                                     <label className="cursor-pointer bg-gray-900/10 hover:bg-gray-900/20 p-1.5 rounded-full transition-colors block backdrop-blur-sm" title="Upload new image">
                                         <input 
                                             type="file" 
@@ -137,6 +139,13 @@ export default function Catalogue() {
                                         />
                                         <Camera className="w-4 h-4 text-gray-700" />
                                     </label>
+                                    <button 
+                                        onClick={() => setEditingProduct(item)}
+                                        className="bg-gray-900/10 hover:bg-gray-900/20 p-1.5 rounded-full transition-colors backdrop-blur-sm"
+                                        title="Edit details"
+                                    >
+                                        <Pencil className="w-4 h-4 text-gray-700" />
+                                    </button>
                                 </div>
                             )}
 
@@ -237,6 +246,12 @@ export default function Catalogue() {
                     ))}
                 </div>
             )}
+            
+            <EditProductModal 
+                product={editingProduct} 
+                open={!!editingProduct} 
+                onOpenChange={(open) => !open && setEditingProduct(null)} 
+            />
         </div>
     );
 }
