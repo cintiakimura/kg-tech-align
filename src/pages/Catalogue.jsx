@@ -26,7 +26,7 @@ export default function Catalogue() {
 
     const { data: catalogue, isLoading } = useQuery({
         queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(),
+        queryFn: () => base44.entities.Catalogue.list(null, 1000),
     });
 
     const addToRequestMutation = useMutation({
@@ -64,6 +64,7 @@ export default function Catalogue() {
     const filteredItems = catalogue?.filter(item => {
         // Search by visible attributes only since PN is secret
         const search = searchTerm.toLowerCase();
+        if (!search) return true;
         return (
             (item.colour && item.colour.toLowerCase().includes(search)) ||
             (item.type && item.type.toLowerCase().includes(search)) ||
