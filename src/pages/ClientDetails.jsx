@@ -37,8 +37,8 @@ export default function ClientDetails() {
 
     // Fetch Fleet for this user
     const { data: cars, isLoading: isLoadingCars } = useQuery({
-        queryKey: ['cars', email],
-        queryFn: () => base44.entities.CarProfile.list(),
+        queryKey: ['vehicles', email],
+        queryFn: () => base44.entities.Vehicle.list(),
         select: (data) => data.filter(c => c.created_by === email),
         enabled: !!email
     });
@@ -59,7 +59,7 @@ export default function ClientDetails() {
                     type: 'Scheme',
                     date: car.updated_date,
                     url: car.file_electrical_scheme,
-                    source: 'Car Profile'
+                    source: 'Vehicle Profile'
                 });
             }
             if (car.file_sensors_actuators) {
@@ -69,7 +69,7 @@ export default function ClientDetails() {
                     type: 'List',
                     date: car.updated_date,
                     url: car.file_sensors_actuators,
-                    source: 'Car Profile'
+                    source: 'Vehicle Profile'
                 });
             }
         });

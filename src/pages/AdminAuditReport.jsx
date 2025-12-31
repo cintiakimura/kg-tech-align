@@ -16,8 +16,8 @@ export default function AdminAuditReport() {
 
     // Fetch all relevant entities that have audit logs
     const { data: cars, isLoading: loadingCars } = useQuery({
-        queryKey: ['cars_audit'],
-        queryFn: () => base44.entities.CarProfile.list(),
+        queryKey: ['vehicles_audit'],
+        queryFn: () => base44.entities.Vehicle.list(),
         initialData: []
     });
 
@@ -111,7 +111,7 @@ export default function AdminAuditReport() {
                 car.audit_log.forEach(log => {
                     logs.push({
                         ...log,
-                        id: `car-${car.id}-${log.date}`,
+                        id: `vehicle-${car.id}-${log.date}`,
                         entityType: 'Vehicle',
                         entityName: `${car.brand} ${car.model}`,
                         entityId: car.id,
@@ -141,9 +141,9 @@ export default function AdminAuditReport() {
         quotes.forEach(quote => {
             if (quote.audit_log && Array.isArray(quote.audit_log)) {
                 quote.audit_log.forEach(log => {
-                    // Find related car for better context if possible
-                    const relatedCar = cars.find(c => c.id === quote.car_profile_id);
-                    const carName = relatedCar ? `${relatedCar.brand} ${relatedCar.model}` : 'Unknown Car';
+                    // Find related vehicle for better context if possible
+                    const relatedCar = cars.find(c => c.id === quote.vehicle_id);
+                    const carName = relatedCar ? `${relatedCar.brand} ${relatedCar.model}` : 'Unknown Vehicle';
                     
                     logs.push({
                         ...log,

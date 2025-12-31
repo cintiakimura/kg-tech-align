@@ -191,7 +191,9 @@ function BuildingIcon({ className }) {
     )
 }
 
-export default function ClientsTable({ companies, cars }) {
+export default function ClientsTable({ companies, cars: vehicles }) {
+    // Alias cars prop to vehicles for internal use, though logic remains same
+    const cars = vehicles; // Keep variable name 'cars' to avoid massive refactor of internal logic
     // Group data by created_by (email)
     const groupedData = React.useMemo(() => {
         const groups = {};
