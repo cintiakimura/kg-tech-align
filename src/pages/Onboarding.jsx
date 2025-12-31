@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X, Download, Loader2 } from 'lucide-react';
 import CompanyForm from '../components/onboarding/CompanyForm';
-import CarForm from '../components/onboarding/CarForm';
+import VehicleForm from '../components/onboarding/VehicleForm';
 import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -33,10 +33,10 @@ export default function Onboarding() {
   });
   const companyProfile = companyProfileList?.[0];
 
-  // Fetch Car Profiles
+  // Fetch Vehicle Profiles
   const { data: carProfiles, isLoading: isLoadingCars } = useQuery({
-    queryKey: ['carProfiles'],
-    queryFn: () => base44.entities.CarProfile.list(),
+    queryKey: ['vehicles'], // Updated query key
+    queryFn: () => base44.entities.Vehicle.list(),
   });
 
   // Fetch Onboarding Content
@@ -79,6 +79,10 @@ Phone: ${companyProfile.phone || 'N/A'}
             const carFolderName = `${car.brand}_${car.model}_${car.id.slice(-4)}`.replace(/[^a-z0-9]/gi, '_');
             const carFolder = carsFolder.folder(carFolderName);
 
+            // Fetch connectors for this car to include in details
+            const connectors = await base44.entities.VehicleConnector.list({ vehicle_id: car.id });
+            const connectorDetails = connectors.map(c => `- Qty ${c.quantity}: ${c.notes || 'No notes'} (ID: ${c.catalogue_id})`).join('\n');
+
             // Car details text file
             const carDetails = `
 Brand: ${car.brand}
@@ -86,6 +90,9 @@ Model: ${car.model}
 Engine: ${car.engine_model || 'N/A'}
 Transmission: ${car.transmission_type || 'N/A'}
 Brakes: ${car.brakes_type || 'N/A'}
+
+Requested Connectors:
+${connectorDetails}
             `.trim();
             carFolder.file("details.txt", carDetails);
 
@@ -153,8 +160,8 @@ Brakes: ${car.brakes_type || 'N/A'}
 
   const handleDeleteCar = async (id) => {
     if (window.confirm(t('delete_car_confirmation'))) {
-        await base44.entities.CarProfile.delete(id);
-        queryClient.invalidateQueries(['carProfiles']);
+        await base44.entities.Vehicle.delete(id);
+        queryClient.invalidateQueries(['vehicles']);
     }
   };
 
@@ -374,7 +381,7 @@ Brakes: ${car.brakes_type || 'N/A'}
         <TabsContent value="fleet" className="mt-6">
             {isAddingCar ? (
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
-                    <CarForm 
+                    <VehicleForm 
                         initialData={editingCar}
                         onCancel={() => {
                             setIsAddingCar(false);
@@ -383,7 +390,7 @@ Brakes: ${car.brakes_type || 'N/A'}
                         onSuccess={() => {
                             setIsAddingCar(false);
                             setEditingCar(null);
-                            queryClient.invalidateQueries(['carProfiles']);
+                            queryClient.invalidateQueries(['vehicles']);
                         }} 
                     />
                 </div>
@@ -402,7 +409,7 @@ Brakes: ${car.brakes_type || 'N/A'}
                             <Skeleton className="h-64 w-full rounded-xl" />
                             <Skeleton className="h-64 w-full rounded-xl" />
                         </div>
-                    ) : carProfiles?.length === 0 ? (
+                    ) : (!carProfiles || carProfiles.length === 0) ? (
                         <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700 bg-transparent">
                             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                                 <div className="w-16 h-16 bg-gray-100 dark:bg-[#333] rounded-full flex items-center justify-center mb-4">
