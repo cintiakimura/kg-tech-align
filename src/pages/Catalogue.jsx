@@ -95,6 +95,16 @@ export default function Catalogue() {
                                     <span className="bg-gray-100 px-2 py-1 rounded">Pin: {item.pins || '-'}</span>
                                     <span className="bg-gray-100 px-2 py-1 rounded">Color: {item.color || '-'}</span>
                                 </div>
+                                {item.technical_pdf_url && (
+                                    <a 
+                                        href={item.technical_pdf_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-blue-600 hover:underline mt-2 block"
+                                    >
+                                        View Technical Datasheet (PDF)
+                                    </a>
+                                )}
                             </CardContent>
                             <CardFooter className="p-4 pt-2">
                                 {user?.user_type === 'supplier' ? (
