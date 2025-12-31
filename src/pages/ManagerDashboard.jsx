@@ -1,16 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Loader2, AlertCircle } from 'lucide-react';
+import { LayoutDashboard, Loader2, AlertCircle, UserPlus } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import DashboardStats from '../components/manager/DashboardStats';
 import ClientsTable from '../components/manager/ClientsTable';
+import InviteUserModal from '@/components/manager/InviteUserModal';
 import { useLanguage } from '../components/LanguageContext';
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
-  // We can't use 't' from LanguageContext easily here for dynamic content unless we add keys, 
-  // but let's assume dashboard is internal/admin and fine in English or we reuse some keys.
+  const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Check auth/role
   const { data: user, isLoading: isLoadingUser } = useQuery({
@@ -55,14 +56,20 @@ export default function ManagerDashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                <LayoutDashboard className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div className="flex items-center gap-3">
+                <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                    <LayoutDashboard className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Manager Dashboard</h1>
+                    <p className="text-muted-foreground">Overview of all clients, companies, and fleets.</p>
+                </div>
             </div>
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Manager Dashboard</h1>
-                <p className="text-muted-foreground">Overview of all clients, companies, and fleets.</p>
-            </div>
+            <Button onClick={() => setShowInviteModal(true)} className="gap-2">
+                <UserPlus className="w-4 h-4" />
+                Invite User
+            </Button>
         </div>
 
         <DashboardStats 
@@ -79,6 +86,11 @@ export default function ManagerDashboard() {
                 cars={cars || []} 
             />
         </div>
+        
+        <InviteUserModal 
+            open={showInviteModal} 
+            onOpenChange={setShowInviteModal} 
+        />
     </div>
   );
 }
