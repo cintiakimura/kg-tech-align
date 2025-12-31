@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useForm, Controller } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Loader2, Plus, Car, Settings, Zap, ArrowLeft, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Car, Settings, Zap, ArrowLeft, Trash2, Package } from 'lucide-react';
 import FileUpload from './FileUpload';
 import { base44 } from "@/api/base44Client";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,11 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
     defaultValues: initialData || {
         transmission_type: "Automatic"
     }
+  });
+
+  const { data: catalogueItems } = useQuery({
+      queryKey: ['catalogue'],
+      queryFn: () => base44.entities.Catalogue.list(),
   });
 
   const onSubmit = async (data) => {
@@ -90,6 +96,36 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">{t('brakes_type')}</label>
                             <Input {...register("brakes_type")} placeholder="e.g. Disc/Drum" className={InputStyle} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Catalogue Selection */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
+                        <Package className="w-5 h-5" /> Catalogue Part
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                             <label className="text-sm font-medium">Select Part</label>
+                             <Controller
+                                name="catalogue_id"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className={InputStyle}>
+                                            <SelectValue placeholder="Select a part..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {catalogueItems?.map(item => (
+                                                <SelectItem key={item.id} value={item.id}>
+                                                    {item.type} - {item.colour} ({item.pins} pins)
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
                         </div>
                     </div>
                 </div>
