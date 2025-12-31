@@ -27,19 +27,28 @@ export default function AdminImportCatalogue() {
             const response = await fetch(GOOGLE_SHEET_CSV_URL);
             const csvText = await response.text();
             
-            const rows = csvText.split('\n').map(row => {
-                const cells = row.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-                return {
-                    part_number: cells[0],
-                    description: cells[1]
-                };
-            }).filter(r => 
-                r.part_number && 
-                r.part_number.trim() !== '' && 
-                r.part_number !== 'Part Number' && 
-                r.description && 
-                r.description.trim() !== ''
-            );
+            // CSV Parsing with simplified logic for known columns
+            // Columns: 0: Brand, 1: Pins, 2: Color, 3: Type, 4: PN, 5: Supplier, 6+: URLs
+            const rows = csvText.split('\n')
+                .map(row => {
+                    // Split by comma, handling potential quotes roughly (assuming simple data based on sample)
+                    // Using a regex to split by comma outside quotes is safer
+                    const cells = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+                    return cells;
+                })
+                .filter(cells => cells.length > 4 && cells[4] && cells[4] !== 'PN') // Filter header and empty PNs
+                .map(cells => {
+                    const providedUrls = cells.slice(6).filter(c => c && c.startsWith('http'));
+                    return {
+                        brand: cells[0] || "",
+                        pins: cells[1] ? parseInt(cells[1]) : null,
+                        color: cells[2] || "",
+                        type: cells[3] ? cells[3].toLowerCase() : "other",
+                        part_number: cells[4],
+                        supplier: cells[5] || "",
+                        provided_urls: providedUrls
+                    };
+                });
             
             addLog(`Found ${rows.length} parts. Starting processing...`);
             
@@ -47,31 +56,54 @@ export default function AdminImportCatalogue() {
             
             for (const row of rows) {
                 try {
-                    addLog(`Processing ${row.part_number}...`);
+                    addLog(`Processing ${row.part_number} (${row.brand})...`);
                     
-                    // 2. Parse Description
-                    const metadata = parseDescription(row.description);
+                    // Construct a description if missing
+                    const description = `${row.brand} ${row.pins || '?'} Pin ${row.color} ${row.type}`.trim();
                     
-                    // 3. Search Image (Clean, No Watermark) and PDF
-                    const searchResult = await base44.integrations.Core.InvokeLLM({
-                        prompt: `Find a high quality, clean product image URL and a technical datasheet PDF URL for electronic component "${row.part_number} ${row.description}". 
-                        Search Digi-Key, Mouser, LCSC.
-                        CRITICAL: The image MUST be clean. NO watermarks, NO overlays, NO logos.
-                        The PDF should be a direct link to the datasheet.`,
-                        response_json_schema: {
-                            type: "object",
-                            properties: {
-                                image_url: { type: "string" },
-                                pdf_url: { type: "string" }
-                            }
-                        },
-                        add_context_from_internet: true
-                    });
+                    // 3. Search Image and PDF using Provided Links
+                    let searchResult = { image_url: null, pdf_url: null };
+                    
+                    if (row.provided_urls.length > 0) {
+                        addLog(`Checking ${row.provided_urls.length} provided links...`);
+                        searchResult = await base44.integrations.Core.InvokeLLM({
+                            prompt: `I am looking for data for electronic part "${row.part_number}" (${description}).
+                            I have these product page links: ${row.provided_urls.join(', ')}.
+                            
+                            Please visit these links and:
+                            1. Find the **Technical Datasheet PDF** direct URL.
+                            2. Find a **clean product image URL** (no watermarks, white background preferred).
+                            
+                            Return JSON: { "image_url": "url", "pdf_url": "url" }`,
+                            response_json_schema: {
+                                type: "object",
+                                properties: {
+                                    image_url: { type: "string" },
+                                    pdf_url: { type: "string" }
+                                }
+                            },
+                            add_context_from_internet: true
+                        });
+                    } else {
+                        // Fallback to search if no links (though user said use provided links)
+                         addLog(`No links provided, searching web...`);
+                         searchResult = await base44.integrations.Core.InvokeLLM({
+                            prompt: `Find image and datasheet for "${row.part_number}" ${description}.`,
+                            response_json_schema: {
+                                type: "object",
+                                properties: {
+                                    image_url: { type: "string" },
+                                    pdf_url: { type: "string" }
+                                }
+                            },
+                            add_context_from_internet: true
+                        });
+                    }
                     
                     const { image_url: imageUrl, pdf_url: pdfUrl } = searchResult;
                     let finalImageUrl = imageUrl;
                     
-                    // 4. Download & Upload Image to Storage (No Watermark)
+                    // 4. Download & Upload Image to Storage
                     if (imageUrl && imageUrl.startsWith('http')) {
                         try {
                              const imgRes = await fetch(imageUrl);
@@ -91,28 +123,31 @@ export default function AdminImportCatalogue() {
                     }
                     
                     // 5. Upsert Record
+                    // Filter undefined/null values to "ignore blank cells"
+                    const dataToSave = {
+                        part_number: row.part_number,
+                        description: description,
+                        type: row.type || "other",
+                        ...(row.brand && { brand: row.brand }),
+                        ...(row.supplier && { supplier: row.supplier }),
+                        ...(row.pins && { pins: row.pins }),
+                        ...(row.color && { color: row.color }),
+                        ...(finalImageUrl && { image_url: finalImageUrl }),
+                        ...(pdfUrl && { technical_pdf_url: pdfUrl })
+                    };
+
                     const existingRecord = (await base44.entities.Catalogue.list()).find(r => r.part_number === row.part_number);
                     
                     if (existingRecord) {
-                        await base44.entities.Catalogue.update(existingRecord.id, {
-                            description: row.description,
-                            pins: metadata.pins,
-                            color: metadata.color,
-                            type: metadata.type,
-                            image_url: finalImageUrl,
-                            technical_pdf_url: pdfUrl || null
-                        });
+                        await base44.entities.Catalogue.update(existingRecord.id, dataToSave);
                     } else {
-                        await base44.entities.Catalogue.create({
-                            part_number: row.part_number,
-                            description: row.description,
-                            pins: metadata.pins,
-                            color: metadata.color,
-                            type: metadata.type,
-                            image_url: finalImageUrl,
-                            technical_pdf_url: pdfUrl || null
-                        });
+                        await base44.entities.Catalogue.create(dataToSave);
                     }
+                    
+                } catch (rowErr) {
+                    console.error(`Error processing row ${row.part_number}`, rowErr);
+                    addLog(`Error processing ${row.part_number}: ${rowErr.message}`);
+                }
                     
                 } catch (rowErr) {
                     console.error(`Error processing row ${row.part_number}`, rowErr);
