@@ -69,14 +69,74 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                             {errors.model && <span className="text-xs text-red-500">{errors.model.message}</span>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('engine_model')}</label>
-                            <Input {...register("engine_model")} placeholder="e.g. V6 3.5L" className={InputStyle} />
+                            <label className="text-sm font-medium">Version <span className="text-[#00C600]">*</span></label>
+                            <Input {...register("version", { required: "Version is required" })} placeholder="e.g. SE, LE, XLE" className={InputStyle} />
+                            {errors.version && <span className="text-xs text-red-500">{errors.version.message}</span>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('transmission')}</label>
+                            <label className="text-sm font-medium">Year <span className="text-[#00C600]">*</span></label>
+                            <Input 
+                                type="number" 
+                                {...register("year", { 
+                                    required: "Year is required",
+                                    valueAsNumber: true,
+                                    min: { value: 1900, message: "Invalid year" },
+                                    max: { value: new Date().getFullYear() + 1, message: "Invalid year" }
+                                })} 
+                                placeholder="e.g. 2023" 
+                                className={InputStyle} 
+                            />
+                            {errors.year && <span className="text-xs text-red-500">{errors.year.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">VIN <span className="text-[#00C600]">*</span></label>
+                            <Input {...register("vin", { required: "VIN is required" })} placeholder="Vehicle Identification Number" className={InputStyle} />
+                            {errors.vin && <span className="text-xs text-red-500">{errors.vin.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Fuel Type <span className="text-[#00C600]">*</span></label>
+                            <Controller
+                                name="fuel"
+                                control={control}
+                                rules={{ required: "Fuel type is required" }}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className={InputStyle}>
+                                            <SelectValue placeholder="Select fuel type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Petrol">Petrol</SelectItem>
+                                            <SelectItem value="Diesel">Diesel</SelectItem>
+                                            <SelectItem value="Electric">Electric</SelectItem>
+                                            <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                            <SelectItem value="Other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.fuel && <span className="text-xs text-red-500">{errors.fuel.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Engine Size <span className="text-[#00C600]">*</span></label>
+                            <Input {...register("engine_size", { required: "Engine size is required" })} placeholder="e.g. 2.0L" className={InputStyle} />
+                            {errors.engine_size && <span className="text-xs text-red-500">{errors.engine_size.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Engine Power <span className="text-[#00C600]">*</span></label>
+                            <Input {...register("engine_power", { required: "Engine power is required" })} placeholder="e.g. 150HP" className={InputStyle} />
+                            {errors.engine_power && <span className="text-xs text-red-500">{errors.engine_power.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Engine Code <span className="text-[#00C600]">*</span></label>
+                            <Input {...register("engine_code", { required: "Engine code is required" })} placeholder="e.g. CDNC" className={InputStyle} />
+                            {errors.engine_code && <span className="text-xs text-red-500">{errors.engine_code.message}</span>}
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">{t('transmission')} <span className="text-[#00C600]">*</span></label>
                             <Controller
                                 name="transmission_type"
                                 control={control}
+                                rules={{ required: "Transmission is required" }}
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <SelectTrigger className={InputStyle}>
@@ -92,10 +152,17 @@ export default function CarForm({ onCancel, onSuccess, initialData }) {
                                     </Select>
                                 )}
                             />
+                            {errors.transmission_type && <span className="text-xs text-red-500">{errors.transmission_type.message}</span>}
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">{t('brakes_type')}</label>
-                            <Input {...register("brakes_type")} placeholder="e.g. Disc/Drum" className={InputStyle} />
+                            <label className="text-sm font-medium">Number of Gears <span className="text-[#00C600]">*</span></label>
+                            <Input 
+                                type="number"
+                                {...register("number_gears", { required: "Number of gears is required", valueAsNumber: true, min: 1 })} 
+                                placeholder="e.g. 6" 
+                                className={InputStyle} 
+                            />
+                            {errors.number_gears && <span className="text-xs text-red-500">{errors.number_gears.message}</span>}
                         </div>
                     </div>
                 </div>
