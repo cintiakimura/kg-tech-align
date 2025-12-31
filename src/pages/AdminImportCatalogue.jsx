@@ -27,54 +27,57 @@ export default function AdminImportCatalogue() {
             const response = await fetch(GOOGLE_SHEET_CSV_URL);
             const csvText = await response.text();
             
-            // CSV Parsing with simplified logic for known columns
-            // Columns: 0: Brand, 1: Pins, 2: Color, 3: Type, 4: PN, 5: Supplier, 6+: URLs
+            // Columns: 0: Brand, 1: Pins, 2: Colour, 3: Type, 4: PN (Part 1), 5: Supplier, 6: Link, 7: Cover, 8: PN (Part 2)
             const rows = csvText.split('\n')
                 .map(row => {
-                    // Split by comma, handling potential quotes roughly (assuming simple data based on sample)
-                    // Using a regex to split by comma outside quotes is safer
                     const cells = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
                     return cells;
                 })
-                .filter(cells => cells.length > 4 && cells[4] && cells[4] !== 'PN') // Filter header and empty PNs
+                .filter(cells => cells.length > 4 && (cells[4] || cells[8])) // Ensure at least one part number exists
                 .map(cells => {
-                    const providedUrls = cells.slice(6).filter(c => c && c.startsWith('http'));
                     return {
                         brand: cells[0] || "",
                         pins: cells[1] ? parseInt(cells[1]) : null,
-                        color: cells[2] || "",
+                        colour: cells[2] || "",
                         type: cells[3] ? cells[3].toLowerCase() : "other",
-                        part_number: cells[4],
-                        supplier: cells[5] || "",
-                        provided_urls: providedUrls
+                        part1: cells[4], // Part 1
+                        part2: cells[8], // Part 2 (Column I is index 8)
+                        supplier: cells[5] || ""
                     };
                 });
             
-            addLog(`Found ${rows.length} parts. Starting processing...`);
+            addLog(`Found ${rows.length} rows to process...`);
             
             let completed = 0;
             
             for (const row of rows) {
                 try {
-                    addLog(`Processing ${row.part_number} (${row.brand})...`);
+                    const mainPart = row.part1 || row.part2;
+                    if (!mainPart) continue;
+
+                    addLog(`Processing ${mainPart}...`);
                     
-                    // Construct a description if missing
-                    const description = `${row.brand} ${row.pins || '?'} Pin ${row.color} ${row.type}`.trim();
+                    // 1. Search Image and PDF
+                    // Try Part 1 first, then Part 2 if Part 1 fails or is missing
+                    const partsToTry = [row.part1, row.part2].filter(p => p);
                     
-                    // 3. Search Image and PDF using Provided Links
-                    let searchResult = { image_url: null, pdf_url: null };
-                    
-                    if (row.provided_urls.length > 0) {
-                        addLog(`Checking ${row.provided_urls.length} provided links...`);
-                        searchResult = await base44.integrations.Core.InvokeLLM({
-                            prompt: `I am looking for data for electronic part "${row.part_number}" (${description}).
-                            I have these product page links: ${row.provided_urls.join(', ')}.
+                    let finalImageUrl = null;
+                    let finalPdfUrl = null;
+
+                    for (const part of partsToTry) {
+                        if (!part) continue;
+                        
+                        addLog(`Searching for ${part} on Digikey/Mouser/LCSC...`);
+                        
+                        const searchResult = await base44.integrations.Core.InvokeLLM({
+                            prompt: `Find a clean product image (NO watermarks, NO logos, white background) and a technical datasheet PDF for electronic component "${part}" (Brand: ${row.brand}).
+                            Search on digikey.com, mouser.com, lcsc.com.
                             
-                            Please visit these links and:
-                            1. Find the **Technical Datasheet PDF** direct URL.
-                            2. Find a **clean product image URL** (no watermarks, white background preferred).
+                            Rules:
+                            1. Image MUST be clean. If only watermarked images exist, return null for image.
+                            2. PDF must be a direct link to a datasheet/spec sheet.
                             
-                            Return JSON: { "image_url": "url", "pdf_url": "url" }`,
+                            Return JSON: { "image_url": "url_or_null", "pdf_url": "url_or_null" }`,
                             response_json_schema: {
                                 type: "object",
                                 properties: {
@@ -84,59 +87,58 @@ export default function AdminImportCatalogue() {
                             },
                             add_context_from_internet: true
                         });
-                    } else {
-                        // Fallback to search if no links (though user said use provided links)
-                         addLog(`No links provided, searching web...`);
-                         searchResult = await base44.integrations.Core.InvokeLLM({
-                            prompt: `Find image and datasheet for "${row.part_number}" ${description}.`,
-                            response_json_schema: {
-                                type: "object",
-                                properties: {
-                                    image_url: { type: "string" },
-                                    pdf_url: { type: "string" }
+
+                        if (searchResult.image_url) {
+                            // Try to upload image
+                            try {
+                                addLog(`Found image for ${part}, uploading...`);
+                                const imgRes = await fetch(searchResult.image_url);
+                                const blob = await imgRes.blob();
+                                const file = new File([blob], `${part}_clean.png`, { type: blob.type });
+                                const uploadRes = await base44.integrations.Core.UploadFile({ file });
+                                if (uploadRes?.file_url) {
+                                    finalImageUrl = uploadRes.file_url;
                                 }
-                            },
-                            add_context_from_internet: true
-                        });
-                    }
-                    
-                    const { image_url: imageUrl, pdf_url: pdfUrl } = searchResult;
-                    let finalImageUrl = imageUrl;
-                    
-                    // 4. Download & Upload Image to Storage
-                    if (imageUrl && imageUrl.startsWith('http')) {
-                        try {
-                             const imgRes = await fetch(imageUrl);
-                             const blob = await imgRes.blob();
-                             const file = new File([blob], `${row.part_number}.png`, { type: blob.type });
-                             
-                             const uploadRes = await base44.integrations.Core.UploadFile({
-                                file: file
-                             });
-                             
-                             if (uploadRes && uploadRes.file_url) {
-                                finalImageUrl = uploadRes.file_url;
-                             }
-                        } catch (imgErr) {
-                            console.warn("Image upload failed, using external URL", imgErr);
+                            } catch (e) {
+                                console.warn("Image upload failed", e);
+                            }
                         }
+
+                        if (searchResult.pdf_url) {
+                            // Try to upload PDF if possible, otherwise use link
+                            try {
+                                addLog(`Found PDF for ${part}, uploading...`);
+                                const pdfRes = await fetch(searchResult.pdf_url);
+                                if (pdfRes.ok) {
+                                    const blob = await pdfRes.blob();
+                                    const file = new File([blob], `${part}_datasheet.pdf`, { type: 'application/pdf' });
+                                    const uploadRes = await base44.integrations.Core.UploadFile({ file });
+                                    if (uploadRes?.file_url) {
+                                        finalPdfUrl = uploadRes.file_url;
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn("PDF upload failed (likely CORS), using direct link", e);
+                                finalPdfUrl = searchResult.pdf_url;
+                            }
+                        }
+
+                        // If we found a clean image, we can stop searching parts
+                        if (finalImageUrl) break;
                     }
                     
-                    // 5. Upsert Record
-                    // Filter undefined/null values to "ignore blank cells"
+                    // 2. Upsert Record
                     const dataToSave = {
-                        part_number: row.part_number,
-                        description: description,
-                        type: row.type || "other",
-                        ...(row.brand && { brand: row.brand }),
-                        ...(row.supplier && { supplier: row.supplier }),
+                        secret_part_number: mainPart,
                         ...(row.pins && { pins: row.pins }),
-                        ...(row.color && { color: row.color }),
+                        ...(row.colour && { colour: row.colour }),
+                        ...(row.type && { type: row.type }),
                         ...(finalImageUrl && { image_url: finalImageUrl }),
-                        ...(pdfUrl && { technical_pdf_url: pdfUrl })
+                        ...(finalPdfUrl && { pdf_url: finalPdfUrl })
                     };
 
-                    const existingRecord = (await base44.entities.Catalogue.list()).find(r => r.part_number === row.part_number);
+                    const allItems = await base44.entities.Catalogue.list();
+                    const existingRecord = allItems.find(r => r.secret_part_number === mainPart);
                     
                     if (existingRecord) {
                         await base44.entities.Catalogue.update(existingRecord.id, dataToSave);
@@ -145,8 +147,8 @@ export default function AdminImportCatalogue() {
                     }
                     
                 } catch (rowErr) {
-                    console.error(`Error processing row ${row.part_number}`, rowErr);
-                    addLog(`Error processing ${row.part_number}: ${rowErr.message}`);
+                    console.error(`Error processing row`, rowErr);
+                    addLog(`Error: ${rowErr.message}`);
                 }
                 
                 completed++;
