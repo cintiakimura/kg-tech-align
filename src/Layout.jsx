@@ -45,7 +45,7 @@ function LayoutContent({ children }) {
       } else {
           // Handle Redirects on Root or Dashboard access
           if (location.pathname === '/') {
-              if (currentUser.role === 'admin') navigate('/ManagerDashboard');
+              if (currentUser.role === 'admin' || currentUser.user_type === 'manager') navigate('/ManagerDashboard');
               else if (currentUser.user_type === 'supplier') navigate('/SupplierDashboard');
               else if (currentUser.user_type === 'client') navigate('/Onboarding');
           }
@@ -141,25 +141,27 @@ function LayoutContent({ children }) {
                      </button>
                    </DropdownMenuTrigger>
                    <DropdownMenuContent align="end">
+                     {(user.role === 'admin' || user.user_type === 'manager') && (
+                         <DropdownMenuItem asChild>
+                             <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                             Manager Dashboard
+                             </Link>
+                         </DropdownMenuItem>
+                     )}
                      {user.role === 'admin' && (
-                                                     <>
-                                                         <DropdownMenuItem asChild>
-                                                             <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
-                                                             Manager Dashboard
-                                                             </Link>
-                                                         </DropdownMenuItem>
-                                                         <DropdownMenuItem asChild>
-                                                             <Link to="/admin/import-catalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
-                                                             Import Catalogue
-                                                             </Link>
-                                                         </DropdownMenuItem>
-                                                         <DropdownMenuItem asChild>
-                                                             <Link to="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
-                                                             Audit Report
-                                                             </Link>
-                                                         </DropdownMenuItem>
-                                                     </>
-                                                 )}
+                         <>
+                             <DropdownMenuItem asChild>
+                                 <Link to="/admin/import-catalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                 Import Catalogue
+                                 </Link>
+                             </DropdownMenuItem>
+                             <DropdownMenuItem asChild>
+                                 <Link to="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                 Audit Report
+                                 </Link>
+                             </DropdownMenuItem>
+                         </>
+                     )}
                       {(user.user_type === 'supplier') && (
                           <DropdownMenuItem asChild>
                               <Link to="/SupplierDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">

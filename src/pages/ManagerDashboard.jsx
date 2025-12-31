@@ -19,27 +19,29 @@ export default function ManagerDashboard() {
       retry: false
   });
 
-  useEffect(() => {
-      if (!isLoadingUser && (!user || user.role !== 'admin')) {
-          navigate('/'); // Redirect if not admin
-      }
-  }, [user, isLoadingUser, navigate]);
+  const isManagerOrAdmin = user?.role === 'admin' || user?.user_type === 'manager';
 
-  // Fetch All Companies (admin can see all)
+  useEffect(() => {
+      if (!isLoadingUser && (!user || !isManagerOrAdmin)) {
+          navigate('/'); // Redirect if not admin or manager
+      }
+  }, [user, isLoadingUser, navigate, isManagerOrAdmin]);
+
+  // Fetch All Companies (admin/manager can see all)
   const { data: companies, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['allCompanies'],
     queryFn: () => base44.entities.CompanyProfile.list(),
-    enabled: !!user && user.role === 'admin'
+    enabled: !!isManagerOrAdmin
   });
 
-  // Fetch All Cars (admin can see all)
+  // Fetch All Cars (admin/manager can see all)
   const { data: cars, isLoading: isLoadingCars } = useQuery({
     queryKey: ['allCars'],
     queryFn: () => base44.entities.CarProfile.list(),
-    enabled: !!user && user.role === 'admin'
+    enabled: !!isManagerOrAdmin
   });
 
-  if (isLoadingUser || (user?.role === 'admin' && (isLoadingCompanies || isLoadingCars))) {
+  if (isLoadingUser || (isManagerOrAdmin && (isLoadingCompanies || isLoadingCars))) {
       return (
           <div className="flex h-[80vh] items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-[#00C600]" />
@@ -47,7 +49,7 @@ export default function ManagerDashboard() {
       );
   }
 
-  if (user?.role !== 'admin') {
+  if (!isManagerOrAdmin) {
       return null; // Will redirect via useEffect
   }
 
