@@ -97,6 +97,9 @@ export default function Catalogue() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <div className="flex items-center px-3 py-2 bg-white border rounded text-xs font-medium text-gray-500">
+                         {catalogue?.length || 0} Items
+                    </div>
                     <div className="flex items-center border rounded-md bg-white">
                         <Button 
                             variant="ghost" 
