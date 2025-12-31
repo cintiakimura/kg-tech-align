@@ -57,7 +57,7 @@ export default function SupplierDashboard() {
             toast.success("Quote submitted successfully");
             setSelectedProject(null);
             setQuoteForm({ price: '', shipping: '', note: '' });
-            queryClient.invalidateQueries(['supplier-projects']);
+            queryClient.invalidateQueries({ queryKey: ['supplier-projects'] });
         },
         onError: () => {
             toast.error("Failed to submit quote");

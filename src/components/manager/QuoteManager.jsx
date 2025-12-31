@@ -198,8 +198,8 @@ export default function QuoteManager({ cars, quotes, companies }) {
         },
         onSuccess: () => {
             toast.success("Winner selected!");
-            queryClient.invalidateQueries(['admin-cars']);
-            queryClient.invalidateQueries(['admin-quotes']);
+            queryClient.invalidateQueries({ queryKey: ['admin-cars'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-quotes'] });
         }
     });
 
