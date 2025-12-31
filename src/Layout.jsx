@@ -137,12 +137,19 @@ function LayoutContent({ children }) {
                    </DropdownMenuTrigger>
                    <DropdownMenuContent align="end">
                      {user.role === 'admin' && (
-                          <DropdownMenuItem asChild>
-                              <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
-                                 Manager Dashboard
-                              </Link>
-                          </DropdownMenuItem>
-                      )}
+                                                     <>
+                                                         <DropdownMenuItem asChild>
+                                                             <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                                             Manager Dashboard
+                                                             </Link>
+                                                         </DropdownMenuItem>
+                                                         <DropdownMenuItem asChild>
+                                                             <Link to="/ImportCatalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                                             Import Catalogue
+                                                             </Link>
+                                                         </DropdownMenuItem>
+                                                     </>
+                                                 )}
                       {(user.user_type === 'supplier') && (
                           <DropdownMenuItem asChild>
                               <Link to="/SupplierDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
