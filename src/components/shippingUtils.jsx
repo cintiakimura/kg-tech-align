@@ -1,35 +1,56 @@
 import { base44 } from "@/api/base44Client";
 
-// Helper to simulate shipping API calls
-export const getShippingRates = async (weight, width, height, depth, destination) => {
-    // In a real app, this would call a backend function which uses secrets to call DHL/FedEx
-    // const response = await base44.functions.call('shipping', 'getRates', { ... });
-    
-    // Simulating API latency
+// Helper to simulate FedEx Shipping API calls
+// Note: In a production environment, these calls should be proxied through a backend function
+// to protect API keys and handle CORS. Since we are in a client-side preview, we simulate the responses
+// based on the provided environment variable logic.
+
+export const getFedExRates = async (weight, width, height, depth, originPostcode, destPostcode) => {
+    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Mock response
+    // In a real implementation:
+    // const token = await getFedExToken();
+    // const rates = await fetch('https://apis.fedex.com/rate/v1/rates/quotes', ...);
+
+    console.log(`Fetching FedEx rates for ${weight}kg pkg from ${originPostcode} to ${destPostcode}`);
+    
+    // Return realistic mock data
     return [
-        { id: 'dhl_express', carrier: 'DHL', service: 'Express Worldwide', price: 45.50, currency: 'GBP', eta: '2 Days' },
-        { id: 'fedex_priority', carrier: 'FedEx', service: 'International Priority', price: 42.10, currency: 'GBP', eta: '3 Days' },
-        { id: 'dhl_standard', carrier: 'DHL', service: 'Economy Select', price: 28.90, currency: 'GBP', eta: '5-7 Days' }
-    ];
+        { 
+            id: 'FEDEX_INTERNATIONAL_PRIORITY', 
+            carrier: 'FedEx', 
+            service: 'International Priority', 
+            price: 42.10 + (weight * 2.5), // dynamic price simulation
+            currency: 'GBP', 
+            eta: '1-3 Business Days' 
+        },
+        { 
+            id: 'FEDEX_INTERNATIONAL_ECONOMY', 
+            carrier: 'FedEx', 
+            service: 'International Economy', 
+            price: 28.90 + (weight * 1.5), 
+            currency: 'GBP', 
+            eta: '4-6 Business Days' 
+        }
+    ].sort((a, b) => a.price - b.price); // Cheapest first
 };
 
-export const createShipmentLabel = async (rateId, shipmentDetails) => {
-    // Simulating API call
+export const createFedExShipment = async (serviceType, shipmentDetails) => {
+    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const trackingNumber = `${rateId.split('_')[0].toUpperCase()}${Math.floor(Math.random() * 1000000000)}`;
+    const trackingNumber = `79${Math.floor(Math.random() * 10000000000)}`;
     
-    // Return a dummy PDF URL (using a placeholder image service for demo purposes or just a string)
-    // In real life this would be a URL to a PDF stored in S3/Base44 Storage
-    const labelUrl = "https://via.placeholder.com/600x800.png?text=SHIPPING+LABEL+" + trackingNumber;
+    // Simulate Label Generation
+    const labelUrl = "https://via.placeholder.com/600x800.png?text=FEDEX+LABEL+" + trackingNumber;
     
     return {
         trackingNumber,
         labelUrl,
-        carrier: rateId.includes('dhl') ? 'DHL' : 'FedEx'
+        carrier: 'FedEx',
+        service: serviceType,
+        format: 'PDF'
     };
 };
 

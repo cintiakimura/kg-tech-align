@@ -16,58 +16,49 @@ import { format } from "date-fns";
 function QuoteCard({ quote, isWinner, onSelect, disabled }) {
     return (
         <div className={`border rounded p-3 flex justify-between items-center ${isWinner ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
-            <div>
-                <div className="font-semibold text-sm">{quote.supplier_email}</div>
-                <div className="text-xs text-muted-foreground">{quote.note || 'No notes provided'}</div>
+            <div className="flex-1">
+                <div className="font-semibold text-sm flex items-center gap-2">
+                    {quote.supplier_email}
+                    {isWinner && <Badge className="bg-green-600 h-5 text-[10px]">WINNER</Badge>}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                    <span className="font-medium text-gray-700">Lead Time: {quote.lead_time_days} Days</span>
+                    <span className="mx-2">•</span>
+                    <span>{quote.note || 'No comments'}</span>
+                </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
+                <div className="text-right text-xs text-gray-500">
+                    <div>Price: £{quote.price?.toFixed(2)}</div>
+                    <div>Shipping: £{quote.shipping_cost?.toFixed(2)}</div>
+                </div>
                 <div className="text-right">
-                    <div className="font-bold">£{quote.price}</div>
-                    <div className="text-xs text-muted-foreground">+ £{quote.shipping_cost} shipping</div>
+                    <div className="font-bold text-lg">£{quote.total_gbp?.toFixed(2)}</div>
                 </div>
                 {!isWinner && !disabled && (
                     <Button size="sm" onClick={() => onSelect(quote)} className="bg-[#00C600] hover:bg-[#00b300]">
                         Select Winner
                     </Button>
                 )}
-                {isWinner && (
-                    <Badge className="bg-green-600">Selected</Badge>
-                )}
             </div>
         </div>
     );
 }
 
-function ShippingModal({ car, companies }) {
+function ShippingModal({ car, quote }) {
     const queryClient = useQueryClient();
     const [step, setStep] = useState(1);
-    const [details, setDetails] = useState({ weight: '', width: '', height: '', depth: '' });
-    const [rates, setRates] = useState([]);
-    const [selectedRate, setSelectedRate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [shipmentResult, setShipmentResult] = useState(null);
 
-    const clientCompany = companies.find(c => c.created_by === car.created_by);
-
-    const handleGetRates = async () => {
+    const handleCreateFedExShipment = async () => {
         setLoading(true);
         try {
-            const result = await getShippingRates(details.weight, details.width, details.height, details.depth, clientCompany?.address);
-            setRates(result);
-            setStep(2);
-        } catch (e) {
-            toast.error("Failed to fetch rates");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreateShipment = async () => {
-        if (!selectedRate) return;
-        setLoading(true);
-        try {
-            // 1. Create Label
-            const result = await createShipmentLabel(selectedRate.id, details);
+            // 1. Create Label via FedEx
+            const result = await createFedExShipment('INTERNATIONAL_PRIORITY', {
+                weight: quote.weight_kg,
+                dimensions: { l: quote.width_cm, w: quote.height_cm, h: quote.depth_cm }
+            });
             setShipmentResult(result);
             
             // 2. Update Car Profile
@@ -77,18 +68,25 @@ function ShippingModal({ car, companies }) {
             await base44.entities.CarProfile.update(car.id, {
                 status: 'Shipped',
                 tracking_number: result.trackingNumber,
+                carrier: result.carrier,
+                label_url: result.labelUrl,
                 audit_log: newAuditLog
             });
 
             // 3. Send Emails (Integration)
-            // Notify Client
+            // Notify Client & Supplier
             await base44.integrations.SendEmail.SendEmail({
                 to: car.created_by,
                 subject: `Your Order for ${car.brand} ${car.model} has Shipped`,
-                body: `Good news! Your order has been shipped via ${result.carrier}.\nTracking Number: ${result.trackingNumber}\n\nTrack your package here: ${result.labelUrl}` // simplified link
+                body: `Good news! Your order has been shipped via ${result.carrier}.\nTracking Number: ${result.trackingNumber}\nDownload Label: ${result.labelUrl}`
+            });
+             await base44.integrations.SendEmail.SendEmail({
+                to: quote.supplier_email,
+                subject: `Shipment Created for ${car.brand} ${car.model}`,
+                body: `A label has been generated for your winning quote.\nTracking Number: ${result.trackingNumber}\nDownload Label: ${result.labelUrl}`
             });
             
-            setStep(3);
+            setStep(2);
             queryClient.invalidateQueries(['admin-cars']);
         } catch (e) {
             console.error(e);
@@ -101,60 +99,32 @@ function ShippingModal({ car, companies }) {
     return (
         <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-                <DialogTitle>Create Shipment</DialogTitle>
+                <DialogTitle>Create FedEx Shipment</DialogTitle>
             </DialogHeader>
 
             {step === 1 && (
                 <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Weight (kg)</label>
-                        <Input value={details.weight} onChange={e => setDetails({...details, weight: e.target.value})} type="number" placeholder="0.5" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Width (cm)</label>
-                            <Input value={details.width} onChange={e => setDetails({...details, width: e.target.value})} type="number" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Height (cm)</label>
-                            <Input value={details.height} onChange={e => setDetails({...details, height: e.target.value})} type="number" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Depth (cm)</label>
-                            <Input value={details.depth} onChange={e => setDetails({...details, depth: e.target.value})} type="number" />
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <h3 className="font-semibold text-blue-800 flex items-center gap-2">
+                            <Truck className="w-4 h-4" /> Package Details from Quote
+                        </h3>
+                        <div className="mt-2 text-sm text-blue-700 grid grid-cols-2 gap-2">
+                            <div>Weight: <span className="font-bold">{quote.weight_kg} kg</span></div>
+                            <div>Dims: <span className="font-bold">{quote.width_cm}x{quote.height_cm}x{quote.depth_cm} cm</span></div>
                         </div>
                     </div>
-                    <Button className="w-full mt-4" onClick={handleGetRates} disabled={loading || !details.weight}>
-                        {loading ? "Fetching Rates..." : "Get Live Rates"}
+                    
+                    <p className="text-sm text-gray-500">
+                        This will generate a production shipping label using the FedEx Ship API and notify the client.
+                    </p>
+
+                    <Button className="w-full mt-4 bg-[#4D148C] hover:bg-[#3d0f70]" onClick={handleCreateFedExShipment} disabled={loading}>
+                        {loading ? "Connecting to FedEx..." : "Generate FedEx Label"}
                     </Button>
                 </div>
             )}
 
             {step === 2 && (
-                <div className="space-y-4 py-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">Select a Service</h3>
-                    <div className="space-y-2">
-                        {rates.map(rate => (
-                            <div 
-                                key={rate.id} 
-                                onClick={() => setSelectedRate(rate)}
-                                className={`p-3 border rounded cursor-pointer flex justify-between items-center ${selectedRate?.id === rate.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'}`}
-                            >
-                                <div>
-                                    <div className="font-bold">{rate.carrier} - {rate.service}</div>
-                                    <div className="text-xs text-muted-foreground">ETA: {rate.eta}</div>
-                                </div>
-                                <div className="font-bold">£{rate.price.toFixed(2)}</div>
-                            </div>
-                        ))}
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleCreateShipment} disabled={loading || !selectedRate}>
-                        {loading ? "Generating Label..." : `Ship with ${selectedRate?.carrier || ''}`}
-                    </Button>
-                </div>
-            )}
-
-            {step === 3 && (
                 <div className="py-8 text-center space-y-4">
                     <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
                         <Check className="w-8 h-8" />
@@ -166,7 +136,7 @@ function ShippingModal({ car, companies }) {
                     <div className="flex gap-2 justify-center">
                         <Button variant="outline" asChild>
                             <a href={shipmentResult?.labelUrl} target="_blank">
-                                <Printer className="w-4 h-4 mr-2" /> Print Label
+                                <Printer className="w-4 h-4 mr-2" /> Download Label
                             </a>
                         </Button>
                     </div>
@@ -187,12 +157,13 @@ export default function QuoteManager({ cars, quotes, companies }) {
             // 1. Update Quote status
             await base44.entities.Quote.update(quote.id, { 
                 status: 'selected',
+                is_winner: true,
                 audit_log: appendAuditLog(quote.audit_log, 'Selected as Winner', user.email)
             });
             
             // 2. Update Car Profile Status
             await base44.entities.CarProfile.update(carId, { 
-                status: 'Selected',
+                status: 'Quote Selected',
                 audit_log: appendAuditLog(cars.find(c => c.id === carId).audit_log, 'Quote Selected', user.email)
             });
         },
@@ -203,7 +174,7 @@ export default function QuoteManager({ cars, quotes, companies }) {
         }
     });
 
-    const activeCars = cars.filter(c => ['Open', 'Selected', 'Shipped'].includes(c.status));
+    const activeCars = cars.filter(c => ['Open', 'Quote Selected', 'Shipped'].includes(c.status));
 
     return (
         <div className="space-y-6">
@@ -222,16 +193,16 @@ export default function QuoteManager({ cars, quotes, companies }) {
                                          {car.tracking_number && <span className="ml-2">Tracking: {car.tracking_number}</span>}
                                      </div>
                                  </div>
-                                 {car.status === 'Selected' && (
-                                     <Dialog>
-                                         <DialogTrigger asChild>
-                                             <Button className="bg-blue-600 hover:bg-blue-700">
-                                                 <Package className="w-4 h-4 mr-2" /> Create Shipment
-                                             </Button>
-                                         </DialogTrigger>
-                                         <ShippingModal car={car} companies={companies} />
-                                     </Dialog>
-                                 )}
+                                 {car.status === 'Quote Selected' && (
+                                                                     <Dialog>
+                                                                         <DialogTrigger asChild>
+                                                                             <Button className="bg-[#4D148C] hover:bg-[#3d0f70]">
+                                                                                 <Package className="w-4 h-4 mr-2" /> FedEx Shipment
+                                                                             </Button>
+                                                                         </DialogTrigger>
+                                                                         <ShippingModal car={car} quote={carQuotes.find(q => q.is_winner)} />
+                                                                     </Dialog>
+                                                                 )}
                              </div>
                          </CardHeader>
                          <CardContent>

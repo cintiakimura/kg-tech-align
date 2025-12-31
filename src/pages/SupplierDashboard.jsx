@@ -14,7 +14,19 @@ import { appendAuditLog } from "../components/shippingUtils";
 export default function SupplierDashboard() {
     const queryClient = useQueryClient();
     const [selectedProject, setSelectedProject] = useState(null);
-    const [quoteForm, setQuoteForm] = useState({ price: '', shipping: '', note: '' });
+    const [quoteForm, setQuoteForm] = useState({ 
+        price: '', 
+        shipping: '', 
+        note: '', 
+        leadTime: '',
+        weight: '',
+        width: '',
+        height: '',
+        depth: '',
+        originPostcode: 'CN-200000', // Default origin
+        serviceType: ''
+    });
+    const [calculatingRates, setCalculatingRates] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Get current user for audit logs
@@ -43,20 +55,34 @@ export default function SupplierDashboard() {
 
     const submitQuoteMutation = useMutation({
         mutationFn: async (data) => {
+            const price = parseFloat(data.price);
+            const shipping = parseFloat(data.shipping);
+            
             await base44.entities.Quote.create({
-                price: parseFloat(data.price),
-                shipping_cost: parseFloat(data.shipping),
+                price: price,
+                shipping_cost: shipping,
+                total_gbp: price + shipping,
+                lead_time_days: parseInt(data.leadTime),
                 note: data.note,
                 car_profile_id: selectedProject.id,
                 supplier_email: user.email,
                 status: 'pending',
+                is_winner: false,
+                weight_kg: parseFloat(data.weight),
+                width_cm: parseFloat(data.width),
+                height_cm: parseFloat(data.height),
+                depth_cm: parseFloat(data.depth),
                 audit_log: appendAuditLog([], 'Quote Submitted', user.email)
             });
         },
         onSuccess: () => {
             toast.success("Quote submitted successfully");
             setSelectedProject(null);
-            setQuoteForm({ price: '', shipping: '', note: '' });
+            setQuoteForm({ 
+                price: '', shipping: '', note: '', leadTime: '', 
+                weight: '', width: '', height: '', depth: '', 
+                originPostcode: 'CN-200000', serviceType: ''
+            });
             queryClient.invalidateQueries({ queryKey: ['supplier-projects'] });
         },
         onError: () => {
@@ -64,9 +90,47 @@ export default function SupplierDashboard() {
         }
     });
 
+    const handleCalculateShipping = async () => {
+        if (!quoteForm.weight || !quoteForm.width || !quoteForm.height || !quoteForm.depth) {
+            toast.error("Please fill in weight and dimensions first");
+            return;
+        }
+        
+        setCalculatingRates(true);
+        try {
+            // Use project destination or default
+            const destPostcode = selectedProject?.company?.address ? 'SW1A 1AA' : 'SW1A 1AA'; // Mock destination extraction
+            
+            const rates = await getFedExRates(
+                parseFloat(quoteForm.weight),
+                parseFloat(quoteForm.width),
+                parseFloat(quoteForm.height),
+                parseFloat(quoteForm.depth),
+                quoteForm.originPostcode,
+                destPostcode
+            );
+            
+            if (rates && rates.length > 0) {
+                // Select cheapest
+                const cheapest = rates[0];
+                setQuoteForm(prev => ({
+                    ...prev,
+                    shipping: cheapest.price.toFixed(2),
+                    serviceType: cheapest.service
+                }));
+                toast.success(`FedEx Rate Found: £${cheapest.price.toFixed(2)} (${cheapest.service})`);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to calculate shipping rates");
+        } finally {
+            setCalculatingRates(false);
+        }
+    };
+
     const handleSubmit = () => {
-        if (!quoteForm.price || !quoteForm.shipping) {
-            toast.error("Price and Shipping are required");
+        if (!quoteForm.price || !quoteForm.shipping || !quoteForm.leadTime) {
+            toast.error("Price, Shipping, and Lead Time are required");
             return;
         }
         submitQuoteMutation.mutate(quoteForm);
@@ -153,22 +217,73 @@ export default function SupplierDashboard() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium">Shipping (£)</label>
+                                                <label className="text-sm font-medium">Lead Time (Days)</label>
+                                                <Input 
+                                                    type="number" 
+                                                    placeholder="e.g. 14"
+                                                    value={quoteForm.leadTime}
+                                                    onChange={(e) => setQuoteForm({...quoteForm, leadTime: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="border rounded-md p-3 bg-gray-50 space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-semibold flex items-center gap-2">
+                                                    <Truck className="w-4 h-4" /> FedEx Shipping Calculator
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-1">
+                                                    <label className="text-xs">Weight (kg)</label>
+                                                    <Input type="number" placeholder="kg" className="h-8" value={quoteForm.weight} onChange={(e) => setQuoteForm({...quoteForm, weight: e.target.value})} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-xs">Origin Postcode</label>
+                                                    <Input className="h-8" value={quoteForm.originPostcode} onChange={(e) => setQuoteForm({...quoteForm, originPostcode: e.target.value})} />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <Input type="number" placeholder="L (cm)" className="h-8" value={quoteForm.width} onChange={(e) => setQuoteForm({...quoteForm, width: e.target.value})} />
+                                                <Input type="number" placeholder="W (cm)" className="h-8" value={quoteForm.height} onChange={(e) => setQuoteForm({...quoteForm, height: e.target.value})} />
+                                                <Input type="number" placeholder="H (cm)" className="h-8" value={quoteForm.depth} onChange={(e) => setQuoteForm({...quoteForm, depth: e.target.value})} />
+                                            </div>
+
+                                            <div className="flex gap-2 items-end">
+                                                <Button type="button" size="sm" variant="secondary" className="w-full" onClick={handleCalculateShipping} disabled={calculatingRates}>
+                                                    {calculatingRates ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : <Truck className="w-3 h-3 mr-2" />}
+                                                    {calculatingRates ? 'Calculating...' : 'Get Live FedEx Rates'}
+                                                </Button>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-sm font-medium">Shipping Cost (£)</label>
                                                 <Input 
                                                     type="number" 
                                                     placeholder="0.00"
                                                     value={quoteForm.shipping}
-                                                    onChange={(e) => setQuoteForm({...quoteForm, shipping: e.target.value})}
+                                                    readOnly
+                                                    className="bg-white"
                                                 />
+                                                {quoteForm.serviceType && <p className="text-xs text-green-600">via {quoteForm.serviceType}</p>}
                                             </div>
                                         </div>
+
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Note (Optional)</label>
+                                            <label className="text-sm font-medium">Comments / Notes</label>
                                             <Textarea 
-                                                placeholder="Add details about lead time, parts, etc."
+                                                placeholder="Add details about parts, exceptions, etc."
                                                 value={quoteForm.note}
                                                 onChange={(e) => setQuoteForm({...quoteForm, note: e.target.value})}
                                             />
+                                        </div>
+                                        
+                                        <div className="pt-2 border-t flex justify-between items-center font-bold">
+                                            <span>Total Quote:</span>
+                                            <span className="text-xl">
+                                                £{((parseFloat(quoteForm.price) || 0) + (parseFloat(quoteForm.shipping) || 0)).toFixed(2)}
+                                            </span>
                                         </div>
                                     </div>
                                     <DialogFooter>
