@@ -153,6 +153,11 @@ function LayoutContent({ children }) {
                                                              Import Catalogue
                                                              </Link>
                                                          </DropdownMenuItem>
+                                                         <DropdownMenuItem asChild>
+                                                             <Link to="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                                             Audit Report
+                                                             </Link>
+                                                         </DropdownMenuItem>
                                                      </>
                                                  )}
                       {(user.user_type === 'supplier') && (
