@@ -5,12 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, Loader2, Package, Paperclip, Camera } from "lucide-react";
+import { Search, ShoppingCart, Loader2, Package, Paperclip, Camera, LayoutGrid, List } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Catalogue() {
     const [searchTerm, setSearchTerm] = useState("");
+    const [viewMode, setViewMode] = useState("grid");
     const queryClient = useQueryClient();
     const [user, setUser] = useState(null);
 
@@ -83,25 +84,46 @@ export default function Catalogue() {
                         Import from Google Sheet
                      </Button>
                 )}
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search by pins, colour, type..." 
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-72">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by pins, colour, type..." 
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center border rounded-md bg-white">
+                        <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className={`h-10 w-10 rounded-none rounded-l-md ${viewMode === 'grid' ? 'bg-gray-100' : ''}`}
+                            onClick={() => setViewMode('grid')}
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </Button>
+                        <div className="w-px h-6 bg-gray-200" />
+                        <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className={`h-10 w-10 rounded-none rounded-r-md ${viewMode === 'list' ? 'bg-gray-100' : ''}`}
+                            onClick={() => setViewMode('list')}
+                        >
+                            <List className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-48 w-full" />)}
+                <div className={`gap-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col'}`}>
+                    {[1,2,3,4,5,6].map(i => <Skeleton key={i} className={viewMode === 'grid' ? "h-48 w-full" : "h-24 w-full"} />)}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={`gap-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col'}`}>
                     {filteredItems.map((item) => (
-                        <Card key={item.id} className="overflow-hidden flex h-48 hover:shadow-md transition-all relative group">
+                        <Card key={item.id} className={`overflow-hidden hover:shadow-md transition-all relative group ${viewMode === 'grid' ? 'flex h-48' : 'flex items-center p-2'}`}>
                             {/* Admin Image Upload */}
                             {user.role === 'admin' && (
                                 <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -118,8 +140,8 @@ export default function Catalogue() {
                                 </div>
                             )}
 
-                            {/* Left: Clean Product Image */}
-                            <div className="w-48 bg-white p-4 flex items-center justify-center border-r shrink-0 relative">
+                            {/* Clean Product Image */}
+                            <div className={`${viewMode === 'grid' ? 'w-48 border-r p-4' : 'w-24 h-20 p-2'} bg-white flex items-center justify-center shrink-0 relative`}>
                                 {item.image_url ? (
                                     <img 
                                         src={item.image_url} 
@@ -127,14 +149,14 @@ export default function Catalogue() {
                                         className="w-full h-full object-contain mix-blend-multiply"
                                     />
                                 ) : (
-                                    <Package className="w-12 h-12 text-gray-200" />
+                                    <Package className={`${viewMode === 'grid' ? 'w-12 h-12' : 'w-8 h-8'} text-gray-200`} />
                                 )}
                             </div>
                             
-                            {/* Right: Details */}
-                            <div className="flex-1 p-4 flex flex-col justify-between">
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-start">
+                            {/* Details */}
+                            <div className={`flex-1 p-4 flex ${viewMode === 'grid' ? 'flex-col justify-between' : 'flex-row items-center justify-between gap-4'}`}>
+                                <div className={`${viewMode === 'grid' ? 'space-y-3' : 'flex items-center gap-8'}`}>
+                                    {viewMode === 'grid' ? (
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2 text-sm">
                                                 <span className="font-semibold text-gray-500 w-14">Pins:</span>
@@ -149,8 +171,25 @@ export default function Catalogue() {
                                                 <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
                                             </div>
                                         </div>
-                                        
-                                        {item.pdf_url && (
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Pins</span>
+                                                <span className="font-bold">{item.pins || '-'}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Colour</span>
+                                                <span className="capitalize">{item.colour || '-'}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Type</span>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                            </div>
+                                        </>
+                                    )}
+                                    
+                                    {item.pdf_url && viewMode === 'grid' && (
+                                        <div className="absolute top-4 right-4">
                                             <a 
                                                 href={item.pdf_url} 
                                                 target="_blank" 
@@ -160,24 +199,36 @@ export default function Catalogue() {
                                             >
                                                 <Paperclip className="w-4 h-4" />
                                             </a>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="mt-2">
+                                <div className={`${viewMode === 'grid' ? 'mt-2' : 'flex items-center gap-4'}`}>
+                                    {item.pdf_url && viewMode === 'list' && (
+                                        <a 
+                                            href={item.pdf_url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-gray-400 hover:text-blue-600 transition-colors p-2"
+                                            title="View Datasheet"
+                                        >
+                                            <Paperclip className="w-4 h-4" />
+                                        </a>
+                                    )}
+
                                     {user?.user_type === 'supplier' ? (
-                                        <div className="text-xs text-gray-400 text-center py-2 italic">
+                                        <div className="text-xs text-gray-400 italic px-2">
                                             View Only
                                         </div>
                                     ) : (
                                         <Button 
                                             size="sm"
-                                            className="w-full bg-[#00C600] hover:bg-[#00b300] h-8 text-xs" 
+                                            className={`${viewMode === 'grid' ? 'w-full' : ''} bg-[#00C600] hover:bg-[#00b300] h-8 text-xs`} 
                                             onClick={() => addToRequestMutation.mutate(item)}
                                             disabled={addToRequestMutation.isPending}
                                         >
                                             {addToRequestMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShoppingCart className="w-3 h-3 mr-2" />}
-                                            Add to request
+                                            {viewMode === 'grid' ? 'Add to request' : 'Add'}
                                         </Button>
                                     )}
                                 </div>
