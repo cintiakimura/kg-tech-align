@@ -46,30 +46,28 @@ export default function AdminImportCatalogue() {
                     // 2. Parse Description
                     const metadata = parseDescription(row.description);
                     
-                    // 3. Search Image (Clean, No Watermark)
+                    // 3. Search Image (Clean, No Watermark) and PDF
                     const searchResult = await base44.integrations.Core.InvokeLLM({
-                        prompt: `Find a high quality, clean product image URL for electronic component "${row.part_number} ${row.description}". 
+                        prompt: `Find a high quality, clean product image URL and a technical datasheet PDF URL for electronic component "${row.part_number} ${row.description}". 
                         Search Digi-Key, Mouser, LCSC.
                         CRITICAL: The image MUST be clean. NO watermarks, NO overlays, NO logos.
-                        Return ONLY the direct image URL.`,
+                        The PDF should be a direct link to the datasheet.`,
+                        response_json_schema: {
+                            type: "object",
+                            properties: {
+                                image_url: { type: "string" },
+                                pdf_url: { type: "string" }
+                            }
+                        },
                         add_context_from_internet: true
                     });
                     
-                    const imageUrl = searchResult.trim();
+                    const { image_url: imageUrl, pdf_url: pdfUrl } = searchResult;
                     let finalImageUrl = imageUrl;
                     
-                    // 4. Download & Upload to Storage (No Watermark)
+                    // 4. Download & Upload Image to Storage (No Watermark)
                     if (imageUrl && imageUrl.startsWith('http')) {
                         try {
-                             // Use integration to upload via URL if possible, or fetch blob and upload
-                             // Since UploadFile expects a file object (in browser) or base64/blob, 
-                             // we'll fetch it here in the browser and pass it to UploadFile
-                             
-                             // Note: Fetching cross-origin images might fail due to CORS.
-                             // We'll try. If it fails, we might just use the external URL.
-                             // But the prompt says "upload directly to Supabase Storage".
-                             // Best effort:
-                             
                              const imgRes = await fetch(imageUrl);
                              const blob = await imgRes.blob();
                              const file = new File([blob], `${row.part_number}.png`, { type: blob.type });
@@ -83,26 +81,10 @@ export default function AdminImportCatalogue() {
                              }
                         } catch (imgErr) {
                             console.warn("Image upload failed, using external URL", imgErr);
-                            // Fallback to external URL if upload fails (CORS etc)
                         }
                     }
                     
                     // 5. Upsert Record
-                    // Check if exists
-                    const existing = await base44.entities.Catalogue.list({
-                         // Filters in list() are usually object. Assuming standard filter support.
-                         // If not supported, we might create duplicates. 
-                         // But for now let's try to filter by part_number manually if needed?
-                         // Ideally API supports filter.
-                    });
-                    
-                    // Client-side check for now since I can't trust partial filter support blindly without docs saying so (though SDK usually supports it).
-                    // Actually, let's just create. If unique constraint exists in DB it errors.
-                    // The user asked for "Insert or update".
-                    // I will list all (limit 1000) or assume I can filter.
-                    // Let's try base44.entities.Catalogue.list() and filter in memory if list is small, or just create.
-                    // Better:
-                    
                     const existingRecord = (await base44.entities.Catalogue.list()).find(r => r.part_number === row.part_number);
                     
                     if (existingRecord) {
@@ -111,7 +93,8 @@ export default function AdminImportCatalogue() {
                             pins: metadata.pins,
                             color: metadata.color,
                             type: metadata.type,
-                            image_url: finalImageUrl
+                            image_url: finalImageUrl,
+                            technical_pdf_url: pdfUrl || null
                         });
                     } else {
                         await base44.entities.Catalogue.create({
@@ -120,7 +103,8 @@ export default function AdminImportCatalogue() {
                             pins: metadata.pins,
                             color: metadata.color,
                             type: metadata.type,
-                            image_url: finalImageUrl
+                            image_url: finalImageUrl,
+                            technical_pdf_url: pdfUrl || null
                         });
                     }
                     
