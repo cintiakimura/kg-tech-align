@@ -1,13 +1,15 @@
-import Onboarding from './pages/Onboarding';
-import ManagerDashboard from './pages/ManagerDashboard';
 import ClientDetails from './pages/ClientDetails';
+import Home from './pages/Home';
+import ManagerDashboard from './pages/ManagerDashboard';
+import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Onboarding": Onboarding,
-    "ManagerDashboard": ManagerDashboard,
     "ClientDetails": ClientDetails,
+    "Home": Home,
+    "ManagerDashboard": ManagerDashboard,
+    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {

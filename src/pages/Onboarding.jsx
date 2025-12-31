@@ -29,7 +29,7 @@ export default function Onboarding() {
   // Fetch Company Profile
   const { data: companyProfileList, isLoading: isLoadingCompany } = useQuery({
     queryKey: ['companyProfile'],
-    queryFn: () => base44.entities.CompanyProfile.list({}, { limit: 1 }),
+    queryFn: () => base44.entities.CompanyProfile.list(undefined, 1),
   });
   const companyProfile = companyProfileList?.[0];
 
@@ -42,7 +42,7 @@ export default function Onboarding() {
   // Fetch Onboarding Content
   const { data: onboardingContentList, isLoading: isLoadingContent } = useQuery({
     queryKey: ['onboardingContent'],
-    queryFn: () => base44.entities.OnboardingContent.list({}, { limit: 1 }),
+    queryFn: () => base44.entities.OnboardingContent.list(undefined, 1),
   });
   const onboardingContent = onboardingContentList?.[0];
 
