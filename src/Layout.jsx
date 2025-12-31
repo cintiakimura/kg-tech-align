@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Moon, Sun, Menu, X, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +14,10 @@ import { LanguageProvider, useLanguage } from './components/LanguageContext';
 function LayoutContent({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [user, setUser] = useState(null);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
   const { language, changeLanguage, t } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check user preference or default to dark
@@ -23,16 +25,50 @@ function LayoutContent({ children }) {
     setIsDarkMode(isDark);
     applyTheme(isDark);
     
-    async function loadUser() {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-      } catch (e) {
-        console.error("User not logged in");
+    checkAuth();
+  }, [location.pathname]);
+
+  async function checkAuth() {
+    try {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+          base44.auth.redirectToLogin(window.location.pathname);
+          return;
       }
+
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+
+      // Check for role
+      if (!currentUser.user_type && currentUser.role !== 'admin') {
+          setShowRoleSelector(true);
+      } else {
+          // Handle Redirects on Root or Dashboard access
+          if (location.pathname === '/') {
+              if (currentUser.role === 'admin') navigate('/ManagerDashboard');
+              else if (currentUser.user_type === 'supplier') navigate('/SupplierDashboard');
+              else if (currentUser.user_type === 'client') navigate('/Onboarding');
+          }
+      }
+    } catch (e) {
+      console.error("Auth check failed", e);
+      base44.auth.redirectToLogin();
     }
-    loadUser();
-  }, []);
+  }
+
+  const handleRoleSelect = async (type) => {
+      try {
+          await base44.auth.updateMe({ user_type: type });
+          setShowRoleSelector(false);
+          // Force reload user to get update
+          const updatedUser = await base44.auth.me();
+          setUser(updatedUser);
+          if (type === 'supplier') navigate('/SupplierDashboard');
+          else navigate('/Onboarding');
+      } catch (e) {
+          console.error("Failed to set role", e);
+      }
+  };
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -125,9 +161,39 @@ function LayoutContent({ children }) {
         </div>
       </nav>
 
+      {/* Role Selection Modal */}
+      {showRoleSelector && (
+        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-[#2a2a2a] p-8 rounded-xl max-w-md w-full shadow-2xl space-y-6 text-center">
+                <h2 className="text-2xl font-bold">Welcome!</h2>
+                <p className="text-muted-foreground">To get started, please select your account type:</p>
+                <div className="grid grid-cols-2 gap-4">
+                    <Button 
+                        onClick={() => handleRoleSelect('client')} 
+                        className="h-32 flex flex-col gap-2 hover:bg-[#00C600]/10 border-2 border-transparent hover:border-[#00C600] transition-all"
+                        variant="outline"
+                    >
+                        <span className="text-4xl">🏢</span>
+                        <span className="font-bold">Client</span>
+                        <span className="text-xs text-muted-foreground">I want to order parts</span>
+                    </Button>
+                    <Button 
+                        onClick={() => handleRoleSelect('supplier')}
+                        className="h-32 flex flex-col gap-2 hover:bg-blue-500/10 border-2 border-transparent hover:border-blue-500 transition-all"
+                        variant="outline"
+                    >
+                        <span className="text-4xl">🏭</span>
+                        <span className="font-bold">Supplier</span>
+                        <span className="text-xs text-muted-foreground">I want to submit quotes</span>
+                    </Button>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {children}
+        {!showRoleSelector && children}
       </main>
 
       {/* CSS Variables for Theme Colors */}
