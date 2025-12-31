@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Package, Truck, FileText, Send, Building2 } from "lucide-react";
 import { toast } from "sonner";
-import { appendAuditLog } from "../components/shippingUtils";
+import { getFedExRates, appendAuditLog } from "../components/shippingUtils";
 
 export default function SupplierDashboard() {
     const queryClient = useQueryClient();

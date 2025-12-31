@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Check, Truck, ChevronDown, Package, Printer, Send, Info } from "lucide-react";
 import { toast } from "sonner";
-import { getShippingRates, createShipmentLabel, appendAuditLog } from "../../components/shippingUtils";
+import { createFedExShipment, appendAuditLog } from "../../components/shippingUtils";
 import { format } from "date-fns";
 
 function QuoteCard({ quote, isWinner, onSelect, disabled }) {
