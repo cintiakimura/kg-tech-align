@@ -11,7 +11,8 @@ import DashboardStats from '../components/manager/DashboardStats';
 import ClientsTable from '../components/manager/ClientsTable';
 import InviteUserModal from '@/components/manager/InviteUserModal';
 import QuoteManager from '@/components/manager/QuoteManager';
-import AdminAuditReport from './AdminAuditReport'; // Importing the page component to embed
+import SupplierDashboard from './SupplierDashboard';
+import Onboarding from './Onboarding';
 import { useLanguage } from '../components/LanguageContext';
 
 export default function ManagerDashboard() {
@@ -93,8 +94,11 @@ export default function ManagerDashboard() {
                 <TabsTrigger value="quotes" className="gap-2">
                     <FileCheck className="w-4 h-4" /> Quotes & Fulfillment
                 </TabsTrigger>
-                <TabsTrigger value="audit" className="gap-2">
-                    <ShieldAlert className="w-4 h-4" /> System Audit
+                <TabsTrigger value="supplier" className="gap-2">
+                    <span className="text-xl">🏭</span> Supplier View
+                </TabsTrigger>
+                <TabsTrigger value="client" className="gap-2">
+                    <span className="text-xl">🏢</span> Client View
                 </TabsTrigger>
             </TabsList>
 
@@ -167,10 +171,15 @@ export default function ManagerDashboard() {
                 </div>
             </TabsContent>
 
-            <TabsContent value="audit">
-                {/* Embedding the Audit Report Page */}
-                <div className="border rounded-xl overflow-hidden">
-                    <AdminAuditReport /> 
+            <TabsContent value="supplier">
+                <div className="border rounded-xl overflow-hidden p-4 bg-gray-50 dark:bg-gray-900">
+                    <SupplierDashboard />
+                </div>
+            </TabsContent>
+
+            <TabsContent value="client">
+                <div className="border rounded-xl overflow-hidden p-4 bg-gray-50 dark:bg-gray-900">
+                    <Onboarding />
                 </div>
             </TabsContent>
         </Tabs>
