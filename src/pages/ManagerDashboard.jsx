@@ -115,7 +115,7 @@ export default function ManagerDashboard() {
                 {/* Menu Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-purple-600 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-purple-600 transition-all border-l-4 border-l-purple-600 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/ProductionControl')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -126,7 +126,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-green-500 transition-all border-l-4 border-l-green-500 h-full transform hover:-translate-y-1"
                         onClick={() => openInvite('client')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -137,7 +137,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-indigo-500 transition-all border-l-4 border-l-indigo-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/CreateClientQuote')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -148,7 +148,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-orange-500 transition-all border-l-4 border-l-orange-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/StockControl')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -159,7 +159,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500 h-full opacity-75 hover:opacity-100"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-orange-500 transition-all border-l-4 border-l-orange-500 h-full transform hover:-translate-y-1 opacity-75 hover:opacity-100"
                         onClick={() => setShowAddProductModal(true)}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -170,7 +170,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-blue-500 transition-all border-l-4 border-l-blue-500 h-full transform hover:-translate-y-1"
                         onClick={() => openInvite('supplier')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
@@ -181,7 +181,7 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-emerald-600 h-full"
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-emerald-600 transition-all border-l-4 border-l-emerald-600 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/FinancialAnalysis')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
