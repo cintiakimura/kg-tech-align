@@ -279,27 +279,53 @@ export default function ProductionControl() {
                                                         }}
                                                     />
                                                 </TableCell>
-                                                    <SelectContent>
-                                                            <SelectItem value="Quote Selected">Quote Selected</SelectItem>
-                                                            <SelectItem value="ordered">Ordered</SelectItem>
-                                                            <SelectItem value="in_production">In Production</SelectItem>
-                                                            <SelectItem value="Shipped">Shipped (Legacy)</SelectItem>
-                                                            <SelectItem value="in_transit">In Transit</SelectItem>
-                                                            <SelectItem value="delivered">Delivered</SelectItem>
-                                                            <SelectItem value="problem">Problem</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
+                                                <TableCell className="text-right text-sm">
+                                                    {quote ? `£${quote.price.toFixed(2)}` : '-'}
                                                 </TableCell>
-                                                <TableCell>
-                                                    {clientQuote && (
-                                                        <Link to={`/CreateClientQuote?id=${clientQuote.id}`}>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <Download className="w-4 h-4" />
+                                                <TableCell className="text-right text-sm">
+                                                    {quote ? (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <span>Ship: £{quote.shipping_cost.toFixed(2)}</span>
+                                                            <div className="flex items-center gap-1 justify-end w-20">
+                                                                <span className="text-[10px] text-muted-foreground">Tax:</span>
+                                                                <Input 
+                                                                    type="number" 
+                                                                    className="h-6 w-12 text-right text-[10px] px-1"
+                                                                    defaultValue={quote.importation_tax || 0}
+                                                                    onBlur={(e) => {
+                                                                        const val = parseFloat(e.target.value);
+                                                                        if (val !== quote.importation_tax) {
+                                                                            updateQuoteTaxMutation.mutate({ id: quote.id, tax: val });
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ) : '-'}
+                                                </TableCell>
+                                                <TableCell className="text-right font-semibold text-sm">
+                                                    {clientQuote ? `£${clientTotal.toFixed(2)}` : (
+                                                        <Link to={`/CreateClientQuote?clientId=${clientCompany?.id}&vehicleId=${vehicle.id}`}>
+                                                            <Button size="sm" variant="outline" className="h-6 text-xs border-dashed">
+                                                                Create Quote
                                                             </Button>
                                                         </Link>
                                                     )}
                                                 </TableCell>
-                                            </TableRow>
+                                                <TableCell className="text-right text-sm">
+                                                    {clientQuote ? (
+                                                        <span className={margin > 0 ? 'text-green-600 font-bold' : 'text-red-500'}>
+                                                            {marginPercent.toFixed(1)}%
+                                                            <br/>
+                                                            <span className="text-[10px] font-normal">£{margin.toFixed(2)}</span>
+                                                        </span>
+                                                    ) : '-'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Select 
+                                                        value={vehicle.status} 
+                                                        onValueChange={(val) => updateVehicleStatusMutation.mutate({ id: vehicle.id, status: val })}
+                                                    >
                                                         <SelectTrigger className={`h-8 w-full text-xs ${statusColors[vehicle.status] || 'bg-gray-100'}`}>
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -313,6 +339,15 @@ export default function ProductionControl() {
                                                             <SelectItem value="problem">Problem</SelectItem>
                                                         </SelectContent>
                                                     </Select>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {clientQuote && (
+                                                        <Link to={`/CreateClientQuote?id=${clientQuote.id}`}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500">
+                                                                <FileText className="w-4 h-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         );
