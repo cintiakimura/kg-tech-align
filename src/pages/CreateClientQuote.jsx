@@ -67,10 +67,19 @@ export default function CreateClientQuote() {
 
     const createQuoteMutation = useMutation({
         mutationFn: async (quoteData) => {
+            // Find client email from selected company
+            const clientCompany = clients?.find(c => c.id === quoteData.client_company_id);
+            const clientEmail = clientCompany?.contact_email;
+
+            const payload = {
+                ...quoteData,
+                client_email: clientEmail
+            };
+
             if (quoteId) {
-                await base44.entities.ClientQuote.update(quoteId, quoteData);
+                await base44.entities.ClientQuote.update(quoteId, payload);
             } else {
-                await base44.entities.ClientQuote.create(quoteData);
+                await base44.entities.ClientQuote.create(payload);
             }
         },
         onSuccess: () => {

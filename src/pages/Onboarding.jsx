@@ -24,6 +24,32 @@ export default function Onboarding() {
   const [editingCar, setEditingCar] = useState(null);
   const [isZipping, setIsZipping] = useState(false);
 
+  // Fetch Client Quotes
+  const { data: myQuotes, refetch: refetchQuotes } = useQuery({
+      queryKey: ['myClientQuotes'],
+      queryFn: async () => {
+          const user = await base44.auth.me();
+          if (!user?.email) return [];
+          return base44.entities.ClientQuote.list({ 
+              client_email: user.email,
+              status: { $in: ['sent', 'accepted', 'rejected', 'invoiced'] } 
+          });
+      }
+  });
+
+  const updateQuoteStatus = useMutation({
+      mutationFn: async ({ id, status }) => {
+          await base44.entities.ClientQuote.update(id, { status });
+      },
+      onSuccess: () => {
+          toast.success("Quote updated successfully");
+          refetchQuotes();
+      },
+      onError: () => {
+          toast.error("Failed to update quote status");
+      }
+  });
+
   // Fetch Company Profile
   const { data: companyProfileList, isLoading: isLoadingCompany } = useQuery({
     queryKey: ['companyProfile'],
@@ -189,9 +215,76 @@ ${connectorDetails}
           <TabsTrigger value="fleet" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
             <Car className="w-4 h-4 mr-2" /> {t('tab_fleet')}
           </TabsTrigger>
+          <TabsTrigger value="quotes" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
+            <Printer className="w-4 h-4 mr-2" /> Quotations
+          </TabsTrigger>
         </TabsList>
 
 
+
+        {/* QUOTES TAB */}
+        <TabsContent value="quotes" className="mt-6">
+            <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg">
+                <CardHeader>
+                    <CardTitle>My Quotations</CardTitle>
+                    <CardDescription>Review and approve quotes sent by KG Protech.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {myQuotes?.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+                                No active quotations found.
+                            </div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {myQuotes?.map(quote => (
+                                    <div key={quote.id} className="border rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-50 dark:bg-black/20">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-bold text-lg">{quote.quote_number}</h3>
+                                                {quote.status === 'accepted' && <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded border border-green-200 uppercase font-bold">Approved</span>}
+                                                {quote.status === 'rejected' && <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded border border-red-200 uppercase font-bold">Denied</span>}
+                                                {quote.status === 'sent' && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200 uppercase font-bold">Pending Review</span>}
+                                                {quote.status === 'invoiced' && <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded border border-purple-200 uppercase font-bold">Invoiced</span>}
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">
+                                                Date: {new Date(quote.date).toLocaleDateString()} • Valid Until: {new Date(quote.valid_until).toLocaleDateString()}
+                                            </p>
+                                            <p className="text-sm">
+                                                Total: <span className="font-bold text-lg">€{quote.items?.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0).toFixed(2)}</span>
+                                                <span className="text-xs text-muted-foreground ml-1">(Excl. VAT)</span>
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-3">
+                                            {quote.status === 'sent' && (
+                                                <>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline"
+                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'rejected' })}
+                                                    >
+                                                        Deny
+                                                    </Button>
+                                                    <Button 
+                                                        size="sm" 
+                                                        className="bg-[#00C600] hover:bg-[#00b300]"
+                                                        onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'accepted' })}
+                                                    >
+                                                        Approve Quote
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+        </TabsContent>
 
         {/* COMPANY TAB */}
         <TabsContent value="company" className="mt-6">
