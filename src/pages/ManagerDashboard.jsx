@@ -105,7 +105,7 @@ export default function ManagerDashboard() {
 
             <TabsContent value="overview" className="space-y-6">
                 {/* Menu Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500"
                         onClick={() => setActiveTab('quotes')}
@@ -128,11 +128,11 @@ export default function ManagerDashboard() {
 
                     <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500"
-                        onClick={() => setActiveTab('client')}
+                        onClick={() => document.getElementById('clients-list')?.scrollIntoView({ behavior: 'smooth' })}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
                             <span className="text-3xl">🏢</span>
-                            <span className="font-semibold text-sm">Client View</span>
+                            <span className="font-semibold text-sm">Clients List</span>
                         </CardContent>
                     </Card>
 
@@ -145,29 +145,9 @@ export default function ManagerDashboard() {
                             <span className="font-semibold text-sm">Catalogue</span>
                         </CardContent>
                     </Card>
-
-                    <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-purple-500"
-                        onClick={() => navigate('/admin/import-catalogue')}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
-                            <UserPlus className="w-8 h-8 text-purple-500" />
-                            <span className="font-semibold text-sm">Import Catalogue</span>
-                        </CardContent>
-                    </Card>
-
-                    <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-red-500"
-                        onClick={() => navigate('/AdminAuditReport')}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
-                            <ShieldAlert className="w-8 h-8 text-red-500" />
-                            <span className="font-semibold text-sm">Audit Report</span>
-                        </CardContent>
-                    </Card>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4" id="clients-list">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                         Client Overview
                     </h2>
