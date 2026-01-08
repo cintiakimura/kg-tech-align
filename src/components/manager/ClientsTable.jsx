@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Car, FileText, ExternalLink, Mail, Phone, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronRight, Car, FileText, ExternalLink, Mail, Phone, MapPin, Download, Printer } from 'lucide-react';
 import { format } from 'date-fns';
-
+import { exportToCSV } from '../utils/exportUtils';
 import { useNavigate } from 'react-router-dom';
 
 function ClientRow({ clientEmail, company, cars }) {
@@ -29,7 +29,7 @@ function ClientRow({ clientEmail, company, cars }) {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
             <>
-                <TableRow className="cursor-pointer hover:bg-muted/50">
+                <TableRow className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
                     <TableCell className="w-[50px]">
                         <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm" className="w-9 p-0">
@@ -220,19 +220,41 @@ export default function ClientsTable({ companies, cars: vehicles }) {
         }));
     }, [companies, cars]);
 
+    const handleExport = () => {
+        const exportData = groupedData.map(g => ({
+            ClientEmail: g.email,
+            CompanyName: g.company?.company_name || 'N/A',
+            TaxID: g.company?.tax_id || '',
+            ContactPerson: g.company?.contact_person_name || '',
+            FleetSize: g.cars.length,
+            Status: g.company ? 'Registered' : 'Pending',
+            LastUpdate: g.company?.updated_date || ''
+        }));
+        exportToCSV(exportData, `clients_export_${format(new Date(), 'yyyy-MM-dd')}`);
+    };
+
     return (
-        <div className="rounded-md border bg-white dark:bg-[#2a2a2a] overflow-hidden">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[50px]"></TableHead>
-                        <TableHead>Company / Client</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Fleet Size</TableHead>
-                        <TableHead className="text-right">Last Update</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
+        <div className="space-y-4">
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => window.print()}>
+                    <Printer className="w-4 h-4 mr-2" /> Print
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                    <Download className="w-4 h-4 mr-2" /> Export CSV
+                </Button>
+            </div>
+            <div className="rounded-md border bg-white dark:bg-[#2a2a2a] overflow-hidden shadow-sm">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[50px]"></TableHead>
+                            <TableHead>Company / Client</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Fleet Size</TableHead>
+                            <TableHead className="text-right">Last Update</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                     {groupedData.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
