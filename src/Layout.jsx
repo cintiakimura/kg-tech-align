@@ -130,11 +130,6 @@ function LayoutContent({ children }) {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-4">
-              {user && (
-                  <a href="/Catalogue">
-                       <Button variant="ghost">Catalogue</Button>
-                  </a>
-              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-100'}`}>

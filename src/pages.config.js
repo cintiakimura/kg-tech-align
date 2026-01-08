@@ -2,17 +2,17 @@ import AdminAuditReport from './pages/AdminAuditReport';
 import AdminImportCatalogue from './pages/AdminImportCatalogue';
 import Catalogue from './pages/Catalogue';
 import ClientDetails from './pages/ClientDetails';
+import Clients from './pages/Clients';
 import CreateClientQuote from './pages/CreateClientQuote';
+import FinancialAnalysis from './pages/FinancialAnalysis';
 import ImportCatalogue from './pages/ImportCatalogue';
-import ManagerDashboard from './pages/ManagerDashboard';
+import Logistics from './pages/Logistics';
 import Onboarding from './pages/Onboarding';
-import ProductionControl from './pages/ProductionControl';
+import Purchases from './pages/Purchases';
 import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
-import FinancialAnalysis from './pages/FinancialAnalysis';
-import Purchases from './pages/Purchases';
-import Logistics from './pages/Logistics';
-import Clients from './pages/Clients';
+import ManagerDashboard from './pages/ManagerDashboard';
+import ProductionControl from './pages/ProductionControl';
 import __Layout from './Layout.jsx';
 
 
@@ -21,17 +21,17 @@ export const PAGES = {
     "AdminImportCatalogue": AdminImportCatalogue,
     "Catalogue": Catalogue,
     "ClientDetails": ClientDetails,
+    "Clients": Clients,
     "CreateClientQuote": CreateClientQuote,
+    "FinancialAnalysis": FinancialAnalysis,
     "ImportCatalogue": ImportCatalogue,
-    "ManagerDashboard": ManagerDashboard,
+    "Logistics": Logistics,
     "Onboarding": Onboarding,
-    "ProductionControl": ProductionControl,
+    "Purchases": Purchases,
     "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
-    "FinancialAnalysis": FinancialAnalysis,
-    "Purchases": Purchases,
-    "Logistics": Logistics,
-    "Clients": Clients,
+    "ManagerDashboard": ManagerDashboard,
+    "ProductionControl": ProductionControl,
 }
 
 export const pagesConfig = {

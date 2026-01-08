@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -20,17 +20,28 @@ import {
     ExternalLink,
     Plus,
     DollarSign,
-    Printer
+    Printer,
+    Trash2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import moment from 'moment';
 import { Link } from 'react-router-dom';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import FileUpload from '@/components/onboarding/FileUpload';
 
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const email = searchParams.get('email');
+    const queryClient = useQueryClient();
+    const [showAddDocModal, setShowAddDocModal] = useState(false);
+    const [newDoc, setNewDoc] = useState({ name: '', type: 'Other', date: new Date().toISOString().split('T')[0], description: '', file_url: '' });
 
     // Fetch Company Profile for this user
     const { data: companies, isLoading: isLoadingCompany } = useQuery({
@@ -58,10 +69,52 @@ export default function ClientDetails() {
         queryFn: () => base44.entities.ClientQuote.list({ client_company_id: company.id })
     });
 
+    // Fetch Manual Documents
+    const { data: manualDocs, isLoading: isLoadingDocs } = useQuery({
+        queryKey: ['companyDocuments', company?.id],
+        enabled: !!company?.id,
+        queryFn: () => base44.entities.CompanyDocument.list({ company_id: company.id })
+    });
+
+    const createDocMutation = useMutation({
+        mutationFn: (data) => base44.entities.CompanyDocument.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['companyDocuments']);
+            setShowAddDocModal(false);
+            setNewDoc({ name: '', type: 'Other', date: new Date().toISOString().split('T')[0], description: '', file_url: '' });
+            toast.success("Document added successfully");
+        },
+        onError: () => toast.error("Failed to add document")
+    });
+
+    const deleteDocMutation = useMutation({
+        mutationFn: (id) => base44.entities.CompanyDocument.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['companyDocuments']);
+            toast.success("Document deleted");
+        }
+    });
+
     // Aggregate all documents
     const documents = useMemo(() => {
         const docs = [];
         
+        // Add manual documents
+        if (manualDocs) {
+            manualDocs.forEach(doc => {
+                docs.push({
+                    id: doc.id,
+                    name: doc.name,
+                    type: doc.type,
+                    date: doc.date,
+                    url: doc.file_url,
+                    source: 'Manual Entry',
+                    isManual: true,
+                    description: doc.description
+                });
+            });
+        }
+
         // Add car documents
         fleet.forEach(car => {
             if (car.file_electrical_scheme) {
@@ -322,11 +375,96 @@ export default function ClientDetails() {
                 {/* DOCUMENTS TAB */}
                 <TabsContent value="documents">
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <FileText className="w-5 h-5" /> Document Repository
-                            </CardTitle>
-                            <CardDescription>All technical documents and schemes uploaded for this client's fleet.</CardDescription>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div>
+                                <CardTitle className="flex items-center gap-2">
+                                    <FileText className="w-5 h-5" /> Document Vault
+                                </CardTitle>
+                                <CardDescription>All technical documents and manual entries.</CardDescription>
+                            </div>
+                            <Dialog open={showAddDocModal} onOpenChange={setShowAddDocModal}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" className="bg-[#00C600] hover:bg-[#00b300]">
+                                        <Plus className="w-4 h-4 mr-2" /> Add Document
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Add Manual Document</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="space-y-2">
+                                            <Label>Document Name</Label>
+                                            <Input 
+                                                value={newDoc.name}
+                                                onChange={(e) => setNewDoc({...newDoc, name: e.target.value})}
+                                                placeholder="e.g. Invoice #123"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Type</Label>
+                                                <Select 
+                                                    value={newDoc.type} 
+                                                    onValueChange={(val) => setNewDoc({...newDoc, type: val})}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Invoice">Invoice</SelectItem>
+                                                        <SelectItem value="Contract">Contract</SelectItem>
+                                                        <SelectItem value="Technical">Technical</SelectItem>
+                                                        <SelectItem value="Scheme">Scheme</SelectItem>
+                                                        <SelectItem value="List">List</SelectItem>
+                                                        <SelectItem value="Other">Other</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Date</Label>
+                                                <Input 
+                                                    type="date"
+                                                    value={newDoc.date}
+                                                    onChange={(e) => setNewDoc({...newDoc, date: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Description / Notes</Label>
+                                            <Input 
+                                                value={newDoc.description}
+                                                onChange={(e) => setNewDoc({...newDoc, description: e.target.value})}
+                                                placeholder="Optional details..."
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>File (Optional)</Label>
+                                            <FileUpload 
+                                                value={newDoc.file_url}
+                                                onChange={(url) => setNewDoc({...newDoc, file_url: url})}
+                                                label="Upload Document"
+                                            />
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setShowAddDocModal(false)}>Cancel</Button>
+                                        <Button onClick={() => {
+                                            if (!newDoc.name) {
+                                                toast.error("Name is required");
+                                                return;
+                                            }
+                                            createDocMutation.mutate({
+                                                company_id: company.id,
+                                                ...newDoc
+                                            });
+                                        }} disabled={createDocMutation.isPending}>
+                                            {createDocMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Add Document
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </CardHeader>
                         <CardContent>
                             {documents.length > 0 ? (
@@ -344,9 +482,14 @@ export default function ClientDetails() {
                                         <tbody className="divide-y">
                                             {documents.map(doc => (
                                                 <tr key={doc.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
-                                                    <td className="px-4 py-3 font-medium flex items-center gap-2">
-                                                        <FileText className="w-4 h-4 text-blue-500" />
-                                                        {doc.name}
+                                                    <td className="px-4 py-3 font-medium">
+                                                        <div className="flex items-center gap-2">
+                                                            <FileText className="w-4 h-4 text-blue-500" />
+                                                            <div>
+                                                                <div>{doc.name}</div>
+                                                                {doc.description && <div className="text-xs text-muted-foreground font-normal">{doc.description}</div>}
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <Badge variant="secondary" className="text-xs font-normal">
@@ -358,11 +501,29 @@ export default function ClientDetails() {
                                                         {doc.date ? format(new Date(doc.date), 'MMM d, yyyy') : '-'}
                                                     </td>
                                                     <td className="px-4 py-3 text-right">
-                                                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
-                                                            <Button variant="ghost" size="sm" className="h-8 gap-1 text-blue-600 hover:text-blue-700">
-                                                                <Download className="w-3 h-3" /> Download
-                                                            </Button>
-                                                        </a>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            {doc.url && (
+                                                                <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                                                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700">
+                                                                        <Download className="w-4 h-4" />
+                                                                    </Button>
+                                                                </a>
+                                                            )}
+                                                            {doc.isManual && (
+                                                                <Button 
+                                                                    variant="ghost" 
+                                                                    size="sm" 
+                                                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+                                                                    onClick={() => {
+                                                                        if (confirm('Delete this document?')) {
+                                                                            deleteDocMutation.mutate(doc.id);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
