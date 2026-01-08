@@ -11,7 +11,6 @@ import DashboardStats from '../components/manager/DashboardStats';
 import ClientsTable from '../components/manager/ClientsTable';
 import InviteUserModal from '@/components/manager/InviteUserModal';
 import QuoteManager from '@/components/manager/QuoteManager';
-import EditProductModal from '@/components/catalogue/EditProductModal';
 import SupplierDashboard from './SupplierDashboard';
 import Onboarding from './Onboarding';
 import { useLanguage } from '../components/LanguageContext';
@@ -20,7 +19,6 @@ export default function ManagerDashboard() {
   const navigate = useNavigate();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteRole, setInviteRole] = useState('client');
-  const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -159,13 +157,24 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-orange-500 transition-all border-l-4 border-l-orange-500 h-full transform hover:-translate-y-1 opacity-75 hover:opacity-100"
-                        onClick={() => setShowAddProductModal(true)}
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-emerald-500 transition-all border-l-4 border-l-emerald-500 h-full transform hover:-translate-y-1"
+                        onClick={() => navigate('/Purchases')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-                            <LayoutDashboard className="w-8 h-8 text-orange-500" />
-                            <span className="font-semibold text-sm">Add Product</span>
-                            <span className="text-xs text-muted-foreground">New catalogue item</span>
+                            <span className="text-3xl">🛒</span>
+                            <span className="font-semibold text-sm">Purchases</span>
+                            <span className="text-xs text-muted-foreground">Manage supplier orders</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-cyan-500 transition-all border-l-4 border-l-cyan-500 h-full transform hover:-translate-y-1"
+                        onClick={() => navigate('/Logistics')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <span className="text-3xl">🚚</span>
+                            <span className="font-semibold text-sm">Logistics</span>
+                            <span className="text-xs text-muted-foreground">Track deliveries</span>
                         </CardContent>
                     </Card>
 
@@ -269,11 +278,6 @@ export default function ManagerDashboard() {
             onOpenChange={setShowInviteModal}
             initialRole={inviteRole}
         />
-        <EditProductModal 
-            open={showAddProductModal}
-            onOpenChange={setShowAddProductModal}
-            product={null}
-        />
-    </div>
-  );
-}
+        </div>
+        );
+        }

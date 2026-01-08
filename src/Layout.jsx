@@ -231,8 +231,22 @@ function LayoutContent({ children }) {
         </div>
       )}
 
+      {/* Print Header */}
+      <div className="hidden print:block print:mb-8 text-center border-b border-black pb-4 pt-4">
+          <div className="flex items-center justify-center gap-4 mb-2">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/user_691ced529360bd8b67161013/ed2352d66_LOGOKG.png" 
+                alt="KG Protech Logo" 
+                className="h-16 w-auto object-contain"
+              />
+              <div className="text-left">
+                  <h1 className="text-2xl font-bold text-black">KG PROTECH SAS</h1>
+              </div>
+          </div>
+      </div>
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 print:py-0 print:px-0">
         {!showRoleSelector && children}
       </main>
 
@@ -264,23 +278,65 @@ function LayoutContent({ children }) {
         .border-primary-green { border-color: var(--primary-green); }
 
         /* Custom scrollbar for dark mode */
-        .dark ::-webkit-scrollbar {
-          width: 8px;
+                .dark ::-webkit-scrollbar {
+                  width: 8px;
+                }
+                .dark ::-webkit-scrollbar-track {
+                  background: #212121; 
+                }
+                .dark ::-webkit-scrollbar-thumb {
+                  background: #444; 
+                  border-radius: 4px;
+                }
+                .dark ::-webkit-scrollbar-thumb:hover {
+                  background: #00C600; 
+                }
+
+                @media print {
+                  /* Force light mode variables */
+                  :root {
+                      --bg-dark: #ffffff !important;
+                  }
+                  body, .min-h-screen {
+                      background-color: #ffffff !important;
+                      color: #000000 !important;
+                  }
+                  .dark {
+                      color-scheme: light !important;
+                  }
+                  /* Hide navbar and other non-print elements */
+                  nav, button, .no-print {
+                      display: none !important;
+                  }
+                  /* Ensure content is visible */
+                  main {
+                      padding: 0 !important;
+                      margin: 0 !important;
+                  }
+                  /* Borders */
+                  .border, .border-b, .border-t, .border-l, .border-r {
+                      border-color: #000000 !important;
+                  }
+                  /* Cards */
+                  .card, .bg-white, .dark\:bg-\[\#2a2a2a\], .dark\:bg-\[\#212121\] {
+                      background-color: #ffffff !important;
+                      box-shadow: none !important;
+                      border: 1px solid #ddd !important;
+                  }
+                  /* Text colors */
+                  .text-white, .dark\:text-white, .text-gray-400, .text-muted-foreground {
+                      color: #000000 !important;
+                  }
+                  /* Badges */
+                  .badge {
+                      border: 1px solid #000 !important;
+                      color: #000 !important;
+                  }
+                }
+              `}</style>
+            </div>
+          );
         }
-        .dark ::-webkit-scrollbar-track {
-          background: #212121; 
-        }
-        .dark ::-webkit-scrollbar-thumb {
-          background: #444; 
-          border-radius: 4px;
-        }
-        .dark ::-webkit-scrollbar-thumb:hover {
-          background: #00C600; 
-        }
-      `}</style>
-    </div>
-  );
-}
 
 export default function Layout(props) {
   return (

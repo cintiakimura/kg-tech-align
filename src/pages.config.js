@@ -10,6 +10,8 @@ import ProductionControl from './pages/ProductionControl';
 import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import FinancialAnalysis from './pages/FinancialAnalysis';
+import Purchases from './pages/Purchases';
+import Logistics from './pages/Logistics';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +28,8 @@ export const PAGES = {
     "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
     "FinancialAnalysis": FinancialAnalysis,
+    "Purchases": Purchases,
+    "Logistics": Logistics,
 }
 
 export const pagesConfig = {
