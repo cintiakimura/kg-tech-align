@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, ArrowLeft, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Loader2, ArrowLeft, TrendingUp, TrendingDown, DollarSign, Download, Printer } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import moment from 'moment';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { exportToCSV } from '@/components/utils/exportUtils';
 
 export default function FinancialAnalysis() {
     const { data: quotes, isLoading: loadingQuotes } = useQuery({
@@ -93,18 +94,48 @@ export default function FinancialAnalysis() {
         chartData.push(months[key]);
     });
 
+    const handleExport = () => {
+        const incomeRows = incomeQuotes.map(q => ({
+            Type: 'Income',
+            Date: q.date,
+            Reference: q.quote_number,
+            Status: q.status,
+            Amount: (q.items?.reduce((s, i) => s + (i.quantity * i.unit_price), 0) || 0)
+        }));
+
+        const costRows = costDetails.map(c => ({
+            Type: 'Cost',
+            Date: c.date,
+            Reference: `${c.vehicle} (${c.vin})`,
+            Status: 'Supplier Invoice',
+            Amount: -c.cost // Negative for cost in some views, but positive for "Amount" column usually. I'll keep it positive and let Type distinguish.
+        }));
+
+        exportToCSV([...incomeRows, ...costRows], 'financial_analysis_export');
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#212121] p-6">
             <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex items-center gap-4">
-                    <Link to="/ManagerDashboard">
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="w-5 h-5" />
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link to="/ManagerDashboard">
+                            <Button variant="ghost" size="icon">
+                                <ArrowLeft className="w-5 h-5" />
+                            </Button>
+                        </Link>
+                        <div>
+                            <h1 className="text-2xl font-bold">Financial Analysis</h1>
+                            <p className="text-muted-foreground">Overview of income, costs, and profit</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" /> Print
                         </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold">Financial Analysis</h1>
-                        <p className="text-muted-foreground">Overview of income, costs, and profit</p>
+                        <Button variant="outline" size="sm" onClick={handleExport}>
+                            <Download className="w-4 h-4 mr-2" /> Export CSV
+                        </Button>
                     </div>
                 </div>
 
@@ -189,7 +220,7 @@ export default function FinancialAnalysis() {
                             </TableHeader>
                             <TableBody>
                                 {incomeQuotes.slice(0, 5).map(q => (
-                                    <TableRow key={q.id}>
+                                    <TableRow key={q.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
                                         <TableCell>{moment(q.date).format('YYYY-MM-DD')}</TableCell>
                                         <TableCell>{q.quote_number}</TableCell>
                                         <TableCell>
