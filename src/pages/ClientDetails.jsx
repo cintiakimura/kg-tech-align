@@ -19,7 +19,8 @@ import {
     Download,
     ExternalLink,
     Plus,
-    DollarSign
+    DollarSign,
+    Printer
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
@@ -127,6 +128,9 @@ export default function ClientDetails() {
                         Active Account
                     </Badge>
                 )}
+                <Button variant="outline" size="sm" onClick={() => window.print()} className="print:hidden ml-auto">
+                    <Printer className="w-4 h-4 mr-2" /> Print Profile
+                </Button>
             </div>
 
             {/* Main Content */}

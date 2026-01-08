@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Save, ArrowLeft, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Badge } from "@/components/ui/badge";
