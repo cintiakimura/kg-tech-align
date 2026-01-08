@@ -138,12 +138,12 @@ export default function ManagerDashboard() {
 
                     <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500 h-full"
-                        onClick={() => setActiveTab('quotes')}
+                        onClick={() => navigate('/CreateClientQuote')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-                            <FileCheck className="w-8 h-8 text-indigo-500" />
-                            <span className="font-semibold text-sm">Add Quote</span>
-                            <span className="text-xs text-muted-foreground">Create a new price quotation for a vehicle</span>
+                            <FileText className="w-8 h-8 text-indigo-500" />
+                            <span className="font-semibold text-sm">New Client Quotation</span>
+                            <span className="text-xs text-muted-foreground">Create a sales quote for a client</span>
                         </CardContent>
                     </Card>
 
