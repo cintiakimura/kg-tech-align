@@ -156,9 +156,9 @@ export default function CreateClientQuote() {
     const selectedClient = clients?.find(c => c.id === clientId);
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-[#212121] p-6">
-            <div className="max-w-5xl mx-auto space-y-6">
-                <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-gray-50 dark:bg-[#212121] p-6 print:bg-white print:p-0">
+            <div className="max-w-5xl mx-auto space-y-6 print:space-y-4">
+                <div className="flex items-center justify-between print:hidden">
                     <div className="flex items-center gap-4">
                         <Link to="/ManagerDashboard">
                             <Button variant="ghost" size="icon">
@@ -170,7 +170,10 @@ export default function CreateClientQuote() {
                             <p className="text-muted-foreground">New sales quote for client</p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 print:hidden">
+                        <Button variant="outline" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" /> Print
+                        </Button>
                         {quoteId && (
                             <>
                                 {status === 'draft' && (
