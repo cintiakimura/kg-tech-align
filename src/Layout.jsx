@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, BrowserRouter } from 'react-router-dom';
 import { Moon, Sun, Menu, X, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -284,8 +284,10 @@ function LayoutContent({ children }) {
 
 export default function Layout(props) {
   return (
-    <LanguageProvider>
-      <LayoutContent {...props} />
-    </LanguageProvider>
+    <BrowserRouter>
+      <LanguageProvider>
+        <LayoutContent {...props} />
+      </LanguageProvider>
+    </BrowserRouter>
   );
 }
