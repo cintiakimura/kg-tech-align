@@ -5,7 +5,6 @@ import ClientDetails from './pages/ClientDetails';
 import Clients from './pages/Clients';
 import CreateClientQuote from './pages/CreateClientQuote';
 import FinancialAnalysis from './pages/FinancialAnalysis';
-import ImportCatalogue from './pages/ImportCatalogue';
 import Logistics from './pages/Logistics';
 import Onboarding from './pages/Onboarding';
 import Purchases from './pages/Purchases';
@@ -25,7 +24,6 @@ export const PAGES = {
     "Clients": Clients,
     "CreateClientQuote": CreateClientQuote,
     "FinancialAnalysis": FinancialAnalysis,
-    "ImportCatalogue": ImportCatalogue,
     "Logistics": Logistics,
     "Onboarding": Onboarding,
     "Purchases": Purchases,
