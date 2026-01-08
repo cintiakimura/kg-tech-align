@@ -257,25 +257,94 @@ ${connectorDetails}
                                         </div>
                                         
                                         <div className="flex items-center gap-3">
-                                            {quote.status === 'sent' && (
-                                                <>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline"
-                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                        onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'rejected' })}
-                                                    >
-                                                        Deny
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button size="sm" variant="outline" className="gap-2">
+                                                        <Printer className="w-4 h-4" /> View & Print
                                                     </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        className="bg-[#00C600] hover:bg-[#00b300]"
-                                                        onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'accepted' })}
-                                                    >
-                                                        Approve Quote
-                                                    </Button>
-                                                </>
-                                            )}
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-3xl">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Quotation Details</DialogTitle>
+                                                        <CardDescription>Quote #{quote.quote_number}</CardDescription>
+                                                    </DialogHeader>
+                                                    <div className="py-4 space-y-4" id="printable-quote">
+                                                        <div className="flex justify-between border-b pb-4">
+                                                            <div>
+                                                                <h3 className="font-bold text-lg">KG PROTECH SAS</h3>
+                                                                <p className="text-sm text-muted-foreground">Supplier</p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <h3 className="font-bold">Date</h3>
+                                                                <p>{new Date(quote.date).toLocaleDateString()}</p>
+                                                            </div>
+                                                        </div>
+                                                        <table className="w-full text-sm">
+                                                            <thead>
+                                                                <tr className="border-b">
+                                                                    <th className="text-left py-2">Description</th>
+                                                                    <th className="text-right py-2">Qty</th>
+                                                                    <th className="text-right py-2">Unit Price</th>
+                                                                    <th className="text-right py-2">Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {quote.items?.map((item, idx) => (
+                                                                    <tr key={idx} className="border-b">
+                                                                        <td className="py-2">{item.description}</td>
+                                                                        <td className="text-right py-2">{item.quantity}</td>
+                                                                        <td className="text-right py-2">€{item.unit_price.toFixed(2)}</td>
+                                                                        <td className="text-right py-2">€{(item.quantity * item.unit_price).toFixed(2)}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                        <div className="flex justify-end pt-4">
+                                                            <div className="text-right space-y-1">
+                                                                <div className="flex justify-between gap-8">
+                                                                    <span>Subtotal:</span>
+                                                                    <span>€{quote.items?.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0).toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="flex justify-between gap-8 font-bold text-lg">
+                                                                    <span>Total:</span>
+                                                                    <span>€{quote.items?.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0).toFixed(2)}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <DialogFooter className="gap-2">
+                                                        <Button onClick={() => {
+                                                            const printContent = document.getElementById('printable-quote').innerHTML;
+                                                            const win = window.open('', '', 'height=700,width=700');
+                                                            win.document.write('<html><head><title>Print Quote</title>');
+                                                            win.document.write('<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">');
+                                                            win.document.write('</head><body class="p-8">');
+                                                            win.document.write(printContent);
+                                                            win.document.write('</body></html>');
+                                                            win.document.close();
+                                                            win.print();
+                                                        }} variant="outline">
+                                                            <Printer className="w-4 h-4 mr-2" /> Print
+                                                        </Button>
+                                                        {quote.status === 'sent' && (
+                                                            <>
+                                                                <Button 
+                                                                    variant="destructive"
+                                                                    onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'rejected' })}
+                                                                >
+                                                                    Deny
+                                                                </Button>
+                                                                <Button 
+                                                                    className="bg-[#00C600] hover:bg-[#00b300]"
+                                                                    onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'accepted' })}
+                                                                >
+                                                                    Approve
+                                                                </Button>
+                                                            </>
+                                                        )}
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
                                         </div>
                                     </div>
                                 ))}
@@ -306,103 +375,86 @@ ${connectorDetails}
 
         {/* FLEET TAB */}
         <TabsContent value="fleet" className="mt-6">
-            {isAddingCar ? (
-                <div className="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
-                    <VehicleForm 
-                        initialData={editingCar}
-                        onCancel={() => {
-                            setIsAddingCar(false);
-                            setEditingCar(null);
-                        }} 
-                        onSuccess={() => {
-                            setIsAddingCar(false);
-                            setEditingCar(null);
-                            queryClient.invalidateQueries(['vehicles']);
-                        }} 
-                    />
-                </div>
-            ) : (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-semibold">{t('your_vehicles')}</h2>
-                        <Button onClick={() => setIsAddingCar(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white">
-                            <Plus className="w-4 h-4 mr-2" /> {t('add_vehicle')}
-                        </Button>
+            <div className="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
+                <VehicleForm 
+                    initialData={editingCar}
+                    onCancel={() => {
+                        setEditingCar(null);
+                        // If we are always showing the form, cancel might just clear the edit state to "new" mode
+                        // or we might want to navigate elsewhere. For now, let's keep it resetting to "add new".
+                        setEditingCar(null); 
+                    }} 
+                    onSuccess={() => {
+                        setEditingCar(null);
+                        queryClient.invalidateQueries(['vehicles']);
+                        toast.success("Vehicle saved!");
+                    }} 
+                />
+            </div>
+            
+            {/* List of existing vehicles below the form */}
+            <div className="mt-12 space-y-6">
+                <h2 className="text-xl font-semibold">My Fleet</h2>
+                {isLoadingCars ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Skeleton className="h-64 w-full rounded-xl" />
+                        <Skeleton className="h-64 w-full rounded-xl" />
+                        <Skeleton className="h-64 w-full rounded-xl" />
                     </div>
-
-                    {isLoadingCars ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Skeleton className="h-64 w-full rounded-xl" />
-                            <Skeleton className="h-64 w-full rounded-xl" />
-                            <Skeleton className="h-64 w-full rounded-xl" />
-                        </div>
-                    ) : (!carProfiles || carProfiles.length === 0) ? (
-                        <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700 bg-transparent">
-                            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                                <div className="w-16 h-16 bg-gray-100 dark:bg-[#333] rounded-full flex items-center justify-center mb-4">
-                                    <Car className="w-8 h-8 text-gray-400" />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {carProfiles?.map((car) => (
+                            <Card key={car.id} className="overflow-hidden bg-white dark:bg-[#2a2a2a] border-none shadow-md hover:shadow-xl transition-all group">
+                                <div className="aspect-[4/3] relative bg-gray-100 dark:bg-black">
+                                    {car.image_connector_front ? (
+                                        <img 
+                                            src={car.image_connector_front} 
+                                            alt={car.model} 
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <Car className="w-12 h-12" />
+                                        </div>
+                                    )}
+                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                        <Button size="icon" variant="secondary" className="h-8 w-8 bg-white/90 text-black hover:bg-white" onClick={() => {
+                                            setEditingCar(car);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}>
+                                            <Edit2 className="w-4 h-4" />
+                                        </Button>
+                                        <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => handleDeleteCar(car.id)}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-semibold mb-1">{t('no_vehicles')}</h3>
-                                <p className="text-muted-foreground mb-6 max-w-sm">
-                                    {t('no_vehicles_desc')}
-                                </p>
-                                <Button onClick={() => setIsAddingCar(true)} variant="outline" className="border-[#00C600] text-[#00C600] hover:bg-[#00C600] hover:text-white">
-                                    <Plus className="w-4 h-4 mr-2" /> {t('add_first_car')}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {carProfiles?.map((car) => (
-                                <Card key={car.id} className="overflow-hidden bg-white dark:bg-[#2a2a2a] border-none shadow-md hover:shadow-xl transition-all group">
-                                    <div className="aspect-[4/3] relative bg-gray-100 dark:bg-black">
-                                        {car.image_connector_front ? (
-                                            <img 
-                                                src={car.image_connector_front} 
-                                                alt={car.model} 
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                <Car className="w-12 h-12" />
-                                            </div>
-                                        )}
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                            <Button size="icon" variant="secondary" className="h-8 w-8 bg-white/90 text-black hover:bg-white" onClick={() => handleEditCar(car)}>
-                                                <Edit2 className="w-4 h-4" />
-                                            </Button>
-                                            <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => handleDeleteCar(car.id)}>
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                                <CardContent className="p-5">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
+                                            <p className="text-sm text-muted-foreground">{car.engine_model || 'No engine info'}</p>
+                                        </div>
+                                        <span className="text-xs font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                            {car.transmission_type}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                                        <div className="flex items-center gap-1">
+                                            <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
+                                            {t('docs')}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
+                                            {t('photos')}
                                         </div>
                                     </div>
-                                    <CardContent className="p-5">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
-                                                <p className="text-sm text-muted-foreground">{car.engine_model || 'No engine info'}</p>
-                                            </div>
-                                            <span className="text-xs font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                                                {car.transmission_type}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <div className="flex items-center gap-1">
-                                                <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                                {t('docs')}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                                {t('photos')}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </div>
         </TabsContent>
       </Tabs>
       </div>

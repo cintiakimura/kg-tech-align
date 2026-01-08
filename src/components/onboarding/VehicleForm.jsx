@@ -81,8 +81,8 @@ export default function VehicleForm({ onCancel, onSuccess, initialData }) {
     <Card className="border-none shadow-none bg-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
         <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
             <div>
-                <CardTitle className="text-2xl font-bold">Vehicle Request</CardTitle>
-                <CardDescription>Add a new vehicle and request connectors.</CardDescription>
+                <CardTitle className="text-2xl font-bold">My Training Vehicles</CardTitle>
+                <CardDescription>Add specifications for your training vehicle.</CardDescription>
             </div>
             <Button variant="ghost" onClick={onCancel} size="sm" className="text-gray-500">
                 <ArrowLeft className="w-4 h-4 mr-2" /> {t('back')}
