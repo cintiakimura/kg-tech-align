@@ -10,6 +10,7 @@ import { Loader2, ArrowLeft, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+import TruncatedCell from '@/components/TruncatedCell';
 
 export default function ProductionControl() {
     const queryClient = useQueryClient();
@@ -54,6 +55,17 @@ export default function ProductionControl() {
             setEditingTax({});
         },
         onError: () => toast.error("Failed to update tax")
+    });
+
+    const updateVehicleFieldsMutation = useMutation({
+        mutationFn: async ({ id, data }) => {
+            await base44.entities.Vehicle.update(id, data);
+        },
+        onSuccess: () => {
+            toast.success("Updated");
+            queryClient.invalidateQueries(['productionVehicles']);
+        },
+        onError: () => toast.error("Failed to update")
     });
 
     if (loadingVehicles || loadingQuotes || loadingCompanies) {
@@ -111,19 +123,21 @@ export default function ProductionControl() {
 
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border overflow-hidden">
                     <div className="overflow-x-auto">
-                        <Table>
+                        <Table className="table-fixed w-full">
                             <TableHeader>
                                 <TableRow className="bg-gray-50 dark:bg-gray-900/50">
-                                    <TableHead className="min-w-[150px]">Client</TableHead>
-                                    <TableHead className="min-w-[200px]">Product</TableHead>
-                                    <TableHead className="min-w-[200px]">Supplier</TableHead>
-                                    <TableHead>Ordered</TableHead>
-                                    <TableHead>Delivery Est.</TableHead>
-                                    <TableHead className="text-right">Cost</TableHead>
-                                    <TableHead className="text-right">Shipping</TableHead>
-                                    <TableHead className="text-right">Imp. Tax</TableHead>
-                                    <TableHead className="text-right">Total</TableHead>
-                                    <TableHead className="min-w-[180px]">Status</TableHead>
+                                    <TableHead className="w-[140px]">Client</TableHead>
+                                    <TableHead className="w-[180px]">Product</TableHead>
+                                    <TableHead className="w-[140px]">Supplier</TableHead>
+                                    <TableHead className="w-[110px]">Ordered</TableHead>
+                                    <TableHead className="w-[110px]">Del. Est.</TableHead>
+                                    <TableHead className="w-[140px]">Courier</TableHead>
+                                    <TableHead className="w-[140px]">Tracking</TableHead>
+                                    <TableHead className="w-[100px] text-right">Cost</TableHead>
+                                    <TableHead className="w-[100px] text-right">Ship</TableHead>
+                                    <TableHead className="w-[100px] text-right">Tax</TableHead>
+                                    <TableHead className="w-[100px] text-right">Total</TableHead>
+                                    <TableHead className="w-[160px]">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -140,51 +154,70 @@ export default function ProductionControl() {
                                         
                                         return (
                                             <TableRow key={vehicle.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                <TableCell className="font-medium">
-                                                    {getCompanyName(vehicle.created_by)}
+                                                <TableCell>
+                                                    <TruncatedCell text={getCompanyName(vehicle.created_by)} />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-semibold">{vehicle.brand} {vehicle.model}</span>
-                                                        <span className="text-xs text-muted-foreground">{vehicle.vin}</span>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <TruncatedCell text={`${vehicle.brand} ${vehicle.model}`} className="font-semibold" />
+                                                        <TruncatedCell text={vehicle.vin} className="text-xs text-muted-foreground" />
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    {quote?.supplier_email || '-'}
+                                                    <TruncatedCell text={quote?.supplier_email || '-'} />
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="text-sm">
                                                     {moment(dateOrdered).format('YYYY-MM-DD')}
                                                 </TableCell>
-                                                <TableCell>
+                                                <TableCell className="text-sm">
                                                     {getDeliveryDate(quote, dateOrdered)}
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell>
+                                                    <Input 
+                                                        className="h-8 w-full text-xs" 
+                                                        placeholder="Courier..."
+                                                        defaultValue={vehicle.carrier || ''}
+                                                        onBlur={(e) => {
+                                                            if (e.target.value !== vehicle.carrier) {
+                                                                updateVehicleFieldsMutation.mutate({ id: vehicle.id, data: { carrier: e.target.value } });
+                                                            }
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Input 
+                                                        className="h-8 w-full text-xs" 
+                                                        placeholder="Tracking..."
+                                                        defaultValue={vehicle.tracking_number || ''}
+                                                        onBlur={(e) => {
+                                                            if (e.target.value !== vehicle.tracking_number) {
+                                                                updateVehicleFieldsMutation.mutate({ id: vehicle.id, data: { tracking_number: e.target.value } });
+                                                            }
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="text-right text-sm">
                                                     {quote?.price ? `£${quote.price.toFixed(2)}` : '-'}
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell className="text-right text-sm">
                                                     {quote?.shipping_cost ? `£${quote.shipping_cost.toFixed(2)}` : '-'}
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     {quote ? (
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <div className="relative w-24">
-                                                                <span className="absolute left-2 top-1.5 text-xs text-muted-foreground">£</span>
-                                                                <Input 
-                                                                    type="number" 
-                                                                    className="h-8 pl-5 text-right"
-                                                                    defaultValue={quote.importation_tax || 0}
-                                                                    onBlur={(e) => {
-                                                                        const val = parseFloat(e.target.value);
-                                                                        if (val !== quote.importation_tax) {
-                                                                            updateQuoteTaxMutation.mutate({ id: quote.id, tax: val });
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
+                                                        <Input 
+                                                            type="number" 
+                                                            className="h-8 w-full text-right text-xs"
+                                                            defaultValue={quote.importation_tax || 0}
+                                                            onBlur={(e) => {
+                                                                const val = parseFloat(e.target.value);
+                                                                if (val !== quote.importation_tax) {
+                                                                    updateQuoteTaxMutation.mutate({ id: quote.id, tax: val });
+                                                                }
+                                                            }}
+                                                        />
                                                     ) : '-'}
                                                 </TableCell>
-                                                <TableCell className="text-right font-semibold">
+                                                <TableCell className="text-right font-semibold text-sm">
                                                     {quote ? `£${((quote.price || 0) + (quote.shipping_cost || 0) + (quote.importation_tax || 0)).toFixed(2)}` : '-'}
                                                 </TableCell>
                                                 <TableCell>
@@ -192,7 +225,7 @@ export default function ProductionControl() {
                                                         value={vehicle.status} 
                                                         onValueChange={(val) => updateVehicleStatusMutation.mutate({ id: vehicle.id, status: val })}
                                                     >
-                                                        <SelectTrigger className={`h-8 w-full ${statusColors[vehicle.status] || 'bg-gray-100'}`}>
+                                                        <SelectTrigger className={`h-8 w-full text-xs ${statusColors[vehicle.status] || 'bg-gray-100'}`}>
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
