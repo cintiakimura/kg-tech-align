@@ -17,10 +17,14 @@ import {
     CreditCard, 
     Calendar,
     Download,
-    ExternalLink
+    ExternalLink,
+    Plus,
+    DollarSign
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
+import moment from 'moment';
+import { Link } from 'react-router-dom';
 
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
@@ -45,6 +49,13 @@ export default function ClientDetails() {
 
     const company = companies?.[0];
     const fleet = cars || [];
+
+    // Fetch Quotes for this client
+    const { data: quotes, isLoading: isLoadingQuotes } = useQuery({
+        queryKey: ['clientQuotes', company?.id],
+        enabled: !!company?.id,
+        queryFn: () => base44.entities.ClientQuote.list({ client_company_id: company.id })
+    });
 
     // Aggregate all documents
     const documents = useMemo(() => {
@@ -123,6 +134,7 @@ export default function ClientDetails() {
                 <TabsList>
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="fleet">Fleet ({fleet.length})</TabsTrigger>
+                    <TabsTrigger value="quotes">Quotes & Sales ({quotes?.length || 0})</TabsTrigger>
                     <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
                 </TabsList>
 
@@ -192,6 +204,53 @@ export default function ClientDetails() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                {/* QUOTES TAB */}
+                <TabsContent value="quotes">
+                     <div className="grid gap-4">
+                        <div className="flex justify-end">
+                            <Link to={`/CreateClientQuote?clientId=${company?.id}`}>
+                                <Button className="gap-2">
+                                    <Plus className="w-4 h-4" /> New Quote
+                                </Button>
+                            </Link>
+                        </div>
+                        {quotes?.length > 0 ? (
+                            quotes.map(quote => (
+                                <Card key={quote.id} className="cursor-pointer hover:bg-slate-50 transition-colors">
+                                    <Link to={`/CreateClientQuote?id=${quote.id}`}>
+                                        <CardHeader className="flex flex-row items-center justify-between py-4">
+                                            <div className="space-y-1">
+                                                <CardTitle className="text-base flex items-center gap-2">
+                                                    {quote.quote_number || 'Draft Quote'}
+                                                </CardTitle>
+                                                <CardDescription>{moment(quote.date).format('DD MMM YYYY')}</CardDescription>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-right">
+                                                    <div className="font-bold text-lg">
+                                                        €{(quote.items?.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0) * (1 + (quote.tva_rate/100))).toFixed(2)}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {quote.items?.length} items
+                                                    </div>
+                                                </div>
+                                                <Badge variant={quote.status === 'invoiced' ? 'default' : 'secondary'} className="uppercase">
+                                                    {quote.status}
+                                                </Badge>
+                                            </div>
+                                        </CardHeader>
+                                    </Link>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="text-center py-12 text-muted-foreground border rounded-lg border-dashed">
+                                <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                <p>No quotes found for this client.</p>
+                            </div>
+                        )}
+                     </div>
                 </TabsContent>
 
                 {/* FLEET TAB */}
