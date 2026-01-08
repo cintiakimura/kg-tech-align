@@ -115,42 +115,46 @@ export default function ManagerDashboard() {
                 {/* Menu Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500"
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500 h-full"
                         onClick={() => openInvite('client')}
                     >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <UserPlus className="w-8 h-8 text-green-500" />
                             <span className="font-semibold text-sm">Add Client</span>
+                            <span className="text-xs text-muted-foreground">Invite a new client company to the platform</span>
                         </CardContent>
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500"
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500 h-full"
                         onClick={() => setActiveTab('quotes')}
                     >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <FileCheck className="w-8 h-8 text-indigo-500" />
                             <span className="font-semibold text-sm">Add Quote</span>
+                            <span className="text-xs text-muted-foreground">Create a new price quotation for a vehicle</span>
                         </CardContent>
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500"
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500 h-full"
                         onClick={() => setShowAddProductModal(true)}
                     >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <LayoutDashboard className="w-8 h-8 text-orange-500" />
                             <span className="font-semibold text-sm">Add Product to Catalogue</span>
+                            <span className="text-xs text-muted-foreground">Add a new component to the global catalogue</span>
                         </CardContent>
                     </Card>
 
                     <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500"
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500 h-full"
                         onClick={() => openInvite('supplier')}
                     >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <span className="text-3xl">🏭</span>
                             <span className="font-semibold text-sm">Add Supplier</span>
+                            <span className="text-xs text-muted-foreground">Invite a new supplier to join the network</span>
                         </CardContent>
                     </Card>
                 </div>
