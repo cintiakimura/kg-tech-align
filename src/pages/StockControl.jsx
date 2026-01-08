@@ -12,12 +12,15 @@ import { toast } from "sonner";
 import { Link } from 'react-router-dom';
 import TruncatedCell from '@/components/TruncatedCell';
 import { exportToCSV } from '@/components/utils/exportUtils';
+import EditProductModal from '@/components/catalogue/EditProductModal';
+import { Plus } from "lucide-react";
 
 export default function StockControl() {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [showAll, setShowAll] = useState(false);
     const [editingStock, setEditingStock] = useState({});
+    const [showAddProductModal, setShowAddProductModal] = useState(false);
 
     // Fetch all catalogue items
     const { data: catalogue, isLoading } = useQuery({
@@ -108,6 +111,10 @@ export default function StockControl() {
                         </div>
                     </div>
                     <div className="flex gap-2">
+                        <Button onClick={() => setShowAddProductModal(true)} className="bg-primary-green hover:opacity-90 text-white">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Product
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => window.print()}>
                             <Printer className="w-4 h-4 mr-2" /> Print
                         </Button>
@@ -116,6 +123,12 @@ export default function StockControl() {
                         </Button>
                     </div>
                 </div>
+
+                <EditProductModal 
+                    open={showAddProductModal}
+                    onOpenChange={setShowAddProductModal}
+                    product={null}
+                />
 
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border p-4">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
