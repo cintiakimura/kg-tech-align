@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { base44 } from "@/api/base44Client";
 import { LanguageProvider, useLanguage } from './components/LanguageContext';
+import AIAssistant from '@/components/AIAssistant';
 
 function LayoutContent({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -249,6 +250,11 @@ function LayoutContent({ children }) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 print:py-0 print:px-0">
         {!showRoleSelector && children}
       </main>
+
+      {/* AI Assistant - Only for Managers/Admins */}
+      {!showRoleSelector && user && (user.role === 'admin' || user.user_type === 'manager' || user.email === 'georg@kgprotech.com') && (
+          <AIAssistant />
+      )}
 
       {/* CSS Variables for Theme Colors */}
       <style>{`
