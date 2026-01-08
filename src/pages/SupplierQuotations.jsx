@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Loader2, FileText, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, Package, ExternalLink, Download } from "lucide-react";
+import { Loader2, FileText, CheckCircle, XCircle, ChevronDown, ChevronUp, Search, Package, ExternalLink, Download, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
+import { useNavigate } from 'react-router-dom';
 
 export default function SupplierQuotations() {
     const [search, setSearch] = useState("");
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     // Fetch Data
     const { data: quotes, isLoading: quotesLoading } = useQuery({
@@ -39,7 +41,6 @@ export default function SupplierQuotations() {
     const updateQuoteStatus = useMutation({
         mutationFn: async ({ id, status }) => {
             await base44.entities.Quote.update(id, { status });
-            // If accepted, update vehicle status? Maybe logic for later.
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-quotes'] });
@@ -54,13 +55,6 @@ export default function SupplierQuotations() {
     const enrichedQuotes = quotes?.map(quote => {
         const vehicle = vehicles?.find(v => v.id === quote.vehicle_id);
         const items = quoteItems?.filter(i => i.quote_id === quote.id).map(item => {
-            // we need to find the vehicle connector to find the catalogue id?
-            // Actually QuoteItem links to VehicleConnector.
-            // But we don't have VehicleConnector list here efficiently unless we fetch all.
-            // For now let's just use what we have in QuoteItem. 
-            // We might need to fetch VehicleConnectors to know what the original part was if quoted_part_number is empty?
-            // Let's rely on quoted_part_number or just display "Item".
-            // To be precise, let's fetch VehicleConnectors too if needed, but maybe we can survive without for now or fetch all.
             return item;
         });
 
@@ -81,11 +75,21 @@ export default function SupplierQuotations() {
     }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Supplier Quotations</h1>
-                    <p className="text-muted-foreground">Review quotes received from suppliers.</p>
+        <div className="space-y-6 animate-in fade-in duration-500">
+             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="p-3 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                        <FileText className="w-8 h-8 text-pink-600 dark:text-pink-400" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Supplier Quotations</h1>
+                        <p className="text-muted-foreground">Review quotes received from suppliers.</p>
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                   <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
+                       <ArrowLeft className="w-4 h-4" /> Back
+                   </Button>
                 </div>
             </div>
 
@@ -120,7 +124,7 @@ function QuoteCard({ quote, catalogue, onUpdateStatus }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <Card className={`overflow-hidden transition-all bg-transparent border border-[#00c600] ${isOpen ? 'ring-2 ring-indigo-500/20' : ''}`}>
+        <Card className={`overflow-hidden transition-all bg-white dark:bg-[#2a2a2a] hover:shadow-md ${isOpen ? 'ring-2 ring-pink-500/20 border-pink-500' : ''}`}>
             <div className="p-6">
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                     <div className="space-y-1">
