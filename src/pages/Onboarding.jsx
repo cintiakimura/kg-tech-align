@@ -185,9 +185,12 @@ ${connectorDetails}
             </div>
             <div className="flex items-center gap-3">
                 {companyProfile && (
-                    <div className="flex items-center gap-2 text-sm bg-[#00C600]/10 text-[#00C600] px-3 py-1 rounded-full border border-[#00C600]/20">
+                    <div 
+                        onClick={() => setActiveTab('quotes')}
+                        className="cursor-pointer flex items-center gap-2 text-sm bg-[#00C600]/10 text-[#00C600] px-3 py-1 rounded-full border border-[#00C600]/20 hover:bg-[#00C600]/20 transition-colors"
+                    >
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>{companyProfile.company_name} {t('connected')}</span>
+                        <span>My Quotations</span>
                     </div>
                 )}
                 <div className="flex gap-2">
@@ -208,7 +211,7 @@ ${connectorDetails}
           </div>
 
           <Tabs defaultValue="fleet" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[300px] bg-white dark:bg-[#2a2a2a]">
+        <TabsList className="grid w-full grid-cols-3 lg:w-[450px] bg-white dark:bg-[#2a2a2a]">
           <TabsTrigger value="company" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
             <Building2 className="w-4 h-4 mr-2" /> {t('tab_company')}
           </TabsTrigger>
@@ -216,7 +219,7 @@ ${connectorDetails}
             <Car className="w-4 h-4 mr-2" /> {t('add_vehicle')}
           </TabsTrigger>
           <TabsTrigger value="quotes" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <Printer className="w-4 h-4 mr-2" /> Quotations
+            <Printer className="w-4 h-4 mr-2" /> My Quotations
           </TabsTrigger>
         </TabsList>
 
