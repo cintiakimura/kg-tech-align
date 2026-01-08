@@ -6,6 +6,7 @@ import ImportCatalogue from './pages/ImportCatalogue';
 import ManagerDashboard from './pages/ManagerDashboard';
 import Onboarding from './pages/Onboarding';
 import SupplierDashboard from './pages/SupplierDashboard';
+import ProductionControl from './pages/ProductionControl';
 import __Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "ManagerDashboard": ManagerDashboard,
     "Onboarding": Onboarding,
     "SupplierDashboard": SupplierDashboard,
+    "ProductionControl": ProductionControl,
 }
 
 export const pagesConfig = {

@@ -115,6 +115,17 @@ export default function ManagerDashboard() {
                 {/* Menu Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-purple-600 h-full"
+                        onClick={() => navigate('/ProductionControl')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <span className="text-3xl">🏭</span>
+                            <span className="font-semibold text-sm">Production Control</span>
+                            <span className="text-xs text-muted-foreground">Manage orders, production and logistics</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500 h-full"
                         onClick={() => openInvite('client')}
                     >
