@@ -75,7 +75,7 @@ export default function CreateClientQuote() {
         },
         onSuccess: () => {
             toast.success(quoteId ? "Quote updated" : "Quote created");
-            navigate('/ManagerDashboard');
+            navigate('/Quotations');
         },
         onError: () => toast.error("Failed to save quote")
     });
@@ -160,7 +160,7 @@ export default function CreateClientQuote() {
             <div className="max-w-5xl mx-auto space-y-6 print:space-y-4">
                 <div className="flex items-center justify-between print:hidden">
                     <div className="flex items-center gap-4">
-                        <Link to="/ManagerDashboard">
+                        <Link to="/Quotations">
                             <Button variant="ghost" size="icon">
                                 <ArrowLeft className="w-5 h-5" />
                             </Button>

@@ -111,12 +111,12 @@ export default function ManagerDashboard() {
 
                     <Card 
                         className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-indigo-500 transition-all border-l-4 border-l-indigo-500 h-full transform hover:-translate-y-1"
-                        onClick={() => navigate('/CreateClientQuote')}
+                        onClick={() => navigate('/Quotations')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <FileText className="w-8 h-8 text-indigo-500" />
-                            <span className="font-semibold text-sm">New Client Quotation</span>
-                            <span className="text-xs text-muted-foreground">Create a sales quote for a client</span>
+                            <span className="font-semibold text-sm">Quotations / Sales</span>
+                            <span className="text-xs text-muted-foreground">Manage sales quotes and invoices</span>
                         </CardContent>
                     </Card>
 
