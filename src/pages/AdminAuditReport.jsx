@@ -39,6 +39,24 @@ export default function AdminAuditReport() {
         initialData: []
     });
 
+    const { data: clientQuotes, isLoading: loadingClientQuotes } = useQuery({
+        queryKey: ['client_quotes_audit'],
+        queryFn: () => base44.entities.ClientQuote.list(),
+        initialData: []
+    });
+
+    const { data: vehicleConnectors, isLoading: loadingConnectors } = useQuery({
+        queryKey: ['vehicle_connectors_audit'],
+        queryFn: () => base44.entities.VehicleConnector.list(),
+        initialData: []
+    });
+
+    const { data: quoteItems, isLoading: loadingQuoteItems } = useQuery({
+        queryKey: ['quote_items_audit'],
+        queryFn: () => base44.entities.QuoteItem.list(),
+        initialData: []
+    });
+
     const runDiagnostics = async () => {
         setRunningDiagnostics(true);
         
@@ -91,6 +109,49 @@ export default function AdminAuditReport() {
             details: itemsWithoutImages.length > 0 
                 ? `${itemsWithoutImages.length} catalogue items missing images` 
                 : "All catalogue items have images"
+        });
+
+        // 5. Check Vehicle Requirements (Connectors)
+        const vehiclesWithoutConnectors = cars.filter(c => !vehicleConnectors.some(vc => vc.vehicle_id === c.id));
+        report.checks.push({
+            name: "Vehicle Parts Request",
+            status: vehiclesWithoutConnectors.length > 0 ? "Warning" : "Pass",
+            details: vehiclesWithoutConnectors.length > 0
+                ? `${vehiclesWithoutConnectors.length} vehicles have no requested parts (connectors)`
+                : "All vehicles have requested parts"
+        });
+
+        // 6. Check Client Quotes Integrity
+        const emptyClientQuotes = clientQuotes.filter(cq => !cq.items || cq.items.length === 0);
+        report.checks.push({
+            name: "Client Quotes Content",
+            status: emptyClientQuotes.length > 0 ? "Fail" : "Pass",
+            details: emptyClientQuotes.length > 0
+                ? `${emptyClientQuotes.length} client quotes have no items`
+                : "All client quotes have items"
+        });
+
+        // 7. Check Supplier Quote Items
+        const quotesWithoutItems = quotes.filter(q => !quoteItems.some(qi => qi.quote_id === q.id));
+        report.checks.push({
+            name: "Supplier Quote Detail",
+            status: quotesWithoutItems.length > 0 ? "Warning" : "Pass",
+            details: quotesWithoutItems.length > 0
+                ? `${quotesWithoutItems.length} supplier quotes have no detailed line items`
+                : "All supplier quotes have line items"
+        });
+
+        // 8. Check Production Status Consistency
+        const orderedVehicles = cars.filter(c => ['ordered', 'in_production', 'shipped', 'delivered'].includes(c.status));
+        const vehiclesWithWinner = new Set(quotes.filter(q => q.is_winner).map(q => q.vehicle_id));
+        const inconsistentProduction = orderedVehicles.filter(c => !vehiclesWithWinner.has(c.id));
+        
+        report.checks.push({
+            name: "Production Consistency",
+            status: inconsistentProduction.length > 0 ? "Warning" : "Pass",
+            details: inconsistentProduction.length > 0
+                ? `${inconsistentProduction.length} vehicles in production without a winning supplier quote`
+                : "All production vehicles have winning quotes"
         });
 
         // Overall Status
@@ -257,7 +318,10 @@ export default function AdminAuditReport() {
                         <CardTitle className="text-sm font-medium text-muted-foreground">Entities Tracked</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{cars.length + companies.length + quotes.length}</div>
+                        <div className="text-2xl font-bold">{cars.length + companies.length + quotes.length + clientQuotes.length}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                            {cars.length} Cars, {quotes.length} S.Quotes, {clientQuotes.length} C.Quotes
+                        </div>
                     </CardContent>
                 </Card>
             </div>
