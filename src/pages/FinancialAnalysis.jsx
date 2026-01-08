@@ -220,7 +220,7 @@ export default function FinancialAnalysis() {
                             </TableHeader>
                             <TableBody>
                                 {incomeQuotes.slice(0, 5).map(q => (
-                                    <TableRow key={q.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
+                                    <TableRow key={q.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                                         <TableCell>{moment(q.date).format('YYYY-MM-DD')}</TableCell>
                                         <TableCell>{q.quote_number}</TableCell>
                                         <TableCell>

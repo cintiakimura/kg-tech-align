@@ -29,7 +29,7 @@ function ClientRow({ clientEmail, company, cars }) {
     return (
         <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
             <>
-                <TableRow className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
+                <TableRow className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                     <TableCell className="w-[50px]">
                         <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm" className="w-9 p-0">

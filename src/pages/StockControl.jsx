@@ -167,7 +167,7 @@ export default function StockControl() {
                                         const isLowStock = currentQty <= currentMin;
 
                                         return (
-                                            <TableRow key={item.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
+                                            <TableRow key={item.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                                                 <TableCell>
                                                     {item.image_url ? (
                                                         <img src={item.image_url} alt="" className="w-10 h-10 object-contain mix-blend-multiply border rounded bg-white" />

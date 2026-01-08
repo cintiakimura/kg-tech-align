@@ -239,7 +239,7 @@ export default function SupplierDashboard() {
                 )}
 
                 {projects?.map((project) => (
-                    <Card key={project.id} className="flex flex-col md:flex-row overflow-hidden bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-l-4 hover:border-l-indigo-500 transition-all">
+                    <Card key={project.id} className="flex flex-col md:flex-row overflow-hidden bg-white dark:bg-[#2a2a2a] hover:shadow-lg border-l-4 border-l-transparent hover:border-l-indigo-500 transition-all">
                          {/* Project Info Column */}
                         <div className="p-6 md:w-1/3 bg-gray-50 dark:bg-gray-900 border-b md:border-b-0 md:border-r space-y-4">
                             <div>

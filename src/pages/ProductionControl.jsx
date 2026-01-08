@@ -183,7 +183,7 @@ export default function ProductionControl() {
                                         const dateOrdered = quote?.updated_date || vehicle.updated_date;
                                         
                                         return (
-                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
+                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                                                 <TableCell>
                                                     <TruncatedCell text={getCompanyName(vehicle.created_by)} />
                                                 </TableCell>
