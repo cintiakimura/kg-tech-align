@@ -19,11 +19,9 @@ import { toast } from "sonner";
 export default function Onboarding() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("welcome");
+  const [activeTab, setActiveTab] = useState("fleet");
   const [isAddingCar, setIsAddingCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
-  const [isConfiguringVideos, setIsConfiguringVideos] = useState(false);
-  const [videoUrls, setVideoUrls] = useState({ demo: '', setup: '' });
   const [isZipping, setIsZipping] = useState(false);
 
   // Fetch Company Profile
@@ -39,12 +37,7 @@ export default function Onboarding() {
     queryFn: () => base44.entities.Vehicle.list(),
   });
 
-  // Fetch Onboarding Content
-  const { data: onboardingContentList, isLoading: isLoadingContent } = useQuery({
-    queryKey: ['onboardingContent'],
-    queryFn: () => base44.entities.OnboardingContent.list(undefined, 1),
-  });
-  const onboardingContent = onboardingContentList?.[0];
+
 
   const handlePrint = () => {
     window.print();
@@ -138,26 +131,6 @@ ${connectorDetails}
     }
   };
 
-  const handleSaveVideoUrls = async () => {
-    try {
-        if (onboardingContent?.id) {
-            await base44.entities.OnboardingContent.update(onboardingContent.id, {
-                demo_video_url: videoUrls.demo,
-                setup_video_url: videoUrls.setup
-            });
-        } else {
-            await base44.entities.OnboardingContent.create({
-                demo_video_url: videoUrls.demo,
-                setup_video_url: videoUrls.setup
-            });
-        }
-        queryClient.invalidateQueries(['onboardingContent']);
-        setIsConfiguringVideos(false);
-    } catch (error) {
-        console.error("Failed to save video URLs", error);
-    }
-  };
-
   const handleDeleteCar = async (id) => {
     if (window.confirm(t('delete_car_confirmation'))) {
         await base44.entities.Vehicle.delete(id);
@@ -170,21 +143,7 @@ ${connectorDetails}
     setIsAddingCar(true);
   };
 
-  const getEmbedUrl = (url) => {
-    if (!url) return '';
-    try {
-        // Handle standard YouTube URLs including shorts, mobile, etc.
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
-        const match = url.match(youtubeRegex);
-        
-        if (match && match[1]) {
-            return `https://www.youtube.com/embed/${match[1]}`;
-        }
-    } catch (e) {
-        console.error("Error parsing video URL", e);
-    }
-    return url;
-  };
+
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -222,11 +181,8 @@ ${connectorDetails}
             </div>
           </div>
 
-          <Tabs defaultValue="welcome" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[400px] bg-white dark:bg-[#2a2a2a]">
-          <TabsTrigger value="welcome" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <MonitorPlay className="w-4 h-4 mr-2" /> {t('tab_welcome')}
-          </TabsTrigger>
+          <Tabs defaultValue="fleet" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 lg:w-[300px] bg-white dark:bg-[#2a2a2a]">
           <TabsTrigger value="company" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
             <Building2 className="w-4 h-4 mr-2" /> {t('tab_company')}
           </TabsTrigger>
@@ -235,129 +191,7 @@ ${connectorDetails}
           </TabsTrigger>
         </TabsList>
 
-        {/* WELCOME TAB */}
-        <TabsContent value="welcome" className="mt-6 space-y-6">
-            <div className="flex justify-end mb-2">
-                <Dialog open={isConfiguringVideos} onOpenChange={(open) => {
-                    if (open && onboardingContent) {
-                        setVideoUrls({ 
-                            demo: onboardingContent.demo_video_url || '', 
-                            setup: onboardingContent.setup_video_url || '' 
-                        });
-                    }
-                    setIsConfiguringVideos(open);
-                }}>
-                    <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-xs text-gray-500">
-                            <Settings className="w-3 h-3 mr-1" /> {t('configure_videos')}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>{t('configure_videos')}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">{t('demo_url')}</label>
-                                <Input 
-                                    value={videoUrls.demo} 
-                                    onChange={(e) => setVideoUrls(prev => ({...prev, demo: e.target.value}))} 
-                                    placeholder="https://youtube.com/..."
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">{t('setup_url')}</label>
-                                <Input 
-                                    value={videoUrls.setup} 
-                                    onChange={(e) => setVideoUrls(prev => ({...prev, setup: e.target.value}))} 
-                                    placeholder="https://youtube.com/..."
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsConfiguringVideos(false)}>{t('cancel')}</Button>
-                            <Button onClick={handleSaveVideoUrls} className="bg-[#00C600] text-white">{t('save_changes')}</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Demo Video Card */}
-                <Card className="overflow-hidden border-none shadow-lg bg-white dark:bg-[#2a2a2a]">
-                    <div className="aspect-video bg-black relative group cursor-pointer">
-                        {onboardingContent?.demo_video_url ? (
-                            <iframe 
-                                src={getEmbedUrl(onboardingContent.demo_video_url)} 
-                                className="w-full h-full" 
-                                title="Demo Video"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                            ></iframe>
-                        ) : (
-                            <>
-                                <img 
-                                    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop" 
-                                    alt="Demo Video Thumbnail" 
-                                    className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
-                                </div>
-                            </>
-                        )}
-                        <div className="absolute bottom-4 left-4 pointer-events-none">
-                            <span className="bg-[#00C600] text-white text-xs px-2 py-1 rounded">DEMO</span>
-                        </div>
-                    </div>
-                    <CardHeader>
-                        <CardTitle>{t('platform_overview')}</CardTitle>
-                        <CardDescription>{t('platform_desc')}</CardDescription>
-                    </CardHeader>
-                </Card>
-
-                {/* Setup Video Card */}
-                <Card className="overflow-hidden border-none shadow-lg bg-white dark:bg-[#2a2a2a]">
-                    <div className="aspect-video bg-black relative group cursor-pointer">
-                        {onboardingContent?.setup_video_url ? (
-                            <iframe 
-                                src={getEmbedUrl(onboardingContent.setup_video_url)} 
-                                className="w-full h-full" 
-                                title="Setup Video"
-                                frameBorder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                            ></iframe>
-                        ) : (
-                            <>
-                                <img 
-                                    src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1000&auto=format&fit=crop" 
-                                    alt="Setup Video Thumbnail" 
-                                    className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <PlayCircle className="w-16 h-16 text-white opacity-80 group-hover:scale-110 transition-transform" />
-                                </div>
-                            </>
-                        )}
-                        <div className="absolute bottom-4 left-4 pointer-events-none">
-                            <span className="bg-[#00C600] text-white text-xs px-2 py-1 rounded">TUTORIAL</span>
-                        </div>
-                    </div>
-                    <CardHeader>
-                        <CardTitle>{t('install_setup')}</CardTitle>
-                        <CardDescription>{t('install_desc')}</CardDescription>
-                    </CardHeader>
-                </Card>
-            </div>
-            
-            <div className="flex justify-end">
-                <Button onClick={() => setActiveTab("company")} className="bg-[#00C600] hover:bg-[#00b300] text-white">
-                    {t('get_started')} <CheckCircle2 className="w-4 h-4 ml-2" />
-                </Button>
-            </div>
-        </TabsContent>
 
         {/* COMPANY TAB */}
         <TabsContent value="company" className="mt-6">

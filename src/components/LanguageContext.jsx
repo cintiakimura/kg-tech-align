@@ -5,8 +5,8 @@ const LanguageContext = createContext();
 const translations = {
   en: {
     nav_title: "KG Solutions",
-    onboarding_title: "Client Onboarding",
-    onboarding_desc: "Complete your profile and set up your fleet.",
+    onboarding_title: "Client Dashboard",
+    onboarding_desc: "Manage your company profile and fleet.",
     connected: "Connected",
     export_report: "Export Report",
     tab_welcome: "Welcome",
