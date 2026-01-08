@@ -8,14 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Save, ArrowLeft, Loader2, FileText } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Badge } from "@/components/ui/badge";
 import moment from 'moment';
 
 export default function CreateClientQuote() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const quoteId = searchParams.get('id');
     const queryClient = useQueryClient();
+
     const [clientId, setClientId] = useState("");
     const [date, setDate] = useState(moment().format('YYYY-MM-DD'));
     const [validUntil, setValidUntil] = useState(moment().add(30, 'days').format('YYYY-MM-DD'));
@@ -24,6 +28,30 @@ export default function CreateClientQuote() {
     const [items, setItems] = useState([
         { type: 'manual', catalogue_id: '', description: '', quantity: 1, unit_price: 0 }
     ]);
+    const [status, setStatus] = useState("draft");
+    const [quoteNumber, setQuoteNumber] = useState("");
+
+    // Fetch existing quote if editing
+    const { data: existingQuote } = useQuery({
+        queryKey: ['clientQuote', quoteId],
+        queryFn: () => base44.entities.ClientQuote.get({id: quoteId}),
+        enabled: !!quoteId,
+        retry: false
+    });
+
+    // Populate form
+    useEffect(() => {
+        if (existingQuote) {
+            setClientId(existingQuote.client_company_id);
+            setDate(existingQuote.date);
+            setValidUntil(existingQuote.valid_until);
+            setTvaRate(existingQuote.tva_rate);
+            setNotes(existingQuote.notes || "");
+            setItems(existingQuote.items || []);
+            setStatus(existingQuote.status || "draft");
+            setQuoteNumber(existingQuote.quote_number);
+        }
+    }, [existingQuote]);
 
     // Fetch Clients (CompanyProfiles)
     const { data: clients } = useQuery({
@@ -60,6 +88,7 @@ export default function CreateClientQuote() {
         onSuccess: (_, newStatus) => {
             setStatus(newStatus);
             toast.success(`Quote marked as ${newStatus}`);
+            queryClient.invalidateQueries(['clientQuote', quoteId]);
         },
         onError: () => toast.error("Failed to update status")
     });
@@ -119,8 +148,8 @@ export default function CreateClientQuote() {
                 unit_price: parseFloat(i.unit_price)
             })),
             notes,
-            status: 'draft',
-            quote_number: `Q-${moment().format('YYYYMMDD')}-${Math.floor(Math.random() * 1000)}`
+            status: status || 'draft',
+            quote_number: quoteNumber || `Q-${moment().format('YYYYMMDD')}-${Math.floor(Math.random() * 1000)}`
         });
     };
 
