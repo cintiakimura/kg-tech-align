@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Save, Package, AlertTriangle, MapPin } from "lucide-react";
+import { ArrowLeft, Search, Save, Package, AlertTriangle, MapPin, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
+import TruncatedCell from '@/components/TruncatedCell';
+import { exportToCSV } from '@/components/utils/exportUtils';
 
 export default function StockControl() {
     const queryClient = useQueryClient();
@@ -76,6 +78,20 @@ export default function StockControl() {
         });
     };
 
+    const handleExport = () => {
+        const data = filteredItems.map(item => ({
+            PartNumber: item.secret_part_number,
+            Type: item.type,
+            Colour: item.colour,
+            Pins: item.pins,
+            Location: item.stock_location,
+            Quantity: item.stock_quantity,
+            MinLevel: item.min_stock_level,
+            Status: item.stock_quantity === 0 ? 'Out of Stock' : (item.stock_quantity <= (item.min_stock_level || 10) ? 'Low' : 'In Stock')
+        }));
+        exportToCSV(data, 'stock_inventory_export');
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#212121] p-6">
             <div className="max-w-7xl mx-auto space-y-6">
@@ -90,6 +106,14 @@ export default function StockControl() {
                             <h1 className="text-2xl font-bold">Stock Management</h1>
                             <p className="text-muted-foreground">Monitor inventory levels and locations</p>
                         </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" /> Print
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExport}>
+                            <Download className="w-4 h-4 mr-2" /> Export CSV
+                        </Button>
                     </div>
                 </div>
 
@@ -114,17 +138,17 @@ export default function StockControl() {
                         </div>
                     </div>
 
-                    <div className="rounded-md border">
-                        <Table>
+                    <div className="rounded-md border overflow-x-auto">
+                        <Table className="table-fixed min-w-[800px]">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[100px]">Image</TableHead>
-                                    <TableHead>Part Number / Details</TableHead>
-                                    <TableHead>Location</TableHead>
-                                    <TableHead className="text-right">Min. Level</TableHead>
-                                    <TableHead className="text-right">Quantity</TableHead>
-                                    <TableHead className="w-[100px]">Status</TableHead>
-                                    <TableHead className="w-[80px]"></TableHead>
+                                    <TableHead className="w-[80px]">Image</TableHead>
+                                    <TableHead className="w-[200px]">Part Number / Details</TableHead>
+                                    <TableHead className="w-[150px]">Location</TableHead>
+                                    <TableHead className="w-[100px] text-right">Min. Level</TableHead>
+                                    <TableHead className="w-[100px] text-right">Quantity</TableHead>
+                                    <TableHead className="w-[120px]">Status</TableHead>
+                                    <TableHead className="w-[60px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -143,27 +167,25 @@ export default function StockControl() {
                                         const isLowStock = currentQty <= currentMin;
 
                                         return (
-                                            <TableRow key={item.id}>
+                                            <TableRow key={item.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
                                                 <TableCell>
                                                     {item.image_url ? (
-                                                        <img src={item.image_url} alt="" className="w-12 h-12 object-contain mix-blend-multiply border rounded bg-white" />
+                                                        <img src={item.image_url} alt="" className="w-10 h-10 object-contain mix-blend-multiply border rounded bg-white" />
                                                     ) : (
-                                                        <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-                                                            <Package className="w-6 h-6 text-gray-400" />
+                                                        <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                                                            <Package className="w-5 h-5 text-gray-400" />
                                                         </div>
                                                     )}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="font-semibold">{item.secret_part_number || 'N/A'}</div>
-                                                    <div className="text-xs text-muted-foreground capitalize">
-                                                        {item.type} • {item.colour} • {item.pins} pins
-                                                    </div>
+                                                    <TruncatedCell text={item.secret_part_number || 'N/A'} className="font-semibold" />
+                                                    <TruncatedCell text={`${item.type} • ${item.colour} • ${item.pins} pins`} className="text-xs text-muted-foreground capitalize" />
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
                                                         <MapPin className="w-3 h-3 text-gray-400" />
                                                         <Input 
-                                                            className="h-8 w-28" 
+                                                            className="h-8 w-28 text-xs" 
                                                             value={currentLoc}
                                                             onChange={(e) => handleQuickUpdate(item, 'location', e.target.value)}
                                                             placeholder="A1-01"
