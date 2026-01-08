@@ -129,7 +129,19 @@ function LayoutContent({ children }) {
             </a>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-6">
+              {/* Main Links */}
+              {user && (user.role === 'admin' || user.user_type === 'manager') && (
+                  <a href="/ManagerDashboard" className={`text-sm font-medium transition-colors hover:text-[#00C600] ${window.location.pathname === '/ManagerDashboard' ? 'text-[#00C600]' : ''}`}>
+                      Dashboard
+                  </a>
+              )}
+              {user && user.user_type === 'supplier' && (
+                  <a href="/SupplierDashboard" className={`text-sm font-medium transition-colors hover:text-[#00C600] ${window.location.pathname === '/SupplierDashboard' ? 'text-[#00C600]' : ''}`}>
+                      Dashboard
+                  </a>
+              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className={`gap-2 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-gray-900 hover:bg-gray-100'}`}>
