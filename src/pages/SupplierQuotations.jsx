@@ -133,9 +133,16 @@ function QuoteCard({ quote, catalogue, onUpdateStatus }) {
                                 quote.status === 'selected' ? 'success' : 
                                 quote.status === 'rejected' ? 'destructive' : 'secondary'
                             } className={
-                                quote.status === 'selected' ? 'bg-green-100 text-green-800 border-green-200' : ''
+                                quote.status === 'selected' ? 'bg-green-100 text-green-800 border-green-200' : 
+                                quote.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                'bg-red-100 text-red-800 border-red-200'
                             }>
-                                {quote.status.toUpperCase()}
+                                {
+                                    quote.status === 'pending' ? 'IN REVIEW' :
+                                    quote.status === 'selected' ? 'APPROVED' :
+                                    quote.status === 'rejected' ? 'DENIED' :
+                                    quote.status.toUpperCase()
+                                }
                             </Badge>
                             <span className="text-sm text-muted-foreground">
                                 {format(new Date(quote.created_date), 'MMM dd, yyyy')}
