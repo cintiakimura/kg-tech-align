@@ -31,7 +31,12 @@ function LayoutContent({ children }) {
   async function checkAuth() {
     try {
       const isAuth = await base44.auth.isAuthenticated();
+
+      // Allow public access to Home page (/)
       if (!isAuth) {
+          if (window.location.pathname === '/' || window.location.pathname === '/Home') {
+              return;
+          }
           base44.auth.redirectToLogin(window.location.pathname);
           return;
       }
@@ -41,7 +46,28 @@ function LayoutContent({ children }) {
 
       // Check for role or pending invitation
       if (!currentUser.user_type && currentUser.role !== 'admin') {
-          // Check if there is an invitation for this email
+          // 1. Check for intended role from Home page selection
+          const intendedRole = localStorage.getItem('intended_role');
+          if (intendedRole) {
+              try {
+                  await base44.auth.updateMe({ user_type: intendedRole });
+                  localStorage.removeItem('intended_role');
+
+                  // Force reload user to get update
+                  const updatedUser = await base44.auth.me();
+                  setUser(updatedUser);
+
+                  // Redirect based on new role
+                  if (intendedRole === 'manager') window.location.href = '/ManagerDashboard';
+                  else if (intendedRole === 'supplier') window.location.href = '/SupplierDashboard';
+                  else window.location.href = '/Onboarding'; // client
+                  return;
+              } catch (e) {
+                  console.error("Failed to set intended role", e);
+              }
+          }
+
+          // 2. Check if there is an invitation for this email
           try {
               const invites = await base44.entities.Invitation.list({ email: currentUser.email, status: 'pending' });
               if (invites && invites.length > 0) {
@@ -67,13 +93,13 @@ function LayoutContent({ children }) {
           // No invitation found? Show selector (but restricted)
           setShowRoleSelector(true);
       } else {
-          // Handle Redirects on Root or Dashboard access
-          if (window.location.pathname === '/') {
+          // Handle Redirects on Root if logged in
+          if (window.location.pathname === '/' || window.location.pathname === '/Home') {
               if (currentUser.role === 'admin' || currentUser.user_type === 'manager') window.location.href = '/ManagerDashboard';
               else if (currentUser.user_type === 'supplier') window.location.href = '/SupplierDashboard';
               else if (currentUser.user_type === 'client') window.location.href = '/Onboarding';
           }
-      }
+          }
     } catch (e) {
       console.error("Auth check failed", e);
       base44.auth.redirectToLogin();
