@@ -14,6 +14,7 @@ import Purchases from './pages/Purchases';
 import Logistics from './pages/Logistics';
 import Clients from './pages/Clients';
 import Quotations from './pages/Quotations';
+import DocumentVault from './pages/DocumentVault';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "Logistics": Logistics,
     "Clients": Clients,
     "Quotations": Quotations,
+    "DocumentVault": DocumentVault,
 }
 
 export const pagesConfig = {
