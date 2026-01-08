@@ -75,7 +75,6 @@ export default function SupplierDashboard() {
             const companies = await base44.entities.CompanyProfile.list();
 
             // For each vehicle, fetch its connectors
-            // In a real app with many vehicles, this would be optimized backend-side or batched.
             const enhancedVehicles = await Promise.all(vehicles.map(async (v) => {
                 const company = companies.find(c => c.created_by === v.created_by);
                 const connectors = await base44.entities.VehicleConnector.list({ vehicle_id: v.id });
@@ -85,6 +84,31 @@ export default function SupplierDashboard() {
             return enhancedVehicles;
         }
     });
+
+    // Fetch My Quotations
+    const { data: myQuotes } = useQuery({
+        queryKey: ['my-quotes', user?.email],
+        queryFn: async () => {
+             if (!user?.email) return [];
+             const quotes = await base44.entities.Quote.list({ supplier_email: user.email });
+             // Enrich with vehicle info
+             const vehicles = await base44.entities.Vehicle.list(); // Ideally fetch only relevant ones
+             return quotes.map(q => ({
+                 ...q,
+                 vehicle: vehicles.find(v => v.id === q.vehicle_id)
+             })).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        },
+        enabled: !!user?.email
+    });
+
+    const getStatusLabel = (status) => {
+        switch(status) {
+            case 'pending': return { label: 'In Review', color: 'bg-yellow-100 text-yellow-800' };
+            case 'selected': return { label: 'Approved', color: 'bg-green-100 text-green-800' };
+            case 'rejected': return { label: 'Denied', color: 'bg-red-100 text-red-800' };
+            default: return { label: status, color: 'bg-gray-100 text-gray-800' };
+        }
+    };
 
     const submitQuoteMutation = useMutation({
         mutationFn: async (data) => {
@@ -516,6 +540,52 @@ export default function SupplierDashboard() {
                 </CardContent>
             </Card>
 
+            {/* My Quotations Section */}
+            {myQuotes?.length > 0 && (
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold tracking-tight">My Quotations</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {myQuotes.map((quote) => {
+                            const statusInfo = getStatusLabel(quote.status);
+                            return (
+                                <Card key={quote.id} className="bg-white dark:bg-[#2a2a2a] hover:shadow-md transition-all">
+                                    <CardHeader className="p-4 pb-2">
+                                        <div className="flex justify-between items-start">
+                                            <Badge variant="outline" className={statusInfo.color}>
+                                                {statusInfo.label}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                                {new Date(quote.created_date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <CardTitle className="text-base mt-2">
+                                            {quote.vehicle ? `${quote.vehicle.brand} ${quote.vehicle.model}` : 'Unknown Vehicle'}
+                                        </CardTitle>
+                                        <CardDescription className="text-xs">
+                                            Quote ID: {quote.id.slice(0, 8)}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-2">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <div className="text-xs text-muted-foreground">Total Amount</div>
+                                                <div className="font-bold text-lg">£{quote.total_gbp?.toFixed(2)}</div>
+                                            </div>
+                                            {quote.pdf_url && (
+                                                <a href={quote.pdf_url} target="_blank" className="text-xs text-indigo-600 hover:underline flex items-center gap-1">
+                                                    <FileText className="w-3 h-3" /> View PDF
+                                                </a>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            <h2 className="text-xl font-semibold tracking-tight pt-4">Open Requests</h2>
             <div className="grid grid-cols-1 gap-6">
                 {projects?.length === 0 && (
                     <div className="text-center py-12 text-muted-foreground">

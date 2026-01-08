@@ -52,6 +52,36 @@ export default function ManagerDashboard() {
     enabled: !!isManagerOrAdmin
   });
 
+  // Fetch Notification Counts
+  const { data: notifications } = useQuery({
+      queryKey: ['dashboard-notifications'],
+      queryFn: async () => {
+          // New Clients (last 3 days)
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+          
+          // Since we can't filter by date range easily in list() without knowing implementation details, 
+          // we fetch and filter in memory for now (assuming reasonable dataset size for this demo)
+          const allCompanies = await base44.entities.CompanyProfile.list();
+          const newClients = allCompanies.filter(c => new Date(c.created_date) > threeDaysAgo).length;
+
+          // Pending Quotes
+          const pendingQuotes = await base44.entities.Quote.list({ status: 'pending' });
+          
+          // Shipping Updates (Purchases updated recently)
+          const purchases = await base44.entities.Purchase.list();
+          const recentShipping = purchases.filter(p => new Date(p.updated_date) > threeDaysAgo).length;
+
+          return {
+              newClients,
+              pendingQuotes: pendingQuotes.length,
+              recentShipping
+          };
+      },
+      enabled: !!isManagerOrAdmin,
+      refetchInterval: 30000 // Refresh every 30s
+  });
+
   if (isLoadingUser || (isManagerOrAdmin && (isLoadingCompanies || isLoadingCars))) {
       return (
           <div className="flex h-[80vh] items-center justify-center">
@@ -99,9 +129,12 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-green-500 transition-all border-l-4 border-l-green-500 h-full transform hover:-translate-y-1"
+                        className="relative cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-green-500 transition-all border-l-4 border-l-green-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/Clients')}
                     >
+                        {notifications?.newClients > 0 && (
+                            <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border border-white" title={`${notifications.newClients} new clients`}></div>
+                        )}
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <UserPlus className="w-8 h-8 text-green-500" />
                             <span className="font-semibold text-sm">Clients</span>
@@ -121,9 +154,12 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-pink-500 transition-all border-l-4 border-l-pink-500 h-full transform hover:-translate-y-1"
+                        className="relative cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-pink-500 transition-all border-l-4 border-l-pink-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/SupplierQuotations')}
                     >
+                        {notifications?.pendingQuotes > 0 && (
+                            <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border border-white" title={`${notifications.pendingQuotes} pending quotes`}></div>
+                        )}
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <FileText className="w-8 h-8 text-pink-500" />
                             <span className="font-semibold text-sm">Supplier Quotes</span>
@@ -154,9 +190,12 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-cyan-500 transition-all border-l-4 border-l-cyan-500 h-full transform hover:-translate-y-1"
+                        className="relative cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-cyan-500 transition-all border-l-4 border-l-cyan-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/Logistics')}
                     >
+                        {notifications?.recentShipping > 0 && (
+                            <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse border border-white" title={`${notifications.recentShipping} recent updates`}></div>
+                        )}
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <span className="text-3xl">🚚</span>
                             <span className="font-semibold text-sm">Logistics</span>
