@@ -220,19 +220,35 @@ function LayoutContent({ children }) {
                 <h2 className="text-2xl font-bold">Welcome!</h2>
                 <p className="text-muted-foreground">Complete your account setup to continue.</p>
                 <div className="flex flex-col gap-4">
-                    <Button 
-                        onClick={() => handleRoleSelect('client')} 
-                        className="h-32 flex flex-col gap-2 hover:bg-[#00C600]/10 border-2 border-transparent hover:border-[#00C600] transition-all w-full"
-                        variant="outline"
-                    >
-                        <span className="text-4xl">🏢</span>
-                        <span className="font-bold">Enter as Client</span>
-                        <span className="text-xs text-muted-foreground">I want to order parts</span>
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-4">
-                        Are you a Supplier or Manager? <br/>
-                        Please contact the administrator for an invitation.
-                    </p>
+                    <div className="grid grid-cols-1 gap-4">
+                        <Button 
+                            onClick={() => handleRoleSelect('client')} 
+                            className="h-24 flex flex-col gap-1 hover:bg-[#00C600]/10 border-2 border-transparent hover:border-[#00C600] transition-all w-full"
+                            variant="outline"
+                        >
+                            <span className="text-2xl">🏢</span>
+                            <span className="font-bold">Enter as Client</span>
+                            <span className="text-xs text-muted-foreground">I want to order parts</span>
+                        </Button>
+                        <Button 
+                            onClick={() => handleRoleSelect('supplier')} 
+                            className="h-24 flex flex-col gap-1 hover:bg-blue-500/10 border-2 border-transparent hover:border-blue-500 transition-all w-full"
+                            variant="outline"
+                        >
+                            <span className="text-2xl">🏭</span>
+                            <span className="font-bold">Enter as Supplier</span>
+                            <span className="text-xs text-muted-foreground">I want to submit quotes</span>
+                        </Button>
+                        <Button 
+                            onClick={() => handleRoleSelect('manager')} 
+                            className="h-24 flex flex-col gap-1 hover:bg-purple-500/10 border-2 border-transparent hover:border-purple-500 transition-all w-full"
+                            variant="outline"
+                        >
+                            <span className="text-2xl">👔</span>
+                            <span className="font-bold">Enter as Manager</span>
+                            <span className="text-xs text-muted-foreground">I want to manage operations</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -264,15 +280,9 @@ function LayoutContent({ children }) {
           --bg-dark: #212121;
         }
 
-        @font-face {
-          font-family: 'Akkurat';
-          src: url('https://db.onlinewebfonts.com/t/50f9015c7b3917dc9894e43f49293a77.woff2') format('woff2'); 
-          font-weight: normal;
-          font-style: normal;
-        }
-
+        /* Removed failing font face */
         body, h1, h2, h3, h4, h5, h6, button, input, select, textarea, span, div, p, a {
-          font-family: 'Akkurat', sans-serif !important;
+          font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
         }
 
         /* Force normal font weight for titles and bold classes as requested */
