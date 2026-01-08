@@ -124,7 +124,7 @@ function QuoteCard({ quote, catalogue, onUpdateStatus }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <Card className={`overflow-hidden transition-all bg-white dark:bg-[#2a2a2a] hover:shadow-md ${isOpen ? 'ring-2 ring-pink-500/20 border-pink-500' : ''}`}>
+        <Card className={`overflow-hidden transition-all bg-white dark:bg-[#212121] hover:shadow-md ${isOpen ? 'ring-2 ring-pink-500/20 border-pink-500' : ''}`}>
             <div className="p-6">
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                     <div className="space-y-1">
