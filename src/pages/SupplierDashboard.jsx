@@ -433,12 +433,28 @@ export default function SupplierDashboard() {
                                                 {project.connectors?.map(conn => {
                                                     const catItem = catalogueItems?.find(i => i.id === conn.catalogue_id);
                                                     return (
-                                                        <div key={conn.id} className="grid grid-cols-12 gap-4 items-center p-3 bg-gray-50 rounded border">
-                                                            <div className="col-span-6">
-                                                                <div className="text-sm font-medium">{catItem ? `${catItem.type} ${catItem.colour}` : 'Part'}</div>
-                                                                <div className="text-xs text-gray-500">Qty: {conn.quantity}</div>
+                                                        <div key={conn.id} className="grid grid-cols-12 gap-2 items-end p-3 bg-gray-50 rounded border">
+                                                            <div className="col-span-4 space-y-1">
+                                                                <label className="text-[10px] text-gray-500 uppercase">Part Number / Desc</label>
+                                                                <Input 
+                                                                    className="h-8 bg-white text-xs"
+                                                                    placeholder={catItem ? `${catItem.type} ${catItem.colour}` : 'Part'}
+                                                                    value={quoteForm.items[conn.id]?.part_number !== undefined ? quoteForm.items[conn.id]?.part_number : (catItem ? `${catItem.type} ${catItem.colour}` : '')}
+                                                                    onChange={(e) => handleItemChange(conn.id, 'part_number', e.target.value)}
+                                                                />
+                                                                <div className="text-[10px] text-gray-400">Requested: {catItem ? `${catItem.type} ${catItem.colour}` : 'N/A'}</div>
                                                             </div>
-                                                            <div className="col-span-3">
+                                                            <div className="col-span-2 space-y-1">
+                                                                <label className="text-[10px] text-gray-500 uppercase">Qty</label>
+                                                                <Input 
+                                                                    type="number"
+                                                                    className="h-8 bg-white text-xs"
+                                                                    placeholder={conn.quantity}
+                                                                    value={quoteForm.items[conn.id]?.quantity !== undefined ? quoteForm.items[conn.id]?.quantity : conn.quantity}
+                                                                    onChange={(e) => handleItemChange(conn.id, 'quantity', e.target.value)}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-3 space-y-1">
                                                                 <label className="text-[10px] text-gray-500 uppercase">Unit Price (£)</label>
                                                                 <Input 
                                                                     type="number" 
@@ -448,7 +464,7 @@ export default function SupplierDashboard() {
                                                                     onChange={(e) => handleItemChange(conn.id, 'unit_price', e.target.value)}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-3">
+                                                            <div className="col-span-3 space-y-1">
                                                                 <label className="text-[10px] text-gray-500 uppercase">Lead Time (Days)</label>
                                                                 <Input 
                                                                     type="number" 
