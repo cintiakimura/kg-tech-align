@@ -9,6 +9,7 @@ import Onboarding from './pages/Onboarding';
 import ProductionControl from './pages/ProductionControl';
 import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
+import FinancialAnalysis from './pages/FinancialAnalysis';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +25,7 @@ export const PAGES = {
     "ProductionControl": ProductionControl,
     "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
+    "FinancialAnalysis": FinancialAnalysis,
 }
 
 export const pagesConfig = {

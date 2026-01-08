@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Save, ArrowLeft, Loader2, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import moment from 'moment';
 
 export default function CreateClientQuote() {
@@ -39,13 +39,29 @@ export default function CreateClientQuote() {
 
     const createQuoteMutation = useMutation({
         mutationFn: async (quoteData) => {
-            await base44.entities.ClientQuote.create(quoteData);
+            if (quoteId) {
+                await base44.entities.ClientQuote.update(quoteId, quoteData);
+            } else {
+                await base44.entities.ClientQuote.create(quoteData);
+            }
         },
         onSuccess: () => {
-            toast.success("Quote created successfully");
+            toast.success(quoteId ? "Quote updated" : "Quote created");
             navigate('/ManagerDashboard');
         },
-        onError: () => toast.error("Failed to create quote")
+        onError: () => toast.error("Failed to save quote")
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: async (newStatus) => {
+            if (!quoteId) return;
+            await base44.entities.ClientQuote.update(quoteId, { status: newStatus });
+        },
+        onSuccess: (_, newStatus) => {
+            setStatus(newStatus);
+            toast.success(`Quote marked as ${newStatus}`);
+        },
+        onError: () => toast.error("Failed to update status")
     });
 
     const addItem = () => {
@@ -125,11 +141,46 @@ export default function CreateClientQuote() {
                             <p className="text-muted-foreground">New sales quote for client</p>
                         </div>
                     </div>
-                    <Button onClick={handleSave} disabled={createQuoteMutation.isPending} className="bg-[#00C600] hover:bg-[#00b300]">
-                        {createQuoteMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Quote
-                    </Button>
+                    <div className="flex gap-2">
+                        {quoteId && (
+                            <>
+                                {status === 'draft' && (
+                                    <Button 
+                                        variant="outline" 
+                                        onClick={() => updateStatusMutation.mutate('sent')}
+                                    >
+                                        Mark as Sent
+                                    </Button>
+                                )}
+                                {(status === 'sent' || status === 'accepted') && (
+                                    <Button 
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                        onClick={() => updateStatusMutation.mutate('sale')}
+                                    >
+                                        Promote to Sale
+                                    </Button>
+                                )}
+                                {status === 'sale' && (
+                                    <Button 
+                                        className="bg-purple-600 hover:bg-purple-700"
+                                        onClick={() => updateStatusMutation.mutate('invoiced')}
+                                    >
+                                        Generate Invoice
+                                    </Button>
+                                )}
+                                {status === 'invoiced' && (
+                                    <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+                                        Invoiced
+                                    </Badge>
+                                )}
+                            </>
+                        )}
+                        <Button onClick={handleSave} disabled={createQuoteMutation.isPending} className="bg-[#00C600] hover:bg-[#00b300]">
+                            {createQuoteMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            <Save className="w-4 h-4 mr-2" />
+                            {quoteId ? 'Update Quote' : 'Save Quote'}
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -146,7 +197,8 @@ export default function CreateClientQuote() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">QUOTATION</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{quoteNumber || 'NEW QUOTATION'}</h2>
+                                    {status && <Badge variant="secondary" className="mb-2 uppercase">{status}</Badge>}
                                     <div className="mt-2 text-sm">
                                         <div className="flex justify-end gap-2 items-center mb-2">
                                             <Label>Date:</Label>

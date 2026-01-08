@@ -179,6 +179,17 @@ export default function ManagerDashboard() {
                             <span className="text-xs text-muted-foreground">Invite a new supplier to join the network</span>
                         </CardContent>
                     </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-emerald-600 h-full"
+                        onClick={() => navigate('/FinancialAnalysis')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <span className="text-3xl">📈</span>
+                            <span className="font-semibold text-sm">Financials</span>
+                            <span className="text-xs text-muted-foreground">Analyze costs and income</span>
+                        </CardContent>
+                    </Card>
                 </div>
             </TabsContent>
 
