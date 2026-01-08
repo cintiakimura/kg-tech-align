@@ -31,6 +31,14 @@ export default function SupplierDashboard() {
     });
     const [calculatingRates, setCalculatingRates] = useState(false);
     const [extracting, setExtracting] = useState(false);
+    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+    const [invoiceForm, setInvoiceForm] = useState({
+        number: '',
+        date: new Date().toISOString().split('T')[0],
+        amount: '',
+        file_url: '',
+        notes: ''
+    });
 
     // Get current user
     const { data: user } = useQuery({
@@ -42,6 +50,18 @@ export default function SupplierDashboard() {
     const { data: catalogueItems } = useQuery({
         queryKey: ['catalogue'],
         queryFn: () => base44.entities.Catalogue.list(),
+    });
+
+    // Fetch Supplier Company Profile
+    const { data: supplierCompany } = useQuery({
+        queryKey: ['my-company', user?.email],
+        queryFn: async () => {
+            if (!user?.email) return null;
+            // Try to find company where contact_email is user email or created_by is user email
+            const companies = await base44.entities.CompanyProfile.list();
+            return companies.find(c => c.contact_email === user.email || c.created_by === user.email);
+        },
+        enabled: !!user?.email
     });
 
     // Fetch Open Projects (Vehicles with status 'Open for Quotes')
@@ -308,21 +328,36 @@ export default function SupplierDashboard() {
         }
     };
 
-    if (projectsLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>;
+    const submitInvoiceMutation = useMutation({
+        mutationFn: async (data) => {
+            if (!supplierCompany) throw new Error("Supplier company profile not found. Please contact admin.");
+            
+            await base44.entities.CompanyDocument.create({
+                company_id: supplierCompany.id,
+                name: `Invoice ${data.number}`,
+                type: 'Invoice',
+                date: data.date,
+                description: `Amount: £${data.amount}. ${data.notes}`,
+                file_url: data.file_url
+            });
+        },
+        onSuccess: () => {
+            toast.success("Invoice uploaded successfully");
+            setShowInvoiceModal(false);
+            setInvoiceForm({
+                number: '',
+                date: new Date().toISOString().split('T')[0],
+                amount: '',
+                file_url: '',
+                notes: ''
+            });
+        },
+        onError: (err) => {
+            toast.error("Failed to upload invoice: " + err.message);
+        }
+    });
 
-    const handleExport = () => {
-        const data = projects.map(p => ({
-            Brand: p.brand,
-            Model: p.model,
-            Version: p.version,
-            Year: p.year,
-            Status: p.status,
-            Client: p.company?.company_name || 'Unknown',
-            ConnectorsCount: p.connectors?.length || 0,
-            DateCreated: p.created_date
-        }));
-        exportToCSV(data, 'open_rfqs_export');
-    };
+    if (projectsLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>;
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
@@ -335,9 +370,75 @@ export default function SupplierDashboard() {
                     <Button variant="outline" size="sm" onClick={() => window.print()}>
                         <Printer className="w-4 h-4 mr-2" /> Print
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleExport}>
-                        <Download className="w-4 h-4 mr-2" /> Export CSV
-                    </Button>
+                    <Dialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Upload className="w-4 h-4 mr-2" /> Upload Invoice
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Upload Invoice</DialogTitle>
+                                <CardDescription>Upload your invoice and provide details.</CardDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Invoice Number</label>
+                                    <Input 
+                                        placeholder="e.g. INV-2024-001" 
+                                        value={invoiceForm.number}
+                                        onChange={(e) => setInvoiceForm({...invoiceForm, number: e.target.value})}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Date</label>
+                                        <Input 
+                                            type="date"
+                                            value={invoiceForm.date}
+                                            onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">Amount (£)</label>
+                                        <Input 
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={invoiceForm.amount}
+                                            onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Invoice File</label>
+                                    <FileUpload 
+                                        label="Upload PDF/Image"
+                                        value={invoiceForm.file_url}
+                                        onChange={(url) => setInvoiceForm({...invoiceForm, file_url: url})}
+                                        accept=".pdf,.png,.jpg,.jpeg"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Notes / Reference</label>
+                                    <Textarea 
+                                        placeholder="Optional notes or PO reference..."
+                                        value={invoiceForm.notes}
+                                        onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setShowInvoiceModal(false)}>Cancel</Button>
+                                <Button 
+                                    onClick={() => submitInvoiceMutation.mutate(invoiceForm)}
+                                    disabled={!invoiceForm.number || !invoiceForm.file_url || submitInvoiceMutation.isPending}
+                                >
+                                    {submitInvoiceMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                                    Upload
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
