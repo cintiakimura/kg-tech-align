@@ -31,7 +31,7 @@ export default function SupplierDashboard() {
     });
     const [calculatingRates, setCalculatingRates] = useState(false);
     const [extracting, setExtracting] = useState(false);
-    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+    const [extractingInvoice, setExtractingInvoice] = useState(false);
     const [invoiceForm, setInvoiceForm] = useState({
         number: '',
         date: new Date().toISOString().split('T')[0],
@@ -343,7 +343,6 @@ export default function SupplierDashboard() {
         },
         onSuccess: () => {
             toast.success("Invoice uploaded successfully");
-            setShowInvoiceModal(false);
             setInvoiceForm({
                 number: '',
                 date: new Date().toISOString().split('T')[0],
@@ -356,6 +355,53 @@ export default function SupplierDashboard() {
             toast.error("Failed to upload invoice: " + err.message);
         }
     });
+
+    const handleInvoiceAutoFill = async () => {
+        if (!invoiceForm.file_url) {
+            toast.error("Please upload an invoice first");
+            return;
+        }
+
+        setExtractingInvoice(true);
+        try {
+            const prompt = `
+                Extract the following details from this invoice image/PDF:
+                1. Invoice Number
+                2. Invoice Date (YYYY-MM-DD format)
+                3. Total Amount (number only)
+                
+                Return JSON: { "number": string, "date": string, "amount": number }
+            `;
+
+            const res = await base44.integrations.Core.InvokeLLM({
+                prompt: prompt,
+                file_urls: [invoiceForm.file_url],
+                response_json_schema: {
+                    type: "object",
+                    properties: {
+                        number: { type: "string" },
+                        date: { type: "string" },
+                        amount: { type: "number" }
+                    }
+                }
+            });
+
+            if (res) {
+                setInvoiceForm(prev => ({
+                    ...prev,
+                    number: res.number || prev.number,
+                    date: res.date || prev.date,
+                    amount: res.amount || prev.amount
+                }));
+                toast.success("Invoice details extracted!");
+            }
+        } catch (error) {
+            console.error("Invoice extraction failed", error);
+            toast.error("Failed to extract info");
+        } finally {
+            setExtractingInvoice(false);
+        }
+    };
 
     if (projectsLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>;
 
@@ -370,77 +416,105 @@ export default function SupplierDashboard() {
                     <Button variant="outline" size="sm" onClick={() => window.print()}>
                         <Printer className="w-4 h-4 mr-2" /> Print
                     </Button>
-                    <Dialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <Upload className="w-4 h-4 mr-2" /> Upload Invoice
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Upload Invoice</DialogTitle>
-                                <CardDescription>Upload your invoice and provide details.</CardDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Invoice Number</label>
+                </div>
+            </div>
+
+            {/* Invoice Upload Section */}
+            <Card className="bg-white dark:bg-[#2a2a2a] border-indigo-200 dark:border-indigo-800">
+                <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-indigo-600" /> 
+                        Submit Invoice
+                    </CardTitle>
+                    <CardDescription>Upload an invoice to auto-fill details, then review and submit.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        {/* File Upload Column */}
+                        <div className="md:col-span-4 space-y-4">
+                             <div className="space-y-2">
+                                <label className="text-sm font-medium">1. Upload Invoice File</label>
+                                <FileUpload 
+                                    label="Drop Invoice Here (PDF/Image)"
+                                    value={invoiceForm.file_url}
+                                    onChange={(url) => setInvoiceForm({...invoiceForm, file_url: url})}
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                />
+                            </div>
+                            {invoiceForm.file_url && (
+                                <Button 
+                                    variant="secondary" 
+                                    size="sm" 
+                                    className="w-full gap-2"
+                                    onClick={handleInvoiceAutoFill}
+                                    disabled={extractingInvoice}
+                                >
+                                    {extractingInvoice ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-indigo-500" />}
+                                    Fetch Info from Document
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Manual Fields Column */}
+                        <div className="md:col-span-8 space-y-4">
+                            <label className="text-sm font-medium">2. Review & Submit Details</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs text-muted-foreground">Invoice Number</label>
                                     <Input 
-                                        placeholder="e.g. INV-2024-001" 
+                                        placeholder="INV-..." 
                                         value={invoiceForm.number}
                                         onChange={(e) => setInvoiceForm({...invoiceForm, number: e.target.value})}
+                                        className="bg-white dark:bg-black/20"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Date</label>
-                                        <Input 
-                                            type="date"
-                                            value={invoiceForm.date}
-                                            onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">Amount (£)</label>
-                                        <Input 
-                                            type="number"
-                                            placeholder="0.00"
-                                            value={invoiceForm.amount}
-                                            onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Invoice File</label>
-                                    <FileUpload 
-                                        label="Upload PDF/Image"
-                                        value={invoiceForm.file_url}
-                                        onChange={(url) => setInvoiceForm({...invoiceForm, file_url: url})}
-                                        accept=".pdf,.png,.jpg,.jpeg"
+                                <div className="space-y-1">
+                                    <label className="text-xs text-muted-foreground">Date</label>
+                                    <Input 
+                                        type="date"
+                                        value={invoiceForm.date}
+                                        onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})}
+                                        className="bg-white dark:bg-black/20"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Notes / Reference</label>
-                                    <Textarea 
-                                        placeholder="Optional notes or PO reference..."
-                                        value={invoiceForm.notes}
-                                        onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+                                <div className="space-y-1">
+                                    <label className="text-xs text-muted-foreground">Amount (£)</label>
+                                    <Input 
+                                        type="number"
+                                        placeholder="0.00"
+                                        value={invoiceForm.amount}
+                                        onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})}
+                                        className="bg-white dark:bg-black/20"
                                     />
                                 </div>
                             </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setShowInvoiceModal(false)}>Cancel</Button>
+                            <div className="space-y-1">
+                                <label className="text-xs text-muted-foreground">Notes / Reference</label>
+                                <Input 
+                                    placeholder="Optional notes..." 
+                                    value={invoiceForm.notes}
+                                    onChange={(e) => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+                                    className="bg-white dark:bg-black/20"
+                                />
+                            </div>
+                            <div className="flex justify-end pt-2">
                                 <Button 
                                     onClick={() => submitInvoiceMutation.mutate(invoiceForm)}
                                     disabled={!invoiceForm.number || !invoiceForm.file_url || submitInvoiceMutation.isPending}
+                                    className="bg-indigo-600 hover:bg-indigo-700"
                                 >
-                                    {submitInvoiceMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                                    Upload
+                                    {submitInvoiceMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    ) : (
+                                        <Send className="w-4 h-4 mr-2" />
+                                    )}
+                                    Submit Invoice to List
                                 </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 gap-6">
                 {projects?.length === 0 && (
