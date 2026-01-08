@@ -19,7 +19,8 @@ export default function ManagerDashboard() {
   const navigate = useNavigate();
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(null);
-  
+  const [activeTab, setActiveTab] = useState("overview");
+
   // Check auth/role
   const { data: user, isLoading: isLoadingUser } = useQuery({
       queryKey: ['me'],
@@ -86,7 +87,7 @@ export default function ManagerDashboard() {
             </div>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="bg-white dark:bg-[#2a2a2a] p-1 border">
                 <TabsTrigger value="overview" className="gap-2">
                     <LayoutDashboard className="w-4 h-4" /> Overview
@@ -103,10 +104,68 @@ export default function ManagerDashboard() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-                <DashboardStats 
-                    companies={companies || []} 
-                    cars={cars || []} 
-                />
+                {/* Menu Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500"
+                        onClick={() => setActiveTab('quotes')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <FileCheck className="w-8 h-8 text-indigo-500" />
+                            <span className="font-semibold text-sm">Quotes & Fulfillment</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500"
+                        onClick={() => setActiveTab('supplier')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <span className="text-3xl">🏭</span>
+                            <span className="font-semibold text-sm">Supplier View</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500"
+                        onClick={() => setActiveTab('client')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <span className="text-3xl">🏢</span>
+                            <span className="font-semibold text-sm">Client View</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500"
+                        onClick={() => navigate('/Catalogue')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <LayoutDashboard className="w-8 h-8 text-orange-500" />
+                            <span className="font-semibold text-sm">Catalogue</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-purple-500"
+                        onClick={() => navigate('/admin/import-catalogue')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <UserPlus className="w-8 h-8 text-purple-500" />
+                            <span className="font-semibold text-sm">Import Catalogue</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-red-500"
+                        onClick={() => navigate('/AdminAuditReport')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <ShieldAlert className="w-8 h-8 text-red-500" />
+                            <span className="font-semibold text-sm">Audit Report</span>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 <div className="space-y-4">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
