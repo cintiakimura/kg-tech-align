@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import FileUpload from '@/components/onboarding/FileUpload';
 import VehicleForm from '@/components/onboarding/VehicleForm';
 
+
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
