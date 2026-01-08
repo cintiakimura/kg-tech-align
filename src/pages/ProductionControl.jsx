@@ -167,19 +167,22 @@ export default function ProductionControl() {
                     <div className="overflow-x-auto">
                         <Table className="table-fixed w-full">
                             <TableHeader>
-                                <TableRow className="bg-gray-50 dark:bg-gray-900/50">
-                                    <TableHead className="w-[140px]">Client</TableHead>
-                                    <TableHead className="w-[180px]">Product</TableHead>
-                                    <TableHead className="w-[140px]">Supplier</TableHead>
-                                    <TableHead className="w-[110px]">Ordered</TableHead>
-                                    <TableHead className="w-[110px]">Del. Est.</TableHead>
-                                    <TableHead className="w-[140px]">Courier</TableHead>
-                                    <TableHead className="w-[140px]">Tracking</TableHead>
-                                    <TableHead className="w-[100px] text-right">Cost</TableHead>
-                                    <TableHead className="w-[100px] text-right">Ship</TableHead>
-                                    <TableHead className="w-[100px] text-right">Tax</TableHead>
-                                    <TableHead className="w-[100px] text-right">Total</TableHead>
-                                    <TableHead className="w-[160px]">Status</TableHead>
+                                <TableRow className="bg-gray-50 dark:bg-gray-900/50 h-12">
+                                    <TableHead className="w-[150px]">Client</TableHead>
+                                    <TableHead className="w-[150px]">Product</TableHead>
+                                    <TableHead className="w-[150px]">Year</TableHead>
+                                    <TableHead className="w-[150px]">Fuel</TableHead>
+                                    <TableHead className="w-[150px]">Trans.</TableHead>
+                                    <TableHead className="w-[150px]">Supplier</TableHead>
+                                    <TableHead className="w-[150px]">Ordered</TableHead>
+                                    <TableHead className="w-[150px]">Del. Est.</TableHead>
+                                    <TableHead className="w-[150px]">Courier</TableHead>
+                                    <TableHead className="w-[150px]">Tracking</TableHead>
+                                    <TableHead className="w-[150px] text-right">Cost</TableHead>
+                                    <TableHead className="w-[150px] text-right">Ship</TableHead>
+                                    <TableHead className="w-[150px] text-right">Tax</TableHead>
+                                    <TableHead className="w-[150px] text-right">Total</TableHead>
+                                    <TableHead className="w-[150px]">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -204,6 +207,15 @@ export default function ProductionControl() {
                                                         <TruncatedCell text={`${vehicle.brand} ${vehicle.model}`} className="font-semibold" />
                                                         <TruncatedCell text={vehicle.vin} className="text-xs text-muted-foreground" />
                                                     </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TruncatedCell text={vehicle.year} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TruncatedCell text={vehicle.fuel} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TruncatedCell text={vehicle.transmission_type} />
                                                 </TableCell>
                                                 <TableCell>
                                                     <TruncatedCell text={quote?.supplier_email || '-'} />
