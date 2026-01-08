@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Loader2, AlertCircle, UserPlus, FileCheck, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Loader2, AlertCircle, UserPlus, FileCheck, ShieldAlert, FileText, Package } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -149,12 +149,23 @@ export default function ManagerDashboard() {
 
                     <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500 h-full"
+                        onClick={() => navigate('/StockControl')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <Package className="w-8 h-8 text-orange-500" />
+                            <span className="font-semibold text-sm">Stock Control</span>
+                            <span className="text-xs text-muted-foreground">Manage inventory levels and locations</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500 h-full opacity-75 hover:opacity-100"
                         onClick={() => setShowAddProductModal(true)}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <LayoutDashboard className="w-8 h-8 text-orange-500" />
-                            <span className="font-semibold text-sm">Add Product to Catalogue</span>
-                            <span className="text-xs text-muted-foreground">Add a new component to the global catalogue</span>
+                            <span className="font-semibold text-sm">Add Product</span>
+                            <span className="text-xs text-muted-foreground">New catalogue item</span>
                         </CardContent>
                     </Card>
 

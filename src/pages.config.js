@@ -8,6 +8,7 @@ import Onboarding from './pages/Onboarding';
 import SupplierDashboard from './pages/SupplierDashboard';
 import ProductionControl from './pages/ProductionControl';
 import CreateClientQuote from './pages/CreateClientQuote';
+import StockControl from './pages/StockControl';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "SupplierDashboard": SupplierDashboard,
     "ProductionControl": ProductionControl,
     "CreateClientQuote": CreateClientQuote,
+    "StockControl": StockControl,
 }
 
 export const pagesConfig = {
