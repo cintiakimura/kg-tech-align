@@ -12,10 +12,16 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TruncatedCell from '@/components/TruncatedCell';
 import { exportToCSV } from '@/components/utils/exportUtils';
+import InviteUserModal from '@/components/manager/InviteUserModal';
+import VehicleForm from '@/components/onboarding/VehicleForm';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Plus, UserPlus } from 'lucide-react';
 
 export default function ProductionControl() {
     const queryClient = useQueryClient();
     const [editingTax, setEditingTax] = useState({});
+    const [showAddSupplier, setShowAddSupplier] = useState(false);
+    const [showAddVehicle, setShowAddVehicle] = useState(false);
 
     // Fetch all vehicles
     const { data: vehicles, isLoading: loadingVehicles } = useQuery({
@@ -142,6 +148,12 @@ export default function ProductionControl() {
                         <p className="text-muted-foreground">Manage orders, production status, and logistics</p>
                     </div>
                     <div className="flex gap-2">
+                        <Button onClick={() => setShowAddVehicle(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white">
+                            <Plus className="w-4 h-4 mr-2" /> Add Vehicle
+                        </Button>
+                        <Button onClick={() => setShowAddSupplier(true)} variant="outline" className="border-[#00C600] text-[#00C600] hover:bg-[#00C600]/10">
+                            <UserPlus className="w-4 h-4 mr-2" /> Add Supplier
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => window.print()}>
                             <Printer className="w-4 h-4 mr-2" /> Print
                         </Button>
@@ -150,6 +162,25 @@ export default function ProductionControl() {
                         </Button>
                     </div>
                 </div>
+
+                <InviteUserModal 
+                    open={showAddSupplier} 
+                    onOpenChange={setShowAddSupplier}
+                    initialRole="supplier"
+                />
+
+                <Dialog open={showAddVehicle} onOpenChange={setShowAddVehicle}>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <VehicleForm 
+                            onCancel={() => setShowAddVehicle(false)}
+                            onSuccess={() => {
+                                setShowAddVehicle(false);
+                                queryClient.invalidateQueries(['productionVehicles']);
+                                toast.success("Vehicle added manually");
+                            }}
+                        />
+                    </DialogContent>
+                </Dialog>
 
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border overflow-hidden">
                     <div className="overflow-x-auto">

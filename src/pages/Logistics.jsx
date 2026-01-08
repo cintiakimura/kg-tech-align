@@ -9,7 +9,8 @@ import {
     Download,
     ArrowLeft,
     Calendar,
-    ExternalLink
+    ExternalLink,
+    Plus
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,11 @@ export default function Logistics() {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                     {/* Logistics uses Purchase data, so we link to add purchase */}
+                    <Button className="bg-[#00C600] hover:bg-[#00b300] text-white" onClick={() => navigate('/Purchases')}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Logistics
+                    </Button>
                     <Button variant="outline" onClick={() => window.print()}>
                         <Printer className="w-4 h-4 mr-2" />
                         Print

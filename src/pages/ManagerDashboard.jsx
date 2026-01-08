@@ -153,16 +153,7 @@ export default function ManagerDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-blue-500 transition-all border-l-4 border-l-blue-500 h-full transform hover:-translate-y-1"
-                        onClick={() => openInvite('supplier')}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-                            <span className="text-3xl">🏭</span>
-                            <span className="font-semibold text-sm">Add Supplier</span>
-                            <span className="text-xs text-muted-foreground">Invite a new supplier to join the network</span>
-                        </CardContent>
-                    </Card>
+                    {/* Add Supplier card merged into Production Control */}
 
                     <Card 
                         className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-emerald-600 transition-all border-l-4 border-l-emerald-600 h-full transform hover:-translate-y-1"

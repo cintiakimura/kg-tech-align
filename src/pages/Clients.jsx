@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useNavigate } from 'react-router-dom';
-import { Users, UserPlus, ArrowLeft, Loader2 } from 'lucide-react';
+import { Users, UserPlus, ArrowLeft, Loader2, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import ClientsTable from '../components/manager/ClientsTable';
 import InviteUserModal from '@/components/manager/InviteUserModal';
+import CompanyForm from '@/components/onboarding/CompanyForm';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function Clients() {
     const navigate = useNavigate();
     const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showManualAdd, setShowManualAdd] = useState(false);
     const [inviteRole, setInviteRole] = useState('client');
+    const queryClient = useQueryClient();
 
     const { data: companies, isLoading: isLoadingCompanies } = useQuery({
         queryKey: ['allCompanies'],
@@ -44,10 +48,16 @@ export default function Clients() {
                         <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
                     </div>
                 </div>
-                <Button onClick={() => setShowInviteModal(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    Invite Client
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowManualAdd(true)} className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Manual Add
+                    </Button>
+                    <Button onClick={() => setShowInviteModal(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        Invite Client
+                    </Button>
+                </div>
             </div>
 
             <ClientsTable 
@@ -60,6 +70,15 @@ export default function Clients() {
                 onOpenChange={setShowInviteModal}
                 initialRole="client"
             />
+
+            <Dialog open={showManualAdd} onOpenChange={setShowManualAdd}>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <CompanyForm onComplete={() => {
+                        setShowManualAdd(false);
+                        queryClient.invalidateQueries(['allCompanies']);
+                    }} />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
