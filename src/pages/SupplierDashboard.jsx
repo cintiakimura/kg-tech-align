@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, Truck, FileText, Send, Building2, Upload } from "lucide-react";
+import { Loader2, Package, Truck, FileText, Send, Building2, Upload, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { getFedExRates, appendAuditLog } from "../components/shippingUtils";
 import FileUpload from "../components/onboarding/FileUpload"; // Using existing component
+import { exportToCSV } from '@/components/utils/exportUtils';
 
 export default function SupplierDashboard() {
     const queryClient = useQueryClient();
@@ -199,11 +200,35 @@ export default function SupplierDashboard() {
 
     if (projectsLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>;
 
+    const handleExport = () => {
+        const data = projects.map(p => ({
+            Brand: p.brand,
+            Model: p.model,
+            Version: p.version,
+            Year: p.year,
+            Status: p.status,
+            Client: p.company?.company_name || 'Unknown',
+            ConnectorsCount: p.connectors?.length || 0,
+            DateCreated: p.created_date
+        }));
+        exportToCSV(data, 'open_rfqs_export');
+    };
+
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Supplier Dashboard</h1>
-                <p className="text-muted-foreground">Review open vehicle requests and submit your quotes.</p>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Supplier Dashboard</h1>
+                    <p className="text-muted-foreground">Review open vehicle requests and submit your quotes.</p>
+                </div>
+                <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => window.print()}>
+                        <Printer className="w-4 h-4 mr-2" /> Print
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleExport}>
+                        <Download className="w-4 h-4 mr-2" /> Export CSV
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
@@ -214,7 +239,7 @@ export default function SupplierDashboard() {
                 )}
 
                 {projects?.map((project) => (
-                    <Card key={project.id} className="flex flex-col md:flex-row overflow-hidden">
+                    <Card key={project.id} className="flex flex-col md:flex-row overflow-hidden bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-l-4 hover:border-l-indigo-500 transition-all">
                          {/* Project Info Column */}
                         <div className="p-6 md:w-1/3 bg-gray-50 dark:bg-gray-900 border-b md:border-b-0 md:border-r space-y-4">
                             <div>
