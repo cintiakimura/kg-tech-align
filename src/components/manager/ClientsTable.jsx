@@ -273,6 +273,7 @@ export default function ClientsTable({ companies, cars: vehicles }) {
                     )}
                 </TableBody>
             </Table>
+            </div>
         </div>
     );
 }
