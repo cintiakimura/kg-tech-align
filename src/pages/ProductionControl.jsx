@@ -6,18 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Save, AlertCircle, Download, Printer, UserPlus } from "lucide-react";
+import { Loader2, ArrowLeft, Save, AlertCircle, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TruncatedCell from '@/components/TruncatedCell';
 import { exportToCSV } from '@/components/utils/exportUtils';
-import InviteUserModal from '@/components/manager/InviteUserModal';
 
 export default function ProductionControl() {
     const queryClient = useQueryClient();
     const [editingTax, setEditingTax] = useState({});
-    const [showInviteModal, setShowInviteModal] = useState(false);
 
     // Fetch all vehicles
     const { data: vehicles, isLoading: loadingVehicles } = useQuery({
@@ -144,10 +142,6 @@ export default function ProductionControl() {
                         <p className="text-muted-foreground">Manage orders, production status, and logistics</p>
                     </div>
                     <div className="flex gap-2">
-                        <Button onClick={() => setShowInviteModal(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white gap-2">
-                             <UserPlus className="w-4 h-4" />
-                             Add Supplier
-                        </Button>
                         <Button variant="outline" size="sm" onClick={() => window.print()}>
                             <Printer className="w-4 h-4 mr-2" /> Print
                         </Button>
@@ -157,32 +151,23 @@ export default function ProductionControl() {
                     </div>
                 </div>
 
-                <InviteUserModal 
-                    open={showInviteModal} 
-                    onOpenChange={setShowInviteModal}
-                    initialRole="supplier"
-                />
-
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border overflow-hidden">
                     <div className="overflow-x-auto">
                         <Table className="table-fixed w-full">
                             <TableHeader>
-                                <TableRow className="bg-gray-50 dark:bg-gray-900/50 h-12">
-                                    <TableHead className="w-[150px]">Ordered</TableHead>
-                                    <TableHead className="w-[150px]">Del. Est.</TableHead>
-                                    <TableHead className="w-[150px]">Client</TableHead>
-                                    <TableHead className="w-[150px]">Product</TableHead>
-                                    <TableHead className="w-[150px]">Supplier</TableHead>
-                                    <TableHead className="w-[150px]">Tracking</TableHead>
-                                    <TableHead className="w-[150px]">Courier</TableHead>
-                                    <TableHead className="w-[150px] text-right">Cost</TableHead>
-                                    <TableHead className="w-[150px]">Year</TableHead>
-                                    <TableHead className="w-[150px]">Fuel</TableHead>
-                                    <TableHead className="w-[150px]">Trans.</TableHead>
-                                    <TableHead className="w-[150px] text-right">Ship</TableHead>
-                                    <TableHead className="w-[150px] text-right">Tax</TableHead>
-                                    <TableHead className="w-[150px] text-right">Total</TableHead>
-                                    <TableHead className="w-[150px]">Status</TableHead>
+                                <TableRow className="bg-gray-50 dark:bg-gray-900/50">
+                                    <TableHead className="w-[140px]">Client</TableHead>
+                                    <TableHead className="w-[180px]">Product</TableHead>
+                                    <TableHead className="w-[140px]">Supplier</TableHead>
+                                    <TableHead className="w-[110px]">Ordered</TableHead>
+                                    <TableHead className="w-[110px]">Del. Est.</TableHead>
+                                    <TableHead className="w-[140px]">Courier</TableHead>
+                                    <TableHead className="w-[140px]">Tracking</TableHead>
+                                    <TableHead className="w-[100px] text-right">Cost</TableHead>
+                                    <TableHead className="w-[100px] text-right">Ship</TableHead>
+                                    <TableHead className="w-[100px] text-right">Tax</TableHead>
+                                    <TableHead className="w-[100px] text-right">Total</TableHead>
+                                    <TableHead className="w-[160px]">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -198,13 +183,7 @@ export default function ProductionControl() {
                                         const dateOrdered = quote?.updated_date || vehicle.updated_date;
                                         
                                         return (
-                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b h-12">
-                                                <TableCell className="text-sm">
-                                                    {moment(dateOrdered).format('YYYY-MM-DD')}
-                                                </TableCell>
-                                                <TableCell className="text-sm">
-                                                    {getDeliveryDate(quote, dateOrdered)}
-                                                </TableCell>
+                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                                                 <TableCell>
                                                     <TruncatedCell text={getCompanyName(vehicle.created_by)} />
                                                 </TableCell>
@@ -217,17 +196,11 @@ export default function ProductionControl() {
                                                 <TableCell>
                                                     <TruncatedCell text={quote?.supplier_email || '-'} />
                                                 </TableCell>
-                                                <TableCell>
-                                                    <Input 
-                                                        className="h-8 w-full text-xs" 
-                                                        placeholder="Tracking..."
-                                                        defaultValue={vehicle.tracking_number || ''}
-                                                        onBlur={(e) => {
-                                                            if (e.target.value !== vehicle.tracking_number) {
-                                                                updateVehicleFieldsMutation.mutate({ id: vehicle.id, data: { tracking_number: e.target.value } });
-                                                            }
-                                                        }}
-                                                    />
+                                                <TableCell className="text-sm">
+                                                    {moment(dateOrdered).format('YYYY-MM-DD')}
+                                                </TableCell>
+                                                <TableCell className="text-sm">
+                                                    {getDeliveryDate(quote, dateOrdered)}
                                                 </TableCell>
                                                 <TableCell>
                                                     <Input 
@@ -241,17 +214,20 @@ export default function ProductionControl() {
                                                         }}
                                                     />
                                                 </TableCell>
+                                                <TableCell>
+                                                    <Input 
+                                                        className="h-8 w-full text-xs" 
+                                                        placeholder="Tracking..."
+                                                        defaultValue={vehicle.tracking_number || ''}
+                                                        onBlur={(e) => {
+                                                            if (e.target.value !== vehicle.tracking_number) {
+                                                                updateVehicleFieldsMutation.mutate({ id: vehicle.id, data: { tracking_number: e.target.value } });
+                                                            }
+                                                        }}
+                                                    />
+                                                </TableCell>
                                                 <TableCell className="text-right text-sm">
                                                     {quote?.price ? `£${quote.price.toFixed(2)}` : '-'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <TruncatedCell text={vehicle.year} />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <TruncatedCell text={vehicle.fuel} />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <TruncatedCell text={vehicle.transmission_type} />
                                                 </TableCell>
                                                 <TableCell className="text-right text-sm">
                                                     {quote?.shipping_cost ? `£${quote.shipping_cost.toFixed(2)}` : '-'}

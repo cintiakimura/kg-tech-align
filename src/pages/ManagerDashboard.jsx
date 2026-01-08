@@ -111,12 +111,12 @@ export default function ManagerDashboard() {
 
                     <Card 
                         className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-indigo-500 transition-all border-l-4 border-l-indigo-500 h-full transform hover:-translate-y-1"
-                        onClick={() => navigate('/Quotations')}
+                        onClick={() => navigate('/CreateClientQuote')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
                             <FileText className="w-8 h-8 text-indigo-500" />
-                            <span className="font-semibold text-sm">Quotations</span>
-                            <span className="text-xs text-muted-foreground">Manage client quotations</span>
+                            <span className="font-semibold text-sm">New Client Quotation</span>
+                            <span className="text-xs text-muted-foreground">Create a sales quote for a client</span>
                         </CardContent>
                     </Card>
 
@@ -153,7 +153,16 @@ export default function ManagerDashboard() {
                         </CardContent>
                     </Card>
 
-
+                    <Card 
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-blue-500 transition-all border-l-4 border-l-blue-500 h-full transform hover:-translate-y-1"
+                        onClick={() => openInvite('supplier')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <span className="text-3xl">🏭</span>
+                            <span className="font-semibold text-sm">Add Supplier</span>
+                            <span className="text-xs text-muted-foreground">Invite a new supplier to join the network</span>
+                        </CardContent>
+                    </Card>
 
                     <Card 
                         className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-emerald-600 transition-all border-l-4 border-l-emerald-600 h-full transform hover:-translate-y-1"
@@ -163,17 +172,6 @@ export default function ManagerDashboard() {
                             <span className="text-3xl">📈</span>
                             <span className="font-semibold text-sm">Financials</span>
                             <span className="text-xs text-muted-foreground">Analyze costs and income</span>
-                        </CardContent>
-                    </Card>
-
-                    <Card 
-                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-slate-500 transition-all border-l-4 border-l-slate-500 h-full transform hover:-translate-y-1"
-                        onClick={() => navigate('/DocumentVault')}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
-                            <span className="text-3xl">🗄️</span>
-                            <span className="font-semibold text-sm">Document Vault</span>
-                            <span className="text-xs text-muted-foreground">Manage and share important documents</span>
                         </CardContent>
                     </Card>
                 </div>
