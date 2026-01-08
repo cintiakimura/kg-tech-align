@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, Truck, FileText, Send, Building2, Upload, Download, Printer } from "lucide-react";
+import { Loader2, Package, Truck, FileText, Send, Building2, Upload, Download, Printer, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { getFedExRates, appendAuditLog } from "../components/shippingUtils";
 import FileUpload from "../components/onboarding/FileUpload"; // Using existing component
@@ -18,6 +18,7 @@ export default function SupplierDashboard() {
     const [selectedProject, setSelectedProject] = useState(null);
     const [quoteForm, setQuoteForm] = useState({ 
         shipping: '', 
+        tax: '',
         note: '', 
         weight: '',
         width: '',
@@ -29,6 +30,7 @@ export default function SupplierDashboard() {
         items: {} // { connector_id: { unit_price: '', lead_time: '' } }
     });
     const [calculatingRates, setCalculatingRates] = useState(false);
+    const [extracting, setExtracting] = useState(false);
 
     // Get current user
     const { data: user } = useQuery({
@@ -88,12 +90,14 @@ export default function SupplierDashboard() {
             }
 
             const shipping = parseFloat(data.shipping || 0);
+            const tax = parseFloat(data.tax || 0);
 
             // 1. Create Quote
             const quote = await base44.entities.Quote.create({
                 price: partsTotal,
                 shipping_cost: shipping,
-                total_gbp: partsTotal + shipping,
+                importation_tax: tax,
+                total_gbp: partsTotal + shipping + tax,
                 lead_time_days: maxLeadTime,
                 note: data.note,
                 vehicle_id: selectedProject.id,
@@ -128,7 +132,7 @@ export default function SupplierDashboard() {
             toast.success("Quote submitted successfully");
             setSelectedProject(null);
             setQuoteForm({ 
-                shipping: '', note: '', weight: '', width: '', height: '', depth: '', 
+                shipping: '', tax: '', note: '', weight: '', width: '', height: '', depth: '', 
                 originPostcode: 'CN-200000', serviceType: '', pdf_url: '', items: {}
             });
             queryClient.invalidateQueries({ queryKey: ['supplier-projects'] });
@@ -195,7 +199,95 @@ export default function SupplierDashboard() {
             const price = parseFloat(quoteForm.items[conn.id]?.unit_price || 0);
             partsTotal += price * conn.quantity;
         });
-        return partsTotal + (parseFloat(quoteForm.shipping) || 0);
+        return partsTotal + (parseFloat(quoteForm.shipping) || 0) + (parseFloat(quoteForm.tax) || 0);
+    };
+
+    const handleAutoFill = async () => {
+        if (!quoteForm.pdf_url) {
+            toast.error("Please upload a PDF quote first");
+            return;
+        }
+
+        setExtracting(true);
+        try {
+            // Prepare context
+            const contextItems = selectedProject.connectors.map(c => {
+                 const catItem = catalogueItems?.find(i => i.id === c.catalogue_id);
+                 return `ID: ${c.id}, Part: ${catItem ? catItem.type + ' ' + catItem.colour : 'Unknown'}, Pins: ${catItem?.pins || '?'}, Qty: ${c.quantity}`;
+            }).join('\n');
+
+            const prompt = `
+                I have a quote PDF for the following requested items:
+                ${contextItems}
+
+                Please extract the following information from the PDF:
+                1. Tax Amount (if any, labeled as Tax, VAT, or TVA).
+                2. Shipping Cost.
+                3. For each requested item ID listed above, find the matching Unit Price and Lead Time (days) in the quote. 
+                   Match by part description, pins, or quantity.
+
+                Return a JSON object:
+                {
+                    "tax": number,
+                    "shipping": number,
+                    "items": {
+                        "CONNECTOR_ID": { "unit_price": number, "lead_time": number }
+                    }
+                }
+                
+                If a value is not found, use 0.
+            `;
+
+            const res = await base44.integrations.Core.InvokeLLM({
+                prompt: prompt,
+                file_urls: [quoteForm.pdf_url],
+                response_json_schema: {
+                    type: "object",
+                    properties: {
+                        tax: { type: "number" },
+                        shipping: { type: "number" },
+                        items: { 
+                            type: "object",
+                            additionalProperties: {
+                                type: "object",
+                                properties: {
+                                    unit_price: { type: "number" },
+                                    lead_time: { type: "number" }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (res) {
+                setQuoteForm(prev => {
+                    const newItems = { ...prev.items };
+                    if (res.items) {
+                        Object.keys(res.items).forEach(id => {
+                            if (newItems[id]) {
+                                newItems[id] = { ...newItems[id], ...res.items[id] };
+                            } else {
+                                newItems[id] = res.items[id];
+                            }
+                        });
+                    }
+                    return {
+                        ...prev,
+                        tax: res.tax || prev.tax,
+                        shipping: res.shipping || prev.shipping,
+                        items: newItems
+                    };
+                });
+                toast.success("Form auto-filled from quote!");
+            }
+
+        } catch (error) {
+            console.error("Extraction failed", error);
+            toast.error("Failed to extract data from PDF");
+        } finally {
+            setExtracting(false);
+        }
     };
 
     if (projectsLoading) return <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>;
@@ -390,22 +482,53 @@ export default function SupplierDashboard() {
                                                         <Input 
                                                             type="number" 
                                                             value={quoteForm.shipping}
-                                                            readOnly
+                                                            onChange={(e) => setQuoteForm({...quoteForm, shipping: e.target.value})}
                                                             className="h-8 bg-white font-bold"
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* PDF Upload (Optional) */}
+                                            {/* Tax / VAT */}
+                                            <div className="flex justify-end">
+                                                <div className="w-48">
+                                                    <label className="text-xs font-medium">Tax / VAT Amount (£)</label>
+                                                    <Input 
+                                                        type="number" 
+                                                        placeholder="0.00"
+                                                        value={quoteForm.tax}
+                                                        onChange={(e) => setQuoteForm({...quoteForm, tax: e.target.value})}
+                                                        className="h-8 bg-white"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* PDF Upload & Auto-fill */}
                                              <div className="space-y-2">
-                                                <label className="text-sm font-medium">Detailed PDF Quote (Optional)</label>
+                                                <div className="flex justify-between items-center">
+                                                    <label className="text-sm font-medium">Detailed PDF Quote</label>
+                                                    {quoteForm.pdf_url && (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            onClick={handleAutoFill} 
+                                                            disabled={extracting}
+                                                            className="h-7 text-xs gap-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                                                        >
+                                                            {extracting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                                            Auto-fill Form from PDF
+                                                        </Button>
+                                                    )}
+                                                </div>
                                                 <FileUpload 
-                                                    label="Upload PDF" 
+                                                    label="Upload PDF Quote" 
                                                     value={quoteForm.pdf_url} 
                                                     onChange={(url) => setQuoteForm({...quoteForm, pdf_url: url})} 
-                                                    accept=".pdf"
+                                                    accept=".pdf,.png,.jpg"
                                                 />
+                                                <p className="text-[10px] text-muted-foreground">
+                                                    Upload your quote document to auto-extract prices, tax, and shipping details.
+                                                </p>
                                             </div>
 
                                             {/* Notes */}
