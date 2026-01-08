@@ -215,8 +215,14 @@ export default function ManagerDashboard() {
             </TabsContent>
 
             <TabsContent value="client">
-                <div className="border rounded-xl overflow-hidden p-4 bg-gray-50 dark:bg-gray-900">
-                    <Onboarding />
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold">All Clients</h2>
+                    </div>
+                    <ClientsTable 
+                        companies={companies || []} 
+                        cars={cars || []} 
+                    />
                 </div>
             </TabsContent>
         </Tabs>
