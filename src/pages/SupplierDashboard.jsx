@@ -81,8 +81,11 @@ export default function SupplierDashboard() {
             for (const conn of selectedProject.connectors) {
                 const itemData = data.items[conn.id];
                 if (!itemData || !itemData.unit_price) throw new Error("Missing price for some items");
+                
                 const price = parseFloat(itemData.unit_price);
-                const qty = conn.quantity;
+                // Use quoted quantity if present, else requested quantity
+                const qty = itemData.quantity ? parseFloat(itemData.quantity) : conn.quantity;
+                
                 partsTotal += price * qty;
                 
                 const lt = parseInt(itemData.lead_time || 0);
@@ -119,7 +122,9 @@ export default function SupplierDashboard() {
                     quote_id: quote.id,
                     vehicle_connector_id: conn.id,
                     unit_price: parseFloat(itemData.unit_price),
-                    lead_time_days: parseInt(itemData.lead_time || 0)
+                    lead_time_days: parseInt(itemData.lead_time || 0),
+                    quoted_quantity: itemData.quantity ? parseInt(itemData.quantity) : conn.quantity,
+                    quoted_part_number: itemData.part_number
                 });
             }));
 
@@ -197,7 +202,10 @@ export default function SupplierDashboard() {
         let partsTotal = 0;
         selectedProject.connectors.forEach(conn => {
             const price = parseFloat(quoteForm.items[conn.id]?.unit_price || 0);
-            partsTotal += price * conn.quantity;
+            const qty = quoteForm.items[conn.id]?.quantity !== undefined 
+                ? parseFloat(quoteForm.items[conn.id]?.quantity) 
+                : conn.quantity;
+            partsTotal += price * (qty || 0);
         });
         return partsTotal + (parseFloat(quoteForm.shipping) || 0) + (parseFloat(quoteForm.tax) || 0);
     };
@@ -223,15 +231,23 @@ export default function SupplierDashboard() {
                 Please extract the following information from the PDF:
                 1. Tax Amount (if any, labeled as Tax, VAT, or TVA).
                 2. Shipping Cost.
-                3. For each requested item ID listed above, find the matching Unit Price and Lead Time (days) in the quote. 
-                   Match by part description, pins, or quantity.
+                3. For each requested item ID listed above, find the matching:
+                   - Unit Price
+                   - Lead Time (days)
+                   - Quoted Part Number (if they specify a part number)
+                   - Quoted Quantity (if different from request)
 
                 Return a JSON object:
                 {
                     "tax": number,
                     "shipping": number,
                     "items": {
-                        "CONNECTOR_ID": { "unit_price": number, "lead_time": number }
+                        "CONNECTOR_ID": { 
+                            "unit_price": number, 
+                            "lead_time": number,
+                            "part_number": "string",
+                            "quantity": number
+                        }
                     }
                 }
                 
@@ -252,7 +268,9 @@ export default function SupplierDashboard() {
                                 type: "object",
                                 properties: {
                                     unit_price: { type: "number" },
-                                    lead_time: { type: "number" }
+                                    lead_time: { type: "number" },
+                                    part_number: { type: "string" },
+                                    quantity: { type: "number" }
                                 }
                             }
                         }
