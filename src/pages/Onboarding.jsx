@@ -19,7 +19,7 @@ import { toast } from "sonner";
 export default function Onboarding() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("fleet");
+  const [activeTab, setActiveTab] = useState("company");
   const [isAddingCar, setIsAddingCar] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
   const [isZipping, setIsZipping] = useState(false);
@@ -213,7 +213,7 @@ ${connectorDetails}
             <Building2 className="w-4 h-4 mr-2" /> {t('tab_company')}
           </TabsTrigger>
           <TabsTrigger value="fleet" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-            <Car className="w-4 h-4 mr-2" /> {t('tab_fleet')}
+            <Car className="w-4 h-4 mr-2" /> {t('add_vehicle')}
           </TabsTrigger>
           <TabsTrigger value="quotes" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
             <Printer className="w-4 h-4 mr-2" /> Quotations
