@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Save, AlertCircle } from "lucide-react";
+import { Loader2, ArrowLeft, Save, AlertCircle, Download, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TruncatedCell from '@/components/TruncatedCell';
+import { exportToCSV } from '@/components/utils/exportUtils';
 
 export default function ProductionControl() {
     const queryClient = useQueryClient();
@@ -68,6 +69,27 @@ export default function ProductionControl() {
         onError: () => toast.error("Failed to update")
     });
 
+    const handleExport = () => {
+        const data = productionVehicles.map(v => {
+            const quote = getWinningQuote(v.id);
+            return {
+                Client: getCompanyName(v.created_by),
+                Product: `${v.brand} ${v.model}`,
+                VIN: v.vin,
+                Supplier: quote?.supplier_email || '-',
+                DateOrdered: quote?.updated_date || v.updated_date,
+                Courier: v.carrier,
+                Tracking: v.tracking_number,
+                Cost: quote?.price,
+                Shipping: quote?.shipping_cost,
+                Tax: quote?.importation_tax,
+                Total: ((quote?.price || 0) + (quote?.shipping_cost || 0) + (quote?.importation_tax || 0)),
+                Status: v.status
+            };
+        });
+        exportToCSV(data, 'production_control_export');
+    };
+
     if (loadingVehicles || loadingQuotes || loadingCompanies) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -119,6 +141,14 @@ export default function ProductionControl() {
                         <h1 className="text-2xl font-bold">Production Control</h1>
                         <p className="text-muted-foreground">Manage orders, production status, and logistics</p>
                     </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => window.print()}>
+                            <Printer className="w-4 h-4 mr-2" /> Print
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExport}>
+                            <Download className="w-4 h-4 mr-2" /> Export CSV
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border overflow-hidden">
@@ -153,7 +183,7 @@ export default function ProductionControl() {
                                         const dateOrdered = quote?.updated_date || vehicle.updated_date;
                                         
                                         return (
-                                            <TableRow key={vehicle.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-md hover:border-l-4 hover:border-l-indigo-500 transition-all border-b">
                                                 <TableCell>
                                                     <TruncatedCell text={getCompanyName(vehicle.created_by)} />
                                                 </TableCell>
