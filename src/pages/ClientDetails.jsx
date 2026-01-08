@@ -34,6 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import FileUpload from '@/components/onboarding/FileUpload';
+import VehicleForm from '@/components/onboarding/VehicleForm';
 
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
@@ -55,9 +56,13 @@ export default function ClientDetails() {
     const { data: cars, isLoading: isLoadingCars } = useQuery({
         queryKey: ['vehicles', email],
         queryFn: () => base44.entities.Vehicle.list(),
-        select: (data) => data.filter(c => c.created_by === email),
+        select: (data) => data.filter(c => c.created_by === email || c.client_email === email),
         enabled: !!email
     });
+
+    const [isAddingVehicle, setIsAddingVehicle] = useState(false);
+    const [editingVehicle, setEditingVehicle] = useState(null);
+    import VehicleForm from '@/components/onboarding/VehicleForm';
 
     const company = companies?.[0];
     const fleet = cars || [];
@@ -312,16 +317,39 @@ export default function ClientDetails() {
 
                 {/* FLEET TAB */}
                 <TabsContent value="fleet">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Car className="w-5 h-5" /> Vehicle Fleet
-                            </CardTitle>
-                            <CardDescription>List of all vehicles registered by this client.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {fleet.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isAddingVehicle ? (
+                        <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl border shadow-sm">
+                            <VehicleForm 
+                                clientEmail={email}
+                                initialData={editingVehicle}
+                                onCancel={() => {
+                                    setIsAddingVehicle(false);
+                                    setEditingVehicle(null);
+                                }}
+                                onSuccess={() => {
+                                    setIsAddingVehicle(false);
+                                    setEditingVehicle(null);
+                                    queryClient.invalidateQueries(['vehicles', email]);
+                                    toast.success("Vehicle saved to fleet");
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Car className="w-5 h-5" /> Vehicle Fleet
+                                    </CardTitle>
+                                    <CardDescription>List of all vehicles registered by this client.</CardDescription>
+                                </div>
+                                <Button onClick={() => setIsAddingVehicle(true)} className="bg-[#00C600] hover:bg-[#00b300]">
+                                    <Plus className="w-4 h-4 mr-2" /> Add Vehicle
+                                </Button>
+                            </CardHeader>
+                            <CardContent>
+                                {fleet.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {fleet.map(car => (
                                         <div key={car.id} className="border rounded-xl overflow-hidden hover:shadow-md transition-shadow bg-white dark:bg-[#1e1e1e]">
                                             {/* Car Image Preview */}
@@ -355,8 +383,13 @@ export default function ClientDetails() {
                                                     </div>
                                                 </div>
 
-                                                <div className="pt-2 flex gap-2">
-                                                    {/* We could add edit/delete here for admin if needed */}
+                                                <div className="pt-2 flex justify-end gap-2">
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
+                                                        setEditingVehicle(car);
+                                                        setIsAddingVehicle(true);
+                                                    }}>
+                                                        <FileText className="w-4 h-4" />
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </div>

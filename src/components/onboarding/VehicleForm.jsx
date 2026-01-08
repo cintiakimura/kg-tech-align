@@ -10,7 +10,7 @@ import FileUpload from './FileUpload';
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from '../LanguageContext';
 
-export default function VehicleForm({ onCancel, onSuccess, initialData }) {
+export default function VehicleForm({ onCancel, onSuccess, initialData, clientEmail }) {
   const { t } = useLanguage();
   const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: initialData || {
@@ -42,7 +42,8 @@ export default function VehicleForm({ onCancel, onSuccess, initialData }) {
         } else {
              const newVehicle = await base44.entities.Vehicle.create({
                  ...data,
-                 status: 'Open for Quotes'
+                 status: 'Open for Quotes',
+                 client_email: clientEmail // Optional: set if manager creating for client
              });
              vehicleId = newVehicle.id;
         }
