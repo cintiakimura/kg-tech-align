@@ -38,14 +38,19 @@ export default function Onboarding() {
   });
 
   const updateQuoteStatus = useMutation({
-      mutationFn: async ({ id, status }) => {
+      mutationFn: async ({ id, status, vehicle_id }) => {
           await base44.entities.ClientQuote.update(id, { status });
+          if (status === 'accepted' && vehicle_id) {
+              // Trigger production
+              await base44.entities.Vehicle.update(vehicle_id, { status: 'ordered' });
+          }
       },
       onSuccess: () => {
-          toast.success("Quote updated successfully");
+          toast.success("Quote accepted! Production triggered.");
           refetchQuotes();
       },
-      onError: () => {
+      onError: (e) => {
+          console.error(e);
           toast.error("Failed to update quote status");
       }
   });
@@ -339,9 +344,9 @@ ${connectorDetails}
                                                                 </Button>
                                                                 <Button 
                                                                     className="bg-[#00C600] hover:bg-[#00b300]"
-                                                                    onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'accepted' })}
+                                                                    onClick={() => updateQuoteStatus.mutate({ id: quote.id, status: 'accepted', vehicle_id: quote.vehicle_id })}
                                                                 >
-                                                                    Approve
+                                                                    Approve & Order
                                                                 </Button>
                                                             </>
                                                         )}

@@ -83,14 +83,10 @@ export default function SupplierDashboard() {
             // Fetch vehicles
             const vehicles = await base44.entities.Vehicle.list({ status: 'Open for Quotes' });
             
-            // Fetch companies
-            const companies = await base44.entities.CompanyProfile.list();
-
-            // For each vehicle, fetch its connectors
+            // Fetch connectors for each vehicle
             const enhancedVehicles = await Promise.all(vehicles.map(async (v) => {
-                const company = companies.find(c => c.created_by === v.created_by);
                 const connectors = await base44.entities.VehicleConnector.list({ vehicle_id: v.id });
-                return { ...v, company, connectors };
+                return { ...v, connectors };
             }));
             
             return enhancedVehicles;
@@ -903,10 +899,62 @@ export default function SupplierDashboard() {
                 </CardContent>
             </Card>
 
+            {/* Won Jobs / Logistics Section */}
+            {myQuotes?.some(q => q.is_winner || q.status === 'selected') && (
+                <div className="space-y-4">
+                     <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+                        <Truck className="w-5 h-5 text-purple-600" /> Logistics & Shipping
+                     </h2>
+                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {myQuotes.filter(q => q.is_winner || q.status === 'selected').map(quote => (
+                             <Card key={quote.id} className="bg-purple-50 dark:bg-purple-900/10 border-purple-200">
+                                <CardHeader className="p-4 pb-2">
+                                    <Badge className="w-fit bg-purple-600">Won Job</Badge>
+                                    <CardTitle className="text-base mt-2">
+                                        {quote.vehicle ? `${quote.vehicle.brand} ${quote.vehicle.model}` : 'Project'}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Status: {quote.vehicle?.status || 'Unknown'}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-2 space-y-3">
+                                    <div className="text-sm">
+                                        <strong>Ship To:</strong> KG Protech Hub
+                                    </div>
+                                    {quote.vehicle?.status !== 'Shipped' && quote.vehicle?.status !== 'in_transit' && quote.vehicle?.status !== 'delivered' ? (
+                                        <div className="flex flex-col gap-2">
+                                            <Button size="sm" variant="outline" onClick={() => window.open(`https://www.fedex.com/shipping/label?ref=${quote.id}`, '_blank')}>
+                                                <Printer className="w-4 h-4 mr-2" /> Print FedEx Label
+                                            </Button>
+                                            <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                                                await base44.entities.Vehicle.update(quote.vehicle_id, { 
+                                                    status: 'in_transit',
+                                                    tracking_number: `FDX-${Math.floor(Math.random()*1000000)}` // Mock tracking
+                                                });
+                                                queryClient.invalidateQueries(['my-quotes']);
+                                            }}>
+                                                <Truck className="w-4 h-4 mr-2" /> Mark as Shipped
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white dark:bg-black/20 p-2 rounded text-xs">
+                                            <div className="font-bold text-green-600 flex items-center gap-1">
+                                                <Truck className="w-3 h-3" /> In Transit
+                                            </div>
+                                            <div>Tracking: {quote.vehicle?.tracking_number}</div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                             </Card>
+                        ))}
+                     </div>
+                </div>
+            )}
+
             {/* My Quotations Section */}
             {myQuotes?.length > 0 && (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-semibold tracking-tight">My Quotations</h2>
+                    <h2 className="text-xl font-semibold tracking-tight">My Quotations History</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {myQuotes.map((quote) => {
                             const statusInfo = getStatusLabel(quote.status);
@@ -969,10 +1017,10 @@ export default function SupplierDashboard() {
                             <div className="text-sm space-y-1">
                                 <div className="font-medium flex items-center gap-2">
                                     <Building2 className="w-3 h-3" /> 
-                                    {project.company?.company_name || 'Unknown Client'}
+                                    Job #{project.id.slice(0, 8)}
                                 </div>
                                 <div className="text-muted-foreground text-xs">
-                                    {project.company?.address}
+                                    Project Location (Hidden)
                                 </div>
                             </div>
 
