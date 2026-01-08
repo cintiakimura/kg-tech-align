@@ -62,7 +62,6 @@ export default function ClientDetails() {
 
     const [isAddingVehicle, setIsAddingVehicle] = useState(false);
     const [editingVehicle, setEditingVehicle] = useState(null);
-    import VehicleForm from '@/components/onboarding/VehicleForm';
 
     const company = companies?.[0];
     const fleet = cars || [];
