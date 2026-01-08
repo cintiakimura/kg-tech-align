@@ -166,6 +166,45 @@ export default function AdminAuditReport() {
     const allLogs = React.useMemo(() => {
         let logs = [];
 
+        // Process Client Quote Logs
+        clientQuotes.forEach(cq => {
+             // For client quotes, we might not have audit_log property if it wasn't defined in schema or added later, 
+             // but assuming standard entity behavior or if I added it. 
+             // Looking at snapshot, ClientQuote has properties but audit_log wasn't explicitly in the snapshot schema for ClientQuote? 
+             // Wait, I should check the schema for ClientQuote in snapshot.
+             // Snapshot says: ClientQuote properties... no "audit_log" in the list?
+             // Actually, the snapshot says "audit_log" IS in CompanyProfile, Vehicle, Quote.
+             // But ClientQuote schema in snapshot: 
+             /* 
+             <entity name="ClientQuote">
+                ...
+                "properties": { ... },
+                "required": [ ... ],
+                "rls": { ... }
+             }
+             */
+             // It does NOT list audit_log explicitly in properties in the snapshot for ClientQuote.
+             // However, `base44` entities might have it if I added it or if it's there but not in snapshot.
+             // But wait, the system prompt says "built_in_attributes... created_date, updated_date, created_by". 
+             // "audit_log" is NOT a built-in attribute. It must be defined in the schema.
+             // If it's not in the schema, I can't read it.
+             // I'll skip ClientQuote logs for now to avoid errors if the property doesn't exist, 
+             // OR I can check if it exists before iterating.
+             
+             // However, checking the snapshot again for ClientQuote:
+             /*
+             "properties": {
+                "client_company_id": ...,
+                "vehicle_id": ...,
+                ...
+                "status": ...,
+                "notes": ...
+              }
+              */
+             // No audit_log. So I won't add it to the logs section to avoid breaking it.
+             // But I'll keep the diagnostics check I added since that uses `items` which IS in the schema.
+        });
+
         // Process Car Logs
         cars.forEach(car => {
             if (car.audit_log && Array.isArray(car.audit_log)) {
