@@ -29,10 +29,16 @@ export default function ProductionControl() {
         queryFn: () => base44.entities.Vehicle.list(null, 1000),
     });
 
-    // Fetch all quotes
+    // Fetch all supplier quotes
     const { data: quotes, isLoading: loadingQuotes } = useQuery({
         queryKey: ['productionQuotes'],
         queryFn: () => base44.entities.Quote.list(null, 1000),
+    });
+
+    // Fetch all client quotes (sales)
+    const { data: clientQuotes, isLoading: loadingClientQuotes } = useQuery({
+        queryKey: ['productionClientQuotes'],
+        queryFn: () => base44.entities.ClientQuote.list(null, 1000),
     });
 
     // Fetch company profiles for mapping
@@ -112,6 +118,11 @@ export default function ProductionControl() {
 
     const getWinningQuote = (vehicleId) => {
         return quotes?.find(q => q.vehicle_id === vehicleId && (q.is_winner || q.status === 'selected'));
+    };
+
+    const getClientQuote = (vehicleId) => {
+        // Find client quote linked to this vehicle (and ideally accepted/sale, but show any)
+        return clientQuotes?.find(cq => cq.vehicle_id === vehicleId);
     };
 
     const getCompanyName = (email) => {
@@ -194,11 +205,12 @@ export default function ProductionControl() {
                                     <TableHead className="w-[110px]">Del. Est.</TableHead>
                                     <TableHead className="w-[140px]">Courier</TableHead>
                                     <TableHead className="w-[140px]">Tracking</TableHead>
-                                    <TableHead className="w-[100px] text-right">Cost</TableHead>
-                                    <TableHead className="w-[100px] text-right">Ship</TableHead>
-                                    <TableHead className="w-[100px] text-right">Tax</TableHead>
-                                    <TableHead className="w-[100px] text-right">Total</TableHead>
+                                    <TableHead className="w-[100px] text-right">Supp. Cost</TableHead>
+                                    <TableHead className="w-[100px] text-right">Ship+Tax</TableHead>
+                                    <TableHead className="w-[100px] text-right">Client Price</TableHead>
+                                    <TableHead className="w-[100px] text-right">Margin</TableHead>
                                     <TableHead className="w-[160px]">Status</TableHead>
+                                    <TableHead className="w-[50px]">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -211,8 +223,18 @@ export default function ProductionControl() {
                                 ) : (
                                     productionVehicles.map((vehicle) => {
                                         const quote = getWinningQuote(vehicle.id);
+                                        const clientQuote = getClientQuote(vehicle.id);
                                         const dateOrdered = quote?.updated_date || vehicle.updated_date;
                                         
+                                        // Calculations
+                                        const supplierTotal = quote ? ((quote.price || 0) + (quote.shipping_cost || 0) + (quote.importation_tax || 0)) : 0;
+                                        const clientTotal = clientQuote ? clientQuote.items?.reduce((acc, i) => acc + (i.quantity * i.unit_price), 0) : 0;
+                                        const margin = clientTotal - supplierTotal;
+                                        const marginPercent = clientTotal > 0 ? (margin / clientTotal) * 100 : 0;
+
+                                        // Find client company ID for the link
+                                        const clientCompany = companies?.find(c => c.created_by === vehicle.created_by || c.contact_email === vehicle.created_by);
+
                                         return (
                                             <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
                                                 <TableCell>
@@ -257,35 +279,27 @@ export default function ProductionControl() {
                                                         }}
                                                     />
                                                 </TableCell>
-                                                <TableCell className="text-right text-sm">
-                                                    {quote?.price ? `£${quote.price.toFixed(2)}` : '-'}
-                                                </TableCell>
-                                                <TableCell className="text-right text-sm">
-                                                    {quote?.shipping_cost ? `£${quote.shipping_cost.toFixed(2)}` : '-'}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    {quote ? (
-                                                        <Input 
-                                                            type="number" 
-                                                            className="h-8 w-full text-right text-xs"
-                                                            defaultValue={quote.importation_tax || 0}
-                                                            onBlur={(e) => {
-                                                                const val = parseFloat(e.target.value);
-                                                                if (val !== quote.importation_tax) {
-                                                                    updateQuoteTaxMutation.mutate({ id: quote.id, tax: val });
-                                                                }
-                                                            }}
-                                                        />
-                                                    ) : '-'}
-                                                </TableCell>
-                                                <TableCell className="text-right font-semibold text-sm">
-                                                    {quote ? `£${((quote.price || 0) + (quote.shipping_cost || 0) + (quote.importation_tax || 0)).toFixed(2)}` : '-'}
+                                                    <SelectContent>
+                                                            <SelectItem value="Quote Selected">Quote Selected</SelectItem>
+                                                            <SelectItem value="ordered">Ordered</SelectItem>
+                                                            <SelectItem value="in_production">In Production</SelectItem>
+                                                            <SelectItem value="Shipped">Shipped (Legacy)</SelectItem>
+                                                            <SelectItem value="in_transit">In Transit</SelectItem>
+                                                            <SelectItem value="delivered">Delivered</SelectItem>
+                                                            <SelectItem value="problem">Problem</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Select 
-                                                        value={vehicle.status} 
-                                                        onValueChange={(val) => updateVehicleStatusMutation.mutate({ id: vehicle.id, status: val })}
-                                                    >
+                                                    {clientQuote && (
+                                                        <Link to={`/CreateClientQuote?id=${clientQuote.id}`}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                                <Download className="w-4 h-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
                                                         <SelectTrigger className={`h-8 w-full text-xs ${statusColors[vehicle.status] || 'bg-gray-100'}`}>
                                                             <SelectValue />
                                                         </SelectTrigger>

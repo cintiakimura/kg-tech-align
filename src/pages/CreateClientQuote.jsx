@@ -18,9 +18,12 @@ export default function CreateClientQuote() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const quoteId = searchParams.get('id');
+    const paramClientId = searchParams.get('clientId');
+    const paramVehicleId = searchParams.get('vehicleId');
     const queryClient = useQueryClient();
 
-    const [clientId, setClientId] = useState("");
+    const [clientId, setClientId] = useState(paramClientId || "");
+    const [vehicleId, setVehicleId] = useState(paramVehicleId || "");
     const [date, setDate] = useState(moment().format('YYYY-MM-DD'));
     const [validUntil, setValidUntil] = useState(moment().add(30, 'days').format('YYYY-MM-DD'));
     const [tvaRate, setTvaRate] = useState(20);
@@ -43,6 +46,7 @@ export default function CreateClientQuote() {
     useEffect(() => {
         if (existingQuote) {
             setClientId(existingQuote.client_company_id);
+            setVehicleId(existingQuote.vehicle_id || "");
             setDate(existingQuote.date);
             setValidUntil(existingQuote.valid_until);
             setTvaRate(existingQuote.tva_rate);
@@ -148,6 +152,7 @@ export default function CreateClientQuote() {
         
         createQuoteMutation.mutate({
             client_company_id: clientId,
+            vehicle_id: vehicleId,
             date,
             valid_until: validUntil,
             tva_rate: parseFloat(tvaRate),
