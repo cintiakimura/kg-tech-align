@@ -443,6 +443,10 @@ export default function SupplierDashboard() {
             // in a real app we'd have a mapping UI.
             const defaultConnectorId = vehicleConnectors[0]?.id;
 
+            if (!defaultConnectorId) {
+                throw new Error("This vehicle has no requested parts (connectors). Please ask the manager to add parts to the vehicle before submitting a quote.");
+            }
+
             if (defaultConnectorId) {
                 await Promise.all(data.items.map(item => {
                     // Try to find a connector that matches description/part number?
