@@ -123,8 +123,8 @@ function LayoutContent({ children }) {
                 alt="KG Logo" 
                 className="h-10 w-auto object-contain"
               />
-              <span className="font-semibold text-xl tracking-tight hidden sm:block" style={{ fontFamily: 'Inter, sans-serif' }}>
-                KG Solutions
+              <span className="font-semibold text-xl tracking-tight hidden sm:block">
+                KG Hub
               </span>
             </a>
 
