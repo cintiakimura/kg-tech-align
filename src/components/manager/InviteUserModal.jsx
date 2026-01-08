@@ -9,12 +9,18 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-export default function InviteUserModal({ open, onOpenChange }) {
+export default function InviteUserModal({ open, onOpenChange, initialRole = 'client' }) {
     const queryClient = useQueryClient();
     const [formData, setFormData] = React.useState({
         email: '',
-        target_user_type: 'client'
+        target_user_type: initialRole
     });
+
+    React.useEffect(() => {
+        if (open) {
+            setFormData(prev => ({ ...prev, target_user_type: initialRole }));
+        }
+    }, [open, initialRole]);
 
     const inviteMutation = useMutation({
         mutationFn: async (data) => {

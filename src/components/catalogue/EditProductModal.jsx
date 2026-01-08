@@ -27,37 +27,49 @@ export default function EditProductModal({ product, open, onOpenChange }) {
                 secret_part_number: product.secret_part_number || '',
                 pdf_url: product.pdf_url || ''
             });
+        } else {
+            setFormData({
+                pins: '',
+                colour: '',
+                type: 'other',
+                secret_part_number: '',
+                pdf_url: ''
+            });
         }
-    }, [product]);
+    }, [product, open]);
 
-    const updateMutation = useMutation({
+    const mutation = useMutation({
         mutationFn: async (data) => {
             const payload = {
                 ...data,
                 pins: data.pins ? parseInt(data.pins) : null
             };
-            await base44.entities.Catalogue.update(product.id, payload);
+            if (product?.id) {
+                await base44.entities.Catalogue.update(product.id, payload);
+            } else {
+                await base44.entities.Catalogue.create(payload);
+            }
         },
         onSuccess: () => {
-            toast.success("Product updated");
+            toast.success(product ? "Product updated" : "Product created");
             queryClient.invalidateQueries(['catalogue']);
             onOpenChange(false);
         },
         onError: () => {
-            toast.error("Failed to update product");
+            toast.error(product ? "Failed to update product" : "Failed to create product");
         }
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        updateMutation.mutate(formData);
+        mutation.mutate(formData);
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Edit Product</DialogTitle>
+                    <DialogTitle>{product ? 'Edit Product' : 'Add Product'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -114,8 +126,8 @@ export default function EditProductModal({ product, open, onOpenChange }) {
                         />
                     </div>
                     <DialogFooter>
-                         <Button type="submit" disabled={updateMutation.isPending}>
-                            {updateMutation.isPending ? "Saving..." : "Save changes"}
+                         <Button type="submit" disabled={mutation.isPending}>
+                            {mutation.isPending ? "Saving..." : (product ? "Save changes" : "Create Product")}
                         </Button>
                     </DialogFooter>
                 </form>

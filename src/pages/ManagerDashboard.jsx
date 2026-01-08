@@ -11,6 +11,7 @@ import DashboardStats from '../components/manager/DashboardStats';
 import ClientsTable from '../components/manager/ClientsTable';
 import InviteUserModal from '@/components/manager/InviteUserModal';
 import QuoteManager from '@/components/manager/QuoteManager';
+import EditProductModal from '@/components/catalogue/EditProductModal';
 import SupplierDashboard from './SupplierDashboard';
 import Onboarding from './Onboarding';
 import { useLanguage } from '../components/LanguageContext';
@@ -18,8 +19,15 @@ import { useLanguage } from '../components/LanguageContext';
 export default function ManagerDashboard() {
   const navigate = useNavigate();
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteRole, setInviteRole] = useState('client');
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+
+  const openInvite = (role) => {
+      setInviteRole(role);
+      setShowInviteModal(true);
+  };
 
   // Check auth/role
   const { data: user, isLoading: isLoadingUser } = useQuery({
@@ -107,54 +115,44 @@ export default function ManagerDashboard() {
                 {/* Menu Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500"
+                        onClick={() => openInvite('client')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <UserPlus className="w-8 h-8 text-green-500" />
+                            <span className="font-semibold text-sm">Add Client</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-indigo-500"
                         onClick={() => setActiveTab('quotes')}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
                             <FileCheck className="w-8 h-8 text-indigo-500" />
-                            <span className="font-semibold text-sm">Quotes & Fulfillment</span>
-                        </CardContent>
-                    </Card>
-
-                    <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500"
-                        onClick={() => setActiveTab('supplier')}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
-                            <span className="text-3xl">🏭</span>
-                            <span className="font-semibold text-sm">Supplier View</span>
-                        </CardContent>
-                    </Card>
-
-                    <Card 
-                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-green-500"
-                        onClick={() => document.getElementById('clients-list')?.scrollIntoView({ behavior: 'smooth' })}
-                    >
-                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
-                            <span className="text-3xl">🏢</span>
-                            <span className="font-semibold text-sm">Clients List</span>
+                            <span className="font-semibold text-sm">Add Quote</span>
                         </CardContent>
                     </Card>
 
                     <Card 
                         className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-orange-500"
-                        onClick={() => navigate('/Catalogue')}
+                        onClick={() => setShowAddProductModal(true)}
                     >
                         <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
                             <LayoutDashboard className="w-8 h-8 text-orange-500" />
-                            <span className="font-semibold text-sm">Catalogue</span>
+                            <span className="font-semibold text-sm">Add Product to Catalogue</span>
                         </CardContent>
                     </Card>
-                </div>
 
-                <div className="space-y-4" id="clients-list">
-                    <h2 className="text-xl font-semibold flex items-center gap-2">
-                        Client Overview
-                    </h2>
-                    <ClientsTable 
-                        companies={companies || []} 
-                        cars={cars || []} 
-                    />
+                    <Card 
+                        className="cursor-pointer hover:bg-slate-50 transition-colors border-l-4 border-l-blue-500"
+                        onClick={() => openInvite('supplier')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
+                            <span className="text-3xl">🏭</span>
+                            <span className="font-semibold text-sm">Add Supplier</span>
+                        </CardContent>
+                    </Card>
                 </div>
             </TabsContent>
 
@@ -225,7 +223,13 @@ export default function ManagerDashboard() {
         
         <InviteUserModal 
             open={showInviteModal} 
-            onOpenChange={setShowInviteModal} 
+            onOpenChange={setShowInviteModal}
+            initialRole={inviteRole}
+        />
+        <EditProductModal 
+            open={showAddProductModal}
+            onOpenChange={setShowAddProductModal}
+            product={null}
         />
     </div>
   );
