@@ -117,7 +117,7 @@ function LayoutContent({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center gap-4">
+            <a href="/ManagerDashboard" className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/user_691ced529360bd8b67161013/ed2352d66_LOGOKG.png" 
                 alt="KG Logo" 
@@ -126,7 +126,7 @@ function LayoutContent({ children }) {
               <span className="font-semibold text-xl tracking-tight hidden sm:block" style={{ fontFamily: 'Inter, sans-serif' }}>
                 KG Solutions
               </span>
-            </div>
+            </a>
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-4">

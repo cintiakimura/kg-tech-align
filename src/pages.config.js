@@ -12,6 +12,7 @@ import SupplierDashboard from './pages/SupplierDashboard';
 import FinancialAnalysis from './pages/FinancialAnalysis';
 import Purchases from './pages/Purchases';
 import Logistics from './pages/Logistics';
+import Clients from './pages/Clients';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "FinancialAnalysis": FinancialAnalysis,
     "Purchases": Purchases,
     "Logistics": Logistics,
+    "Clients": Clients,
 }
 
 export const pagesConfig = {
