@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate, BrowserRouter } from 'react-router-dom';
+// import { Link, useLocation, useNavigate } from 'react-router-dom'; // Removing router deps to avoid context errors
 import { Moon, Sun, Menu, X, Globe } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +16,8 @@ function LayoutContent({ children }) {
   const [user, setUser] = useState(null);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const { language, changeLanguage, t } = useLanguage();
-  const location = useLocation();
-  const navigate = useNavigate();
+  // const location = useLocation();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     // Check user preference or default to dark
@@ -26,7 +26,7 @@ function LayoutContent({ children }) {
     applyTheme(isDark);
     
     checkAuth();
-  }, [location.pathname]);
+  }, [window.location.pathname]); // Re-run on path change (if re-rendered)
 
   async function checkAuth() {
     try {
@@ -55,9 +55,9 @@ function LayoutContent({ children }) {
                   setUser(updated);
 
                   // Redirect based on new role
-                  if (invite.target_user_type === 'manager') navigate('/ManagerDashboard');
-                  else if (invite.target_user_type === 'supplier') navigate('/SupplierDashboard');
-                  else navigate('/Onboarding'); // client
+                  if (invite.target_user_type === 'manager') window.location.href = '/ManagerDashboard';
+                  else if (invite.target_user_type === 'supplier') window.location.href = '/SupplierDashboard';
+                  else window.location.href = '/Onboarding'; // client
                   return;
               }
           } catch (e) {
@@ -68,10 +68,10 @@ function LayoutContent({ children }) {
           setShowRoleSelector(true);
       } else {
           // Handle Redirects on Root or Dashboard access
-          if (location.pathname === '/') {
-              if (currentUser.role === 'admin' || currentUser.user_type === 'manager') navigate('/ManagerDashboard');
-              else if (currentUser.user_type === 'supplier') navigate('/SupplierDashboard');
-              else if (currentUser.user_type === 'client') navigate('/Onboarding');
+          if (window.location.pathname === '/') {
+              if (currentUser.role === 'admin' || currentUser.user_type === 'manager') window.location.href = '/ManagerDashboard';
+              else if (currentUser.user_type === 'supplier') window.location.href = '/SupplierDashboard';
+              else if (currentUser.user_type === 'client') window.location.href = '/Onboarding';
           }
       }
     } catch (e) {
@@ -87,8 +87,8 @@ function LayoutContent({ children }) {
           // Force reload user to get update
           const updatedUser = await base44.auth.me();
           setUser(updatedUser);
-          if (type === 'supplier') navigate('/SupplierDashboard');
-          else navigate('/Onboarding');
+          if (type === 'supplier') window.location.href = '/SupplierDashboard';
+          else window.location.href = '/Onboarding';
       } catch (e) {
           console.error("Failed to set role", e);
       }
@@ -131,9 +131,9 @@ function LayoutContent({ children }) {
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center space-x-4">
               {user && (
-                  <Link to="/Catalogue">
+                  <a href="/Catalogue">
                        <Button variant="ghost">Catalogue</Button>
-                  </Link>
+                  </a>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -169,30 +169,30 @@ function LayoutContent({ children }) {
                    <DropdownMenuContent align="end">
                      {(user.role === 'admin' || user.user_type === 'manager' || user.email === 'georg@kgprotech.com') && (
                                <DropdownMenuItem asChild>
-                                   <Link to="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                   <a href="/ManagerDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
                                    Manager Dashboard
-                                   </Link>
+                                   </a>
                                </DropdownMenuItem>
                            )}
                            {(user.role === 'admin' || user.email === 'georg@kgprotech.com') && (
                                <>
                                    <DropdownMenuItem asChild>
-                                       <Link to="/admin/import-catalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                       <a href="/admin/import-catalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
                                        Import Catalogue
-                                       </Link>
+                                       </a>
                                    </DropdownMenuItem>
                                    <DropdownMenuItem asChild>
-                                       <Link to="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                                       <a href="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
                                        Audit Report
-                                       </Link>
+                                       </a>
                                    </DropdownMenuItem>
                                </>
                            )}
                       {(user.user_type === 'supplier') && (
                           <DropdownMenuItem asChild>
-                              <Link to="/SupplierDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                              <a href="/SupplierDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
                                  Supplier Dashboard
-                              </Link>
+                              </a>
                           </DropdownMenuItem>
                       )}
                      <DropdownMenuItem onClick={() => base44.auth.logout()}>
@@ -284,10 +284,8 @@ function LayoutContent({ children }) {
 
 export default function Layout(props) {
   return (
-    <BrowserRouter>
-      <LanguageProvider>
-        <LayoutContent {...props} />
-      </LanguageProvider>
-    </BrowserRouter>
+    <LanguageProvider>
+      <LayoutContent {...props} />
+    </LanguageProvider>
   );
 }
