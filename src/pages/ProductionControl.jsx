@@ -6,16 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, Save, AlertCircle, Download, Printer } from "lucide-react";
+import { Loader2, ArrowLeft, Save, AlertCircle, Download, Printer, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 import TruncatedCell from '@/components/TruncatedCell';
 import { exportToCSV } from '@/components/utils/exportUtils';
+import InviteUserModal from '@/components/manager/InviteUserModal';
 
 export default function ProductionControl() {
     const queryClient = useQueryClient();
     const [editingTax, setEditingTax] = useState({});
+    const [showInviteModal, setShowInviteModal] = useState(false);
 
     // Fetch all vehicles
     const { data: vehicles, isLoading: loadingVehicles } = useQuery({
@@ -142,6 +144,10 @@ export default function ProductionControl() {
                         <p className="text-muted-foreground">Manage orders, production status, and logistics</p>
                     </div>
                     <div className="flex gap-2">
+                        <Button onClick={() => setShowInviteModal(true)} className="bg-[#00C600] hover:bg-[#00b300] text-white gap-2">
+                             <UserPlus className="w-4 h-4" />
+                             Add Supplier
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => window.print()}>
                             <Printer className="w-4 h-4 mr-2" /> Print
                         </Button>
@@ -150,6 +156,12 @@ export default function ProductionControl() {
                         </Button>
                     </div>
                 </div>
+
+                <InviteUserModal 
+                    open={showInviteModal} 
+                    onOpenChange={setShowInviteModal}
+                    initialRole="supplier"
+                />
 
                 <div className="bg-white dark:bg-[#2a2a2a] rounded-xl shadow-sm border overflow-hidden">
                     <div className="overflow-x-auto">
@@ -183,7 +195,7 @@ export default function ProductionControl() {
                                         const dateOrdered = quote?.updated_date || vehicle.updated_date;
                                         
                                         return (
-                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b">
+                                            <TableRow key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] hover:bg-transparent hover:shadow-[inset_4px_0_0_0_#6366f1] transition-all border-b h-12">
                                                 <TableCell>
                                                     <TruncatedCell text={getCompanyName(vehicle.created_by)} />
                                                 </TableCell>

@@ -13,6 +13,7 @@ import FinancialAnalysis from './pages/FinancialAnalysis';
 import Purchases from './pages/Purchases';
 import Logistics from './pages/Logistics';
 import Clients from './pages/Clients';
+import Quotations from './pages/Quotations';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Purchases": Purchases,
     "Logistics": Logistics,
     "Clients": Clients,
+    "Quotations": Quotations,
 }
 
 export const pagesConfig = {
