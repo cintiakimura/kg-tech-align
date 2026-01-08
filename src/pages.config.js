@@ -13,6 +13,7 @@ import SupplierDashboard from './pages/SupplierDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ProductionControl from './pages/ProductionControl';
 import Quotations from './pages/Quotations';
+import SupplierQuotations from './pages/SupplierQuotations';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "ManagerDashboard": ManagerDashboard,
     "ProductionControl": ProductionControl,
     "Quotations": Quotations,
+    "SupplierQuotations": SupplierQuotations,
 }
 
 export const pagesConfig = {

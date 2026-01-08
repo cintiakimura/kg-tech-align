@@ -121,6 +121,17 @@ export default function ManagerDashboard() {
                     </Card>
 
                     <Card 
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-pink-500 transition-all border-l-4 border-l-pink-500 h-full transform hover:-translate-y-1"
+                        onClick={() => navigate('/SupplierQuotations')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <FileText className="w-8 h-8 text-pink-500" />
+                            <span className="font-semibold text-sm">Supplier Quotes</span>
+                            <span className="text-xs text-muted-foreground">Review quotes from suppliers</span>
+                        </CardContent>
+                    </Card>
+
+                    <Card 
                         className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-orange-500 transition-all border-l-4 border-l-orange-500 h-full transform hover:-translate-y-1"
                         onClick={() => navigate('/StockControl')}
                     >
