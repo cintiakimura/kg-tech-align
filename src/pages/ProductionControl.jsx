@@ -18,21 +18,17 @@ export default function ProductionControl() {
     const { data: vehicles, isLoading } = useQuery({
         queryKey: ['productionVehicles'],
         queryFn: async () => {
-            // Fetch all related data manually since we can't join in one query easily
             const ve = await base44.entities.Vehicle.list({ status: { $in: ['ordered', 'in_production', 'in_transit', 'delivered'] } });
             
-            // Enrich with Client and Supplier/Order info
-            // This might be heavy, in real app use backend function or improved query
             const enriched = await Promise.all(ve.map(async (v) => {
-                const quotes = await base44.entities.ClientQuote.list({ vehicle_id: v.id, status: 'accepted' });
+                const quotes = await base44.entities.ClientQuote.list({ vehicle_id: v.id });
                 const quote = quotes[0];
                 let client = null;
-                if (quote) {
-                    const companies = await base44.entities.CompanyProfile.list({ contact_email: quote.client_email });
+                if (v.client_email) {
+                    const companies = await base44.entities.CompanyProfile.list({ contact_email: v.client_email });
                     client = companies[0];
                 }
                 
-                // Supplier Quote (Winner)
                 const supplierQuotes = await base44.entities.Quote.list({ vehicle_id: v.id, is_winner: true });
                 const supplierQuote = supplierQuotes[0];
 
@@ -42,17 +38,147 @@ export default function ProductionControl() {
         }
     });
 
-    const updateStatus = useMutation({
-        mutationFn: async ({ id, status }) => {
-            await base44.entities.Vehicle.update(id, { status });
-            // Sync logic: In a real backend, this would trigger updates to Stock/Logistics entities
-            // For now we simulate persistence by just updating the record
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries(['productionVehicles']);
-            toast.success("Status updated");
-        }
-    });
+    // Auto-populate DB if empty
+    React.useEffect(() => {
+        const initData = async () => {
+             try {
+                // Check if data exists
+                const existing = await base44.entities.CompanyProfile.list({ company_name: "Smith Auto Repairs" });
+                if (existing.length > 0) return; // Already populated
+
+                // Helper to ensure creation
+                const createIfMissing = async (entity, query, data) => {
+                    const exist = await base44.entities[entity].list(query);
+                    if (exist.length > 0) return exist[0];
+                    return await base44.entities[entity].create(data);
+                };
+
+                // --- 1. John Smith ---
+                const client1 = await createIfMissing('CompanyProfile', { client_number: "CL-SMITH" }, {
+                    company_name: "Smith Auto Repairs",
+                    client_number: "CL-SMITH",
+                    contact_email: "john@smithauto.com",
+                    contact_person_name: "John Smith",
+                    address: "101 Maple Street, London"
+                });
+
+                const v1 = await createIfMissing('Vehicle', { vehicle_number: "VEH-SMITH-001" }, {
+                    brand: "Ford", model: "Focus", version: "ST", year: 2023,
+                    vehicle_number: "VEH-SMITH-001",
+                    serial_number: "SER-SMITH-001",
+                    status: "in_production",
+                    client_email: "john@smithauto.com",
+                    purpose: "Production",
+                    calculator_system: "Brakes",
+                    brakes_type: "Disc",
+                    fuel: "Petrol", engine_size: "2.3L", engine_power: "280HP", engine_code: "EcoBoost", 
+                    transmission_type: "Manual", number_gears: 6, vin: "VF-SMITH-001"
+                });
+
+                await createIfMissing('VehicleConnector', { vehicle_id: v1.id, notes: "Standard" }, { 
+                    vehicle_id: v1.id, custom_type_name: "OBD-II Connector", quantity: 1, notes: "Standard" 
+                });
+                
+                await createIfMissing('ClientQuote', { vehicle_id: v1.id }, {
+                    client_company_id: client1.id, vehicle_id: v1.id, client_email: "john@smithauto.com",
+                    quote_number: "Q-SMITH-01", status: "accepted",
+                    items: [{ description: "Brake System Overhaul", quantity: 1, unit_price: 1500 }]
+                });
+
+                await createIfMissing('Quote', { vehicle_id: v1.id }, {
+                    vehicle_id: v1.id, supplier_email: "parts@europarts.com",
+                    price: 800, shipping_cost: 100, total_gbp: 900,
+                    status: "selected", is_winner: true, lead_time_days: 10
+                });
+
+                // --- 2. Sarah Lee ---
+                const client2 = await createIfMissing('CompanyProfile', { client_number: "CL-LEE" }, {
+                    company_name: "Lee Logistics",
+                    client_number: "CL-LEE",
+                    contact_email: "sarah@leelogistics.com",
+                    contact_person_name: "Sarah Lee",
+                    address: "42 Ocean Drive, Manchester"
+                });
+
+                const v2 = await createIfMissing('Vehicle', { vehicle_number: "VEH-LEE-002" }, {
+                    brand: "BMW", model: "X5", version: "xDrive40i", year: 2024,
+                    vehicle_number: "VEH-LEE-002",
+                    serial_number: "SER-LEE-002",
+                    status: "in_transit",
+                    client_email: "sarah@leelogistics.com",
+                    purpose: "Production",
+                    calculator_system: "Engine",
+                    brakes_type: "ABS",
+                    fuel: "Hybrid", engine_size: "3.0L", engine_power: "335HP", engine_code: "B58", 
+                    transmission_type: "Automatic", number_gears: 8, vin: "VF-LEE-002"
+                });
+
+                await createIfMissing('VehicleConnector', { vehicle_id: v2.id, notes: "Critical" }, { 
+                    vehicle_id: v2.id, custom_type_name: "High Voltage Harness", quantity: 2, notes: "Critical" 
+                });
+
+                await createIfMissing('ClientQuote', { vehicle_id: v2.id }, {
+                    client_company_id: client2.id, vehicle_id: v2.id, client_email: "sarah@leelogistics.com",
+                    quote_number: "Q-LEE-01", status: "accepted",
+                    items: [{ description: "Engine Replacement Unit", quantity: 1, unit_price: 4500 }]
+                });
+
+                await createIfMissing('Quote', { vehicle_id: v2.id }, {
+                    vehicle_id: v2.id, supplier_email: "global@supplies.com",
+                    price: 3000, shipping_cost: 250, total_gbp: 3250,
+                    status: "selected", is_winner: true, lead_time_days: 7,
+                    tracking_number: "DHL-998877", carrier: "DHL"
+                });
+
+                // --- 3. Tom Brown ---
+                const client3 = await createIfMissing('CompanyProfile', { client_number: "CL-BROWN" }, {
+                    company_name: "Brown Motors",
+                    client_number: "CL-BROWN",
+                    contact_email: "tom@brownmotors.co.uk",
+                    contact_person_name: "Tom Brown",
+                    address: "7 Industrial Estate, Birmingham"
+                });
+
+                const v3 = await createIfMissing('Vehicle', { vehicle_number: "VEH-BROWN-003" }, {
+                    brand: "Audi", model: "A4", version: "S-Line", year: 2024,
+                    vehicle_number: "VEH-BROWN-003",
+                    serial_number: "SER-BROWN-003",
+                    status: "delivered",
+                    client_email: "tom@brownmotors.co.uk",
+                    purpose: "Production",
+                    calculator_system: "Electrics",
+                    brakes_type: "Ceramic",
+                    fuel: "Diesel", engine_size: "2.0L", engine_power: "190HP", engine_code: "TDI", 
+                    transmission_type: "DCT", number_gears: 7, vin: "VF-BROWN-003"
+                });
+
+                await createIfMissing('VehicleConnector', { vehicle_id: v3.id, notes: "Pinout A" }, { 
+                    vehicle_id: v3.id, custom_type_name: "ECU Main Connector", quantity: 1, notes: "Pinout A" 
+                });
+
+                await createIfMissing('ClientQuote', { vehicle_id: v3.id }, {
+                    client_company_id: client3.id, vehicle_id: v3.id, client_email: "tom@brownmotors.co.uk",
+                    quote_number: "Q-BROWN-01", status: "invoiced",
+                    items: [{ description: "Full Electrical Rewire", quantity: 1, unit_price: 2200 }]
+                });
+
+                await createIfMissing('Quote', { vehicle_id: v3.id }, {
+                    vehicle_id: v3.id, supplier_email: "local@parts.fr",
+                    price: 1500, shipping_cost: 50, total_gbp: 1550,
+                    status: "selected", is_winner: true, lead_time_days: 2,
+                    tracking_number: "UPS-112233", carrier: "UPS"
+                });
+
+                queryClient.invalidateQueries(['productionVehicles']);
+
+             } catch (e) {
+                 console.error("Auto-population failed", e);
+             }
+        };
+
+        // Run immediately
+        initData();
+    }, []);
 
 
 
