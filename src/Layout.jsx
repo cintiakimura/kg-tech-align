@@ -32,9 +32,10 @@ function LayoutContent({ children }) {
     try {
       const isAuth = await base44.auth.isAuthenticated();
 
-      // Allow public access to Home page (/)
+      // Allow public access to Home page (/) and specific login routes
       if (!isAuth) {
-          if (window.location.pathname === '/' || window.location.pathname === '/Home') {
+          const publicPaths = ['/', '/Home', '/ClientLogin', '/ManagerLogin', '/SupplierLogin'];
+          if (publicPaths.includes(window.location.pathname)) {
               return;
           }
           base44.auth.redirectToLogin(window.location.pathname);

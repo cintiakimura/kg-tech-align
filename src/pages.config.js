@@ -15,6 +15,9 @@ import Quotations from './pages/Quotations';
 import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierQuotations from './pages/SupplierQuotations';
+import ClientLogin from './pages/ClientLogin';
+import ManagerLogin from './pages/ManagerLogin';
+import SupplierLogin from './pages/SupplierLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +39,9 @@ export const PAGES = {
     "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
     "SupplierQuotations": SupplierQuotations,
+    "ClientLogin": ClientLogin,
+    "ManagerLogin": ManagerLogin,
+    "SupplierLogin": SupplierLogin,
 }
 
 export const pagesConfig = {
