@@ -23,8 +23,6 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
     }
   });
 
-  const calculatorSystemValue = watch("calculator_system");
-
   const { fields, append, remove } = useFieldArray({
     control,
     name: "connectors"
@@ -37,46 +35,69 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
 
   const onSubmit = async (data) => {
     try {
-        let vehicleId = initialData?.id;
+        let newVehicleId = initialData?.id;
 
         // 1. Save Vehicle
         if (initialData?.id) {
              await base44.entities.Vehicle.update(initialData.id, {
                  ...data,
-                 status: data.status || 'Open for Quotes' // Ensure status is set
+                 status: data.status || 'Open for Quotes'
              });
         } else {
+             // Generate Vehicle Number
+             const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
              const newVehicle = await base44.entities.Vehicle.create({
                  ...data,
+                 vehicle_number: vehicleNumber,
                  status: 'Open for Quotes',
-                 client_email: clientEmail // Optional: set if manager creating for client
+                 client_email: clientEmail
              });
-             vehicleId = newVehicle.id;
+             newVehicleId = newVehicle.id;
         }
 
-        // 2. Save Connectors (Delete existing and recreate for simplicity on edit, or just add new)
-        // For simplicity: If editing, we might want to be smarter, but let's just create them for now. 
-        // Real implementation would diff. Given "replace any single product field", let's assume create flow mostly.
-        
+        // 2. Save Connectors
         if (data.connectors && data.connectors.length > 0) {
-            // If editing, we should probably clear old ones first or update. 
-            // Since we don't have bulk delete by query easily exposed in this context without finding them first:
             if (initialData?.id) {
-                const existing = await base44.entities.VehicleConnector.list({ vehicle_id: vehicleId });
+                const existing = await base44.entities.VehicleConnector.list({ vehicle_id: newVehicleId });
                 await Promise.all(existing.map(c => base44.entities.VehicleConnector.delete(c.id)));
             }
             
             await Promise.all(data.connectors.map(conn => 
                 base44.entities.VehicleConnector.create({
-                    vehicle_id: vehicleId,
-                    catalogue_id: conn.catalogue_id,
+                    vehicle_id: newVehicleId,
+                    catalogue_id: conn.catalogue_id === "manual" ? null : (conn.catalogue_id || null),
+                    custom_type_name: conn.custom_type_name,
                     quantity: parseInt(conn.quantity),
                     notes: conn.notes
                 })
             ));
         }
 
-        onSuccess();
+        toast.success("Vehicle saved! You can now add another.");
+
+        if (!initialData?.id) {
+             // "Add Another" flow: Reset relevant fields but keep context
+             reset({
+                ...data,
+                brand: "",
+                model: "",
+                version: "",
+                vin: "",
+                // Keep purpose/system/fuel if typical for batch, or reset. Let's reset main identifiers.
+                connectors: [{ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" }],
+                image_connector_front: "",
+                image_lever_side: "",
+                image_ecu_part_number: "",
+                image_ecu_front: "",
+                image_extra_1: "",
+                image_extra_2: "",
+                file_electrical_scheme: "",
+                file_sensors_actuators: ""
+             });
+             window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            onSuccess();
+        }
     } catch (error) {
         console.error("Failed to save vehicle request", error);
         toast.error("Failed to save vehicle. Please check all fields.");
@@ -143,6 +164,82 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                                 )}
                             />
                         </div>
+
+                        {/* New/Modified Fields */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Brakes Type <span className="text-[#00C600]">*</span></label>
+                            <div className="relative">
+                                <Input 
+                                    list="brakes-options"
+                                    {...register("brakes_type", { required: "Brakes type is required" })} 
+                                    placeholder="Select or type..." 
+                                    className={InputStyle} 
+                                />
+                                <datalist id="brakes-options">
+                                    <option value="Disc" />
+                                    <option value="Drum" />
+                                    <option value="ABS" />
+                                    <option value="Ceramic" />
+                                    <option value="Regenerative" />
+                                </datalist>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Calculator System <span className="text-[#00C600]">*</span></label>
+                            <Controller
+                                name="calculator_system"
+                                control={control}
+                                rules={{ required: "Required" }}
+                                render={({ field }) => (
+                                    <div className="space-y-2">
+                                        <Select onValueChange={(val) => {
+                                            field.onChange(val);
+                                        }} value={["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value) ? field.value : "Custom"}>
+                                            <SelectTrigger className={InputStyle}><SelectValue placeholder="Select system" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Brakes">Brakes</SelectItem>
+                                                <SelectItem value="Engine">Engine</SelectItem>
+                                                <SelectItem value="Suspension">Suspension</SelectItem>
+                                                <SelectItem value="Body">Body</SelectItem>
+                                                <SelectItem value="Electrics">Electrics</SelectItem>
+                                                <SelectItem value="Energy Management">Energy Management</SelectItem>
+                                                <SelectItem value="Custom">Custom / Other</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {/* If Custom or not in list, show text input */}
+                                        {(field.value === "Custom" || !["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value)) && (
+                                            <Input 
+                                                placeholder="Type custom system name..." 
+                                                value={field.value === "Custom" ? "" : field.value}
+                                                onChange={(e) => field.onChange(e.target.value)}
+                                                className={InputStyle}
+                                            />
+                                        )}
+                                    </div>
+                                )}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Purpose <span className="text-[#00C600]">*</span></label>
+                            <Controller
+                                name="purpose"
+                                control={control}
+                                rules={{ required: "Required" }}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger className={InputStyle}><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Production">Production</SelectItem>
+                                            <SelectItem value="Sales">Sales</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </div>
+
+                        {/* Existing Fields Continued */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Engine Size <span className="text-[#00C600]">*</span></label>
                             <Input {...register("engine_size", { required: "Required" })} className={InputStyle} />
@@ -178,13 +275,13 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                     </div>
                 </div>
 
-                {/* Connectors Needed (Repeating Group) */}
+                {/* Connectors Needed (Repeating Group) - Updated to be fully editable */}
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
                             <Package className="w-5 h-5" /> Connectors Needed
                         </h3>
-                        <Button type="button" onClick={() => append({ catalogue_id: "", quantity: 1, notes: "" })} size="sm" variant="outline">
+                        <Button type="button" onClick={() => append({ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" })} size="sm" variant="outline">
                             <Plus className="w-4 h-4 mr-2" /> Add Connector
                         </Button>
                     </div>
@@ -193,32 +290,48 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                         {fields.map((field, index) => (
                             <div key={field.id} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 flex flex-col md:flex-row gap-4 items-start relative group">
                                 <div className="flex-1 w-full md:w-auto">
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Connector</label>
-                                    <Controller
-                                        name={`connectors.${index}.catalogue_id`}
-                                        control={control}
-                                        rules={{ required: "Required" }}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <SelectTrigger className="bg-white">
-                                                    <SelectValue placeholder="Select connector..." />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {catalogueItems?.map(item => (
-                                                        <SelectItem key={item.id} value={item.id}>
-                                                            <div className="flex items-center gap-2">
-                                                                {item.image_url && <img src={item.image_url} className="w-6 h-6 object-contain" />}
-                                                                <span>{item.type} - {item.colour} ({item.pins} pins)</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
+                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Type (Select or Type)</label>
+                                    <div className="space-y-2">
+                                        <Controller
+                                            name={`connectors.${index}.catalogue_id`}
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select 
+                                                    onValueChange={(val) => {
+                                                        if (val === "manual") {
+                                                            field.onChange("manual");
+                                                            setValue(`connectors.${index}.custom_type_name`, ""); 
+                                                        } else {
+                                                            field.onChange(val);
+                                                            setValue(`connectors.${index}.custom_type_name`, ""); 
+                                                        }
+                                                    }} 
+                                                    value={field.value || "manual"}
+                                                >
+                                                    <SelectTrigger className="bg-white">
+                                                        <SelectValue placeholder="Select or type below..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="manual">Manual Entry</SelectItem>
+                                                        {catalogueItems?.map(item => (
+                                                            <SelectItem key={item.id} value={item.id}>
+                                                                {item.type} - {item.colour} ({item.pins} pins)
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        <Input 
+                                            placeholder="Or type connector name..."
+                                            {...register(`connectors.${index}.custom_type_name`)}
+                                            className="bg-white"
+                                        />
+                                    </div>
+                                    
                                     {/* Preview selected item */}
                                     {(() => {
-                                        const selectedId = control._formValues.connectors?.[index]?.catalogue_id;
+                                        const selectedId = watch(`connectors.${index}.catalogue_id`);
                                         const item = catalogueItems?.find(i => i.id === selectedId);
                                         if (item && item.image_url) {
                                             return <img src={item.image_url} className="w-16 h-16 object-contain mt-2 border bg-white rounded" />;
@@ -234,7 +347,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                                     />
                                 </div>
                                 <div className="flex-1 w-full md:w-auto">
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Notes (Optional)</label>
+                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Notes</label>
                                     <Input 
                                         {...register(`connectors.${index}.notes`)} 
                                         placeholder="e.g. Specific coding" 
@@ -261,21 +374,48 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                         <Zap className="w-5 h-5" /> {t('required_photos')}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                         {['image_connector_front', 'image_lever_side', 'image_ecu_part_number', 'image_ecu_front', 'image_extra_1', 'image_extra_2'].map(fieldName => (
-                             <Controller
-                                 key={fieldName}
-                                 name={fieldName}
-                                 control={control}
-                                 render={({ field }) => (
-                                     <FileUpload 
-                                         label={t(fieldName.replace('image_', '').replace('_', '_')) || fieldName.split('_').slice(1).join(' ')} 
-                                         value={field.value} 
-                                         onChange={field.onChange} 
-                                         required={['image_extra_1', 'image_extra_2'].indexOf(fieldName) === -1}
-                                     />
-                                 )}
-                             />
-                         ))}
+                        <Controller
+                           name="image_connector_front"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('conn_front')} value={field.value} onChange={field.onChange} />
+                           )}
+                        />
+                        <Controller
+                           name="image_lever_side"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('lever_side')} value={field.value} onChange={field.onChange} />
+                           )}
+                        />
+                        <Controller
+                           name="image_ecu_part_number"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('ecu_part') + " (Optional)"} value={field.value} onChange={field.onChange} required={false} />
+                           )}
+                        />
+                        <Controller
+                           name="image_ecu_front"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('ecu_front')} value={field.value} onChange={field.onChange} />
+                           )}
+                        />
+                        <Controller
+                           name="image_extra_1"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('extra_photo') + " 1"} value={field.value} onChange={field.onChange} required={false} />
+                           )}
+                        />
+                        <Controller
+                           name="image_extra_2"
+                           control={control}
+                           render={({ field }) => (
+                               <FileUpload label={t('extra_photo') + " 2"} value={field.value} onChange={field.onChange} required={false} />
+                           )}
+                        />
                     </div>
                 </div>
 
