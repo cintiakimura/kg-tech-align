@@ -13,12 +13,17 @@ import { useLanguage } from '../LanguageContext';
 
 export default function VehicleForm({ onCancel, onSuccess, initialData, clientEmail }) {
   const { t } = useLanguage();
-  const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, control, handleSubmit, formState: { errors, isSubmitting }, reset, setValue, watch } = useForm({
     defaultValues: initialData || {
         transmission_type: "Automatic",
-        connectors: [{ catalogue_id: "", quantity: 1, notes: "" }]
+        brakes_type: "Disc",
+        calculator_system: "Engine",
+        purpose: "Production",
+        connectors: [{ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" }]
     }
   });
+
+  const calculatorSystemValue = watch("calculator_system");
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -302,7 +307,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                         {t('cancel')}
                     </Button>
                     <Button type="submit" disabled={isSubmitting} className="bg-[#00C600] hover:bg-[#00b300] text-white">
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : "Submit Vehicle Request"}
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : "Continue"}
                     </Button>
                 </div>
             </form>

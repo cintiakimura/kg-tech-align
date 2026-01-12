@@ -26,7 +26,8 @@ export default function CompanyForm({ onComplete, initialData }) {
         if (initialData?.id) {
              await base44.entities.CompanyProfile.update(initialData.id, data);
         } else {
-             await base44.entities.CompanyProfile.create(data);
+             const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
+             await base44.entities.CompanyProfile.create({ ...data, client_number: clientNumber });
         }
         if (onComplete) onComplete();
     } catch (error) {
