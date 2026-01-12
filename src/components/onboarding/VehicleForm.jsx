@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -71,10 +72,11 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
         }
 
         onSuccess();
-    } catch (error) {
+        } catch (error) {
         console.error("Failed to save vehicle request", error);
-    }
-  };
+        toast.error("Failed to save vehicle request. Please try again.");
+        }
+        };
 
   const InputStyle = "bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
 
