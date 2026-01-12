@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Plus, Car, Settings, Zap, ArrowLeft, Trash2, Package } from 'lucide-react';
+import { toast } from "sonner";
 import FileUpload from './FileUpload';
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from '../LanguageContext';
@@ -72,11 +72,11 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
         }
 
         onSuccess();
-        } catch (error) {
+    } catch (error) {
         console.error("Failed to save vehicle request", error);
-        toast.error("Failed to save vehicle request. Please try again.");
-        }
-        };
+        toast.error("Failed to save vehicle. Please check all fields.");
+    }
+  };
 
   const InputStyle = "bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
 

@@ -375,7 +375,11 @@ ${connectorDetails}
                 ) : (
                     <CompanyForm 
                         initialData={companyProfile} 
-                        onComplete={() => setActiveTab("fleet")} 
+                        onComplete={() => {
+                            queryClient.invalidateQueries(['companyProfile']);
+                            setActiveTab("fleet");
+                            toast.success("Company profile saved!");
+                        }} 
                     />
                 )}
             </Card>

@@ -5,6 +5,7 @@ import ClientDetails from './pages/ClientDetails';
 import Clients from './pages/Clients';
 import CreateClientQuote from './pages/CreateClientQuote';
 import FinancialAnalysis from './pages/FinancialAnalysis';
+import Home from './pages/Home';
 import Logistics from './pages/Logistics';
 import ManagerDashboard from './pages/ManagerDashboard';
 import Onboarding from './pages/Onboarding';
@@ -14,7 +15,6 @@ import Quotations from './pages/Quotations';
 import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierQuotations from './pages/SupplierQuotations';
-import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +26,7 @@ export const PAGES = {
     "Clients": Clients,
     "CreateClientQuote": CreateClientQuote,
     "FinancialAnalysis": FinancialAnalysis,
+    "Home": Home,
     "Logistics": Logistics,
     "ManagerDashboard": ManagerDashboard,
     "Onboarding": Onboarding,
@@ -35,7 +36,6 @@ export const PAGES = {
     "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
     "SupplierQuotations": SupplierQuotations,
-    "Home": Home,
 }
 
 export const pagesConfig = {

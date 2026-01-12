@@ -1,17 +1,15 @@
 import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText, User, Briefcase, Truck } from 'lucide-react';
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from '../LanguageContext';
 
 export default function CompanyForm({ onComplete, initialData }) {
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
     defaultValues: initialData || {}
   });
@@ -24,14 +22,12 @@ export default function CompanyForm({ onComplete, initialData }) {
   const onSubmit = async (data) => {
     try {
         // Check if exists to update, or create new
+        // For simplicity in this flow, we'll create or assume update if passed
         if (initialData?.id) {
              await base44.entities.CompanyProfile.update(initialData.id, data);
-             toast.success("Company profile updated successfully");
         } else {
              await base44.entities.CompanyProfile.create(data);
-             toast.success("Company profile created successfully");
         }
-        await queryClient.invalidateQueries({ queryKey: ['companyProfile'] });
         if (onComplete) onComplete();
     } catch (error) {
         console.error("Failed to save company info", error);
