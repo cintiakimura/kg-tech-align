@@ -56,20 +56,15 @@ export default function ProductionControl() {
 
     const handleCreateDummies = async () => {
         try {
-            toast.loading("Creating dummy scenario...");
+            toast.loading("Initializing production data...");
             
-            // 1. Create Clients
+            // Set 1: EuroParts / TechInstitute
             const client1 = await base44.entities.CompanyProfile.create({
                 company_name: "TechInstitute Paris",
                 client_number: "CL-001",
                 contact_email: "admin@techinstitute.fr",
                 address: "12 Rue de Paris"
             });
-
-            // 2. Create Suppliers (if not exist, we just assume names for the flow)
-            // Ideally we create Users but we can't create users directly. We just simulate "Supplier" entity concepts via Quotes.
-
-            // 3. Create Vehicles
             const v1 = await base44.entities.Vehicle.create({
                 brand: "Renault",
                 model: "Clio",
@@ -81,8 +76,6 @@ export default function ProductionControl() {
                 purpose: "Production",
                 calculator_system: "Engine"
             });
-
-            // 4. Create Quotes (Manager > Client)
             await base44.entities.ClientQuote.create({
                 client_company_id: client1.id,
                 vehicle_id: v1.id,
@@ -91,43 +84,108 @@ export default function ProductionControl() {
                 status: "accepted",
                 items: [{ description: "Engine Wiring Harness", quantity: 1, unit_price: 500 }]
             });
-
-            // 5. Create Supplier Quote (Winner)
             await base44.entities.Quote.create({
                 vehicle_id: v1.id,
-                supplier_email: "orders@europarts.com", // Dummy supplier
+                supplier_email: "orders@europarts.com",
                 price: 300,
                 shipping_cost: 50,
                 total_gbp: 350,
                 status: "selected",
-                is_winner: true
+                is_winner: true,
+                lead_time_days: 5
+            });
+
+            // Set 2: GlobalFit / AutoCorp
+            const client2 = await base44.entities.CompanyProfile.create({
+                company_name: "AutoCorp Industries",
+                client_number: "CL-002",
+                contact_email: "purchasing@autocorp.com",
+                address: "45 Industrial Blvd, Lyon"
+            });
+            const v2 = await base44.entities.Vehicle.create({
+                brand: "Peugeot",
+                model: "308",
+                version: "GT Line",
+                vehicle_number: "VEH-DUM-002",
+                serial_number: "SER-PROD-Y22",
+                status: "ordered",
+                client_email: "purchasing@autocorp.com",
+                purpose: "Production",
+                calculator_system: "Brakes"
+            });
+            await base44.entities.ClientQuote.create({
+                client_company_id: client2.id,
+                vehicle_id: v2.id,
+                client_email: "purchasing@autocorp.com",
+                quote_number: "Q-CL-101",
+                status: "accepted",
+                items: [{ description: "ABS Sensor Kit", quantity: 50, unit_price: 120 }]
+            });
+            await base44.entities.Quote.create({
+                vehicle_id: v2.id,
+                supplier_email: "sales@globalfit.com",
+                price: 5000,
+                shipping_cost: 150,
+                total_gbp: 5150,
+                status: "selected",
+                is_winner: true,
+                lead_time_days: 14
+            });
+
+            // Set 3: LocalLine / MechShop
+            const client3 = await base44.entities.CompanyProfile.create({
+                company_name: "MechShop Services",
+                client_number: "CL-003",
+                contact_email: "info@mechshop.eu",
+                address: "88 Garage Lane, Marseille"
+            });
+            const v3 = await base44.entities.Vehicle.create({
+                brand: "Volkswagen",
+                model: "Golf",
+                version: "MK8",
+                vehicle_number: "VEH-DUM-003",
+                serial_number: "SER-PROD-Z77",
+                status: "delivered",
+                client_email: "info@mechshop.eu",
+                purpose: "Sales",
+                calculator_system: "Electrics"
+            });
+            await base44.entities.ClientQuote.create({
+                client_company_id: client3.id,
+                vehicle_id: v3.id,
+                client_email: "info@mechshop.eu",
+                quote_number: "Q-CL-102",
+                status: "invoiced",
+                items: [{ description: "Custom Dashboard Display", quantity: 2, unit_price: 800 }]
+            });
+            await base44.entities.Quote.create({
+                vehicle_id: v3.id,
+                supplier_email: "logistics@localline.fr",
+                price: 1400,
+                shipping_cost: 20,
+                total_gbp: 1420,
+                status: "selected",
+                is_winner: true,
+                lead_time_days: 2,
+                tracking_number: "TRK-999-888",
+                carrier: "FedEx"
             });
 
             toast.dismiss();
-            toast.success("Dummy data created! Refreshing...");
+            toast.success("Production data initialized.");
             queryClient.invalidateQueries(['productionVehicles']);
         } catch (e) {
             console.error(e);
-            toast.error("Failed to create dummies");
+            toast.error("Failed to initialize data");
         }
     };
 
-    const handleRunStressTest = async () => {
-        // Simulate checking integrity
-        toast.promise(
-            new Promise(resolve => setTimeout(resolve, 2000)),
-            {
-                loading: 'Running system integrity check...',
-                success: 'Stress Test Passed: All links valid, 0 orphaned records.',
-                error: 'Test failed'
-            }
-        );
-        // In real world, generate PDF report here
-        setTimeout(() => {
-            // Trigger browser print or open report window
-            window.open('/AdminAuditReport', '_blank'); 
-        }, 2500);
-    };
+    // Auto-generate if empty
+    React.useEffect(() => {
+        if (!isLoading && vehicles && vehicles.length === 0) {
+            handleCreateDummies();
+        }
+    }, [isLoading, vehicles]);
 
     return (
         <div className="space-y-6 p-6">
@@ -137,8 +195,7 @@ export default function ProductionControl() {
                     <p className="text-muted-foreground">Manage ongoing production orders</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleCreateDummies}>Generate Dummy Data</Button>
-                    <Button variant="destructive" onClick={handleRunStressTest}>Run Stress Test</Button>
+                    {/* Controls removed as requested */}
                 </div>
             </div>
 
