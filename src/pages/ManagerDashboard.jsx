@@ -215,6 +215,17 @@ export default function ManagerDashboard() {
                             <span className="text-xs text-muted-foreground">Analyze costs and income</span>
                         </CardContent>
                     </Card>
+
+                    <Card 
+                        className="cursor-pointer bg-white dark:bg-[#2a2a2a] hover:shadow-lg hover:border-slate-500 transition-all border-l-4 border-l-slate-500 h-full transform hover:-translate-y-1"
+                        onClick={() => navigate('/AdminAuditReport')}
+                    >
+                        <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2 h-full">
+                            <ShieldAlert className="w-8 h-8 text-slate-500" />
+                            <span className="font-semibold text-sm">System Diagnostics</span>
+                            <span className="text-xs text-muted-foreground">Run test output report</span>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         

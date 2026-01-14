@@ -154,6 +154,23 @@ export default function AdminAuditReport() {
                 : "All production vehicles have winning quotes"
         });
 
+        // 9. Demo Data Verification
+        const john = companies.find(c => c.company_name?.includes("Smith Auto"));
+        const sarah = companies.find(c => c.company_name?.includes("Lee Logistics"));
+        const tom = companies.find(c => c.company_name?.includes("Brown Motors"));
+        const missingDemo = [];
+        if (!john) missingDemo.push("John Smith");
+        if (!sarah) missingDemo.push("Sarah Lee");
+        if (!tom) missingDemo.push("Tom Brown");
+
+        report.checks.push({
+            name: "Demo Data Integrity",
+            status: missingDemo.length > 0 ? "Fail" : "Pass",
+            details: missingDemo.length > 0
+                ? `Missing demo flows: ${missingDemo.join(", ")}`
+                : "All 3 demo flows (John, Sarah, Tom) are present and active"
+        });
+
         // Overall Status
         if (report.checks.some(c => c.status === "Fail")) report.status = "Critical";
         else if (report.checks.some(c => c.status === "Warning")) report.status = "Warning";
