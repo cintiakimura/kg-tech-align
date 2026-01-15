@@ -11,6 +11,7 @@ import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '../components/LanguageContext';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -250,10 +251,10 @@ ${connectorDetails}
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-bold text-lg">{quote.quote_number}</h3>
-                                                {quote.status === 'accepted' && <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded border border-green-200 uppercase font-bold">Approved</span>}
-                                                {quote.status === 'rejected' && <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded border border-red-200 uppercase font-bold">Denied</span>}
-                                                {quote.status === 'sent' && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200 uppercase font-bold">Pending Review</span>}
-                                                {quote.status === 'invoiced' && <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded border border-purple-200 uppercase font-bold">Invoiced</span>}
+                                                {quote.status === 'accepted' && <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">Approved</Badge>}
+                                                {quote.status === 'rejected' && <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100">Denied</Badge>}
+                                                {quote.status === 'sent' && <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100">Pending Review</Badge>}
+                                                {quote.status === 'invoiced' && <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">Invoiced</Badge>}
                                             </div>
                                             <p className="text-sm text-muted-foreground">
                                                 Date: {new Date(quote.date).toLocaleDateString()} • Valid Until: {new Date(quote.valid_until).toLocaleDateString()}
@@ -447,9 +448,9 @@ ${connectorDetails}
                                             <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
                                             <p className="text-sm text-muted-foreground">{car.engine_model || 'No engine info'}</p>
                                         </div>
-                                        <span className="text-xs font-mono bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                        <Badge variant="secondary" className="font-mono">
                                             {car.transmission_type}
-                                        </span>
+                                        </Badge>
                                     </div>
                                     <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
                                         <div className="flex items-center gap-1">
