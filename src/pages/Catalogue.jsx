@@ -83,7 +83,7 @@ export default function Catalogue() {
                 </div>
                 {/* Admin Import Button - Only visible to admins */}
                 {user.role === 'admin' && (
-                     <Button variant="outline" onClick={() => window.location.href = '/admin/import-catalogue'}>
+                     <Button variant="outline" onClick={() => window.location.href = '/AdminImportCatalogue'}>
                         Import from Google Sheet
                      </Button>
                 )}
