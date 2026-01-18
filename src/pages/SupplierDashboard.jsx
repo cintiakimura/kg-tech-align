@@ -695,6 +695,7 @@ export default function SupplierDashboard() {
                                     }))}>
                                         <Plus className="w-3 h-3 mr-1" /> Add Item
                                     </Button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                                     {generalQuoteForm.items.map((item, idx) => (
