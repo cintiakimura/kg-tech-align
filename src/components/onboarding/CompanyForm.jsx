@@ -20,15 +20,17 @@ export default function CompanyForm({ onComplete, initialData }) {
   }, [initialData, reset]);
 
   const onSubmit = async (data) => {
-    try {
-        // Check if exists to update, or create new
-        // For simplicity in this flow, we'll create or assume update if passed
-        if (initialData?.id) {
-             await base44.entities.CompanyProfile.update(initialData.id, data);
-        } else {
-             const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
-             await base44.entities.CompanyProfile.create({ ...data, client_number: clientNumber });
-        }
+  try {
+      // Strip system fields that cannot be updated
+      const { id, created_date, updated_date, created_by, updated_by, ...cleanData } = data;
+
+      // Check if exists to update, or create new
+      if (initialData?.id) {
+           await base44.entities.CompanyProfile.update(initialData.id, cleanData);
+      } else {
+           const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
+           await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
+      }
         if (onComplete) onComplete();
     } catch (error) {
         console.error("Failed to save company info", error);
