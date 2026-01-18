@@ -34,7 +34,7 @@ function LayoutContent({ children }) {
 
       // Allow public access to Home page (/) and specific login routes
       if (!isAuth) {
-          const publicPaths = ['/', '/Home', '/ClientLogin', '/ManagerLogin', '/SupplierLogin'];
+          const publicPaths = ['/', '/Home', '/ClientLogin', '/ManagerLogin', '/SupplierLogin', '/Landing'];
           if (publicPaths.includes(window.location.pathname)) {
               return;
           }
