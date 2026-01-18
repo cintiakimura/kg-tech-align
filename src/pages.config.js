@@ -7,6 +7,7 @@ import Clients from './pages/Clients';
 import CreateClientQuote from './pages/CreateClientQuote';
 import FinancialAnalysis from './pages/FinancialAnalysis';
 import Home from './pages/Home';
+import Landing from './pages/Landing';
 import Logistics from './pages/Logistics';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ManagerLogin from './pages/ManagerLogin';
@@ -18,7 +19,6 @@ import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
-import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +32,7 @@ export const PAGES = {
     "CreateClientQuote": CreateClientQuote,
     "FinancialAnalysis": FinancialAnalysis,
     "Home": Home,
+    "Landing": Landing,
     "Logistics": Logistics,
     "ManagerDashboard": ManagerDashboard,
     "ManagerLogin": ManagerLogin,
@@ -43,7 +44,6 @@ export const PAGES = {
     "SupplierDashboard": SupplierDashboard,
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
-    "Landing": Landing,
 }
 
 export const pagesConfig = {

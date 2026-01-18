@@ -16,7 +16,7 @@ export default function ProductionControl() {
     const queryClient = useQueryClient();
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showOrderModal, setShowOrderModal] = useState(false);
-    const [showAddModal, setShowAddModal] = useState(false);
+    // const [showAddModal, setShowAddModal] = useState(false); // Removed modal state
     const [newVehicle, setNewVehicle] = useState({
         brand: '', model: '', version: '', year: new Date().getFullYear(),
         fuel: 'Petrol', engine_size: '2.0L', engine_power: '150HP', engine_code: 'STD',
@@ -36,7 +36,7 @@ export default function ProductionControl() {
         },
         onSuccess: () => {
             toast.success("Production order created");
-            setShowAddModal(false);
+            // setShowAddModal(false);
             setNewVehicle({
                 brand: '', model: '', version: '', year: new Date().getFullYear(),
                 fuel: 'Petrol', engine_size: '2.0L', engine_power: '150HP', engine_code: 'STD',
@@ -226,11 +226,62 @@ export default function ProductionControl() {
                     <p className="text-muted-foreground">Manage ongoing production orders</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button onClick={() => setShowAddModal(true)} className="bg-[#00C600] hover:bg-[#00b300]">
-                        <Plus className="w-4 h-4 mr-2" /> Add Production
-                    </Button>
+                    {/* Button removed, using inline inputs */}
                 </div>
             </div>
+
+            {/* Quick Add Row (Excel-like) */}
+            <Card className="border-2 border-dashed border-gray-200">
+                <CardContent className="p-4">
+                    <div className="flex flex-wrap gap-2 items-end">
+                        <div className="w-32">
+                            <Label className="text-xs">Serial #</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.serial_number} onChange={e => setNewVehicle({...newVehicle, serial_number: e.target.value})} placeholder="Serial..." />
+                        </div>
+                        <div className="w-32">
+                            <Label className="text-xs">VIN</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.vin} onChange={e => setNewVehicle({...newVehicle, vin: e.target.value})} placeholder="VIN..." />
+                        </div>
+                        <div className="w-24">
+                            <Label className="text-xs">Brand</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.brand} onChange={e => setNewVehicle({...newVehicle, brand: e.target.value})} placeholder="Brand" />
+                        </div>
+                        <div className="w-24">
+                            <Label className="text-xs">Model</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.model} onChange={e => setNewVehicle({...newVehicle, model: e.target.value})} placeholder="Model" />
+                        </div>
+                        <div className="w-24">
+                            <Label className="text-xs">Version</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.version} onChange={e => setNewVehicle({...newVehicle, version: e.target.value})} placeholder="Version" />
+                        </div>
+                        <div className="w-20">
+                            <Label className="text-xs">Year</Label>
+                            <Input className="h-8 text-xs" type="number" value={newVehicle.year} onChange={e => setNewVehicle({...newVehicle, year: e.target.value})} />
+                        </div>
+                        <div className="w-28">
+                            <Label className="text-xs">Fuel</Label>
+                             <Select value={newVehicle.fuel} onValueChange={v => setNewVehicle({...newVehicle, fuel: v})}>
+                                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {['Petrol', 'Diesel', 'Electric', 'Hybrid', 'Other'].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="w-40">
+                            <Label className="text-xs">Client Email</Label>
+                            <Input className="h-8 text-xs" value={newVehicle.client_email} onChange={e => setNewVehicle({...newVehicle, client_email: e.target.value})} placeholder="Email..." />
+                        </div>
+                        <Button 
+                            className="h-8 bg-[#00C600] hover:bg-[#00b300]" 
+                            onClick={() => createVehicleMutation.mutate(newVehicle)}
+                            disabled={createVehicleMutation.isPending}
+                        >
+                            {createVehicleMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3 mr-1" />}
+                            Add
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="grid gap-4">
                 {isLoading ? <Loader2 className="animate-spin mx-auto" /> : (
@@ -260,56 +311,7 @@ export default function ProductionControl() {
                 )}
             </div>
 
-            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>Add Manual Production Order</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid grid-cols-2 gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Serial Number</Label>
-                            <Input value={newVehicle.serial_number} onChange={e => setNewVehicle({...newVehicle, serial_number: e.target.value})} placeholder="SER-..." />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>VIN</Label>
-                            <Input value={newVehicle.vin} onChange={e => setNewVehicle({...newVehicle, vin: e.target.value})} placeholder="VIN..." />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Brand</Label>
-                            <Input value={newVehicle.brand} onChange={e => setNewVehicle({...newVehicle, brand: e.target.value})} placeholder="Brand" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Model</Label>
-                            <Input value={newVehicle.model} onChange={e => setNewVehicle({...newVehicle, model: e.target.value})} placeholder="Model" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Version</Label>
-                            <Input value={newVehicle.version} onChange={e => setNewVehicle({...newVehicle, version: e.target.value})} placeholder="Version" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Year</Label>
-                            <Input type="number" value={newVehicle.year} onChange={e => setNewVehicle({...newVehicle, year: e.target.value})} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Fuel</Label>
-                             <Select value={newVehicle.fuel} onValueChange={v => setNewVehicle({...newVehicle, fuel: v})}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    {['Petrol', 'Diesel', 'Electric', 'Hybrid', 'Other'].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Client Email (Optional)</Label>
-                            <Input value={newVehicle.client_email} onChange={e => setNewVehicle({...newVehicle, client_email: e.target.value})} placeholder="client@email.com" />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
-                        <Button onClick={() => createVehicleMutation.mutate(newVehicle)} disabled={!newVehicle.brand || !newVehicle.vin}>Create</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {/* Modal removed */}
 
             <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
