@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, Car, Building2, ClipboardList, Loader2 } from "lucide-react";
+import { Search, FileText, Car, Building2, ClipboardList, Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from 'moment';
 
@@ -99,6 +99,16 @@ export default function AdminAuditReport() {
             details: carsWithoutCompany.length > 0 
                 ? `${carsWithoutCompany.length} vehicles created by users without company profile` 
                 : "All vehicle owners have company profiles"
+        });
+
+        // 3.5 Check Company Profile Data Quality
+        const incompleteCompanies = companies.filter(c => !c.tax_id || !c.phone || !c.contact_email);
+        report.checks.push({
+            name: "Company Profile Quality",
+            status: incompleteCompanies.length > 0 ? "Warning" : "Pass",
+            details: incompleteCompanies.length > 0
+                ? `${incompleteCompanies.length} companies missing tax ID, phone, or email`
+                : "All company profiles have complete contact info"
         });
 
         // 4. Check Catalogue
@@ -322,7 +332,12 @@ export default function AdminAuditReport() {
                 }`}>
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between">
-                            <span>Diagnostics Report</span>
+                            <div className="flex items-center gap-4">
+                                <span>Diagnostics Report</span>
+                                <Button variant="outline" size="sm" onClick={() => window.print()} className="hidden md:flex">
+                                    <Printer className="mr-2 h-4 w-4" /> Print
+                                </Button>
+                            </div>
                             <Badge variant={diagnosticsReport.status === 'Healthy' || diagnosticsReport.status === 'Pass' ? 'default' : 'destructive'} className={
                                 diagnosticsReport.status === 'Warning' ? 'bg-yellow-500 hover:bg-yellow-600' : ''
                             }>
