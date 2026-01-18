@@ -659,25 +659,37 @@ export default function SupplierDashboard() {
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-xs text-muted-foreground">Target Project / Vehicle</label>
-                                    <Select 
-                                        value={generalQuoteForm.vehicle_id} 
-                                        onValueChange={(val) => setGeneralQuoteForm(prev => ({...prev, vehicle_id: val}))}
-                                    >
-                                        <SelectTrigger className="bg-white dark:bg-black/20">
-                                            <SelectValue placeholder="Select Project..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {projects?.map(p => (
-                                                <SelectItem key={p.id} value={p.id}>{p.brand} {p.model} ({p.vin})</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {generalQuoteForm.isInvoice ? (
+                                        <div className="h-10 flex items-center px-3 text-sm text-muted-foreground bg-gray-100 rounded border">
+                                            Independent Invoice (No Vehicle Link)
+                                        </div>
+                                    ) : (
+                                        <Select 
+                                            value={generalQuoteForm.vehicle_id} 
+                                            onValueChange={(val) => setGeneralQuoteForm(prev => ({...prev, vehicle_id: val}))}
+                                        >
+                                            <SelectTrigger className="bg-white dark:bg-black/20">
+                                                <SelectValue placeholder="Select Project..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {projects?.map(p => (
+                                                    <SelectItem key={p.id} value={p.id}>{p.brand} {p.model} ({p.vin})</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="space-y-2 border rounded-md p-3 bg-gray-50 dark:bg-black/10">
                                 <div className="flex justify-between items-center">
                                     <label className="text-xs font-bold text-muted-foreground">Quote Items</label>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => {
+                                            setGeneralQuoteForm(prev => ({ ...prev, isInvoice: !prev.isInvoice }));
+                                        }}>
+                                            {generalQuoteForm.isInvoice ? "Mode: Invoice (Independent)" : "Mode: Quote (Linked)"}
+                                        </Badge>
                                     <Button size="sm" variant="ghost" className="h-6" onClick={() => setGeneralQuoteForm(prev => ({
                                         ...prev, items: [...prev.items, { part_number: '', quantity: 1, unit_price: 0, lead_time: 0 }]
                                     }))}>
@@ -690,7 +702,7 @@ export default function SupplierDashboard() {
                                             <div className="col-span-4">
                                                 <Input 
                                                     placeholder="Part Number" 
-                                                    className="h-7 bg-white" 
+                                                    className="h-7 bg-white text-[#212121]" 
                                                     value={item.part_number} 
                                                     onChange={(e) => {
                                                         const newItems = [...generalQuoteForm.items];
@@ -703,7 +715,7 @@ export default function SupplierDashboard() {
                                                 <Input 
                                                     placeholder="Qty" 
                                                     type="number" 
-                                                    className="h-7 bg-white" 
+                                                    className="h-7 bg-white text-[#212121]" 
                                                     value={item.quantity}
                                                     onChange={(e) => {
                                                         const newItems = [...generalQuoteForm.items];
@@ -716,7 +728,7 @@ export default function SupplierDashboard() {
                                                 <Input 
                                                     placeholder="Price" 
                                                     type="number" 
-                                                    className="h-7 bg-white" 
+                                                    className="h-7 bg-white text-[#212121]" 
                                                     value={item.unit_price}
                                                     onChange={(e) => {
                                                         const newItems = [...generalQuoteForm.items];
@@ -729,7 +741,7 @@ export default function SupplierDashboard() {
                                                 <Input 
                                                     placeholder="Lead" 
                                                     type="number" 
-                                                    className="h-7 bg-white" 
+                                                    className="h-7 bg-white text-[#212121]" 
                                                     value={item.lead_time}
                                                     onChange={(e) => {
                                                         const newItems = [...generalQuoteForm.items];
@@ -785,8 +797,22 @@ export default function SupplierDashboard() {
 
                             <div className="flex justify-end pt-2">
                                 <Button 
-                                    onClick={() => submitGeneralQuoteMutation.mutate(generalQuoteForm)}
-                                    disabled={!generalQuoteForm.vehicle_id || generalQuoteForm.items.length === 0 || submitGeneralQuoteMutation.isPending}
+                                    onClick={() => {
+                                        if (generalQuoteForm.isInvoice) {
+                                            const total = generalQuoteForm.items.reduce((acc, item) => acc + ((parseFloat(item.unit_price) || 0) * (parseFloat(item.quantity) || 0)), 0) + (parseFloat(generalQuoteForm.shipping) || 0) + (parseFloat(generalQuoteForm.tax) || 0);
+
+                                            submitInvoiceMutation.mutate({
+                                                number: `AUTO-${Date.now()}`,
+                                                date: new Date().toISOString().split('T')[0],
+                                                amount: total,
+                                                file_url: generalQuoteForm.file_url,
+                                                notes: generalQuoteForm.note || 'Uploaded via Independent Invoice Mode'
+                                            });
+                                        } else {
+                                            submitGeneralQuoteMutation.mutate(generalQuoteForm);
+                                        }
+                                    }}
+                                    disabled={(generalQuoteForm.isInvoice ? false : !generalQuoteForm.vehicle_id) || (!generalQuoteForm.file_url) || submitGeneralQuoteMutation.isPending || submitInvoiceMutation.isPending}
                                     className="bg-emerald-600 hover:bg-emerald-700"
                                 >
                                     {submitGeneralQuoteMutation.isPending ? (
@@ -794,8 +820,8 @@ export default function SupplierDashboard() {
                                     ) : (
                                         <Send className="w-4 h-4 mr-2" />
                                     )}
-                                    Submit Quotation
-                                </Button>
+                                    {generalQuoteForm.isInvoice ? "Submit Invoice" : "Submit Quotation"}
+                                    </Button>
                             </div>
                         </div>
                     </div>

@@ -4,8 +4,11 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Package, Truck, Printer, Info, CheckCircle2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Package, Truck, Printer, Info, CheckCircle2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import PrintableOrder from '@/components/production/PrintableOrder';
 
@@ -13,6 +16,37 @@ export default function ProductionControl() {
     const queryClient = useQueryClient();
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showOrderModal, setShowOrderModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newVehicle, setNewVehicle] = useState({
+        brand: '', model: '', version: '', year: new Date().getFullYear(),
+        fuel: 'Petrol', engine_size: '2.0L', engine_power: '150HP', engine_code: 'STD',
+        transmission_type: 'Automatic', number_gears: 6, vin: '',
+        serial_number: '', client_email: ''
+    });
+
+    const createVehicleMutation = useMutation({
+        mutationFn: async (data) => {
+            await base44.entities.Vehicle.create({
+                ...data,
+                purpose: 'Production',
+                status: 'in_production',
+                year: parseInt(data.year),
+                number_gears: parseInt(data.number_gears)
+            });
+        },
+        onSuccess: () => {
+            toast.success("Production order created");
+            setShowAddModal(false);
+            setNewVehicle({
+                brand: '', model: '', version: '', year: new Date().getFullYear(),
+                fuel: 'Petrol', engine_size: '2.0L', engine_power: '150HP', engine_code: 'STD',
+                transmission_type: 'Automatic', number_gears: 6, vin: '',
+                serial_number: '', client_email: ''
+            });
+            queryClient.invalidateQueries({ queryKey: ['productionVehicles'] });
+        },
+        onError: (err) => toast.error("Failed to create: " + err.message)
+    });
 
     // Fetch Vehicles (Production Orders)
     const { data: vehicles, isLoading } = useQuery({
@@ -192,7 +226,9 @@ export default function ProductionControl() {
                     <p className="text-muted-foreground">Manage ongoing production orders</p>
                 </div>
                 <div className="flex gap-2">
-                    {/* Controls removed as requested */}
+                    <Button onClick={() => setShowAddModal(true)} className="bg-[#00C600] hover:bg-[#00b300]">
+                        <Plus className="w-4 h-4 mr-2" /> Add Production
+                    </Button>
                 </div>
             </div>
 
@@ -223,6 +259,57 @@ export default function ProductionControl() {
                     </div>
                 )}
             </div>
+
+            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Add Manual Production Order</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Serial Number</Label>
+                            <Input value={newVehicle.serial_number} onChange={e => setNewVehicle({...newVehicle, serial_number: e.target.value})} placeholder="SER-..." />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>VIN</Label>
+                            <Input value={newVehicle.vin} onChange={e => setNewVehicle({...newVehicle, vin: e.target.value})} placeholder="VIN..." />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Brand</Label>
+                            <Input value={newVehicle.brand} onChange={e => setNewVehicle({...newVehicle, brand: e.target.value})} placeholder="Brand" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Model</Label>
+                            <Input value={newVehicle.model} onChange={e => setNewVehicle({...newVehicle, model: e.target.value})} placeholder="Model" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Version</Label>
+                            <Input value={newVehicle.version} onChange={e => setNewVehicle({...newVehicle, version: e.target.value})} placeholder="Version" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Year</Label>
+                            <Input type="number" value={newVehicle.year} onChange={e => setNewVehicle({...newVehicle, year: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Fuel</Label>
+                             <Select value={newVehicle.fuel} onValueChange={v => setNewVehicle({...newVehicle, fuel: v})}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {['Petrol', 'Diesel', 'Electric', 'Hybrid', 'Other'].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Client Email (Optional)</Label>
+                            <Input value={newVehicle.client_email} onChange={e => setNewVehicle({...newVehicle, client_email: e.target.value})} placeholder="client@email.com" />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAddModal(false)}>Cancel</Button>
+                        <Button onClick={() => createVehicleMutation.mutate(newVehicle)} disabled={!newVehicle.brand || !newVehicle.vin}>Create</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
