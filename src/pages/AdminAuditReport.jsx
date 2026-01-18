@@ -111,16 +111,6 @@ export default function AdminAuditReport() {
                 : "All company profiles have complete contact info"
         });
 
-        // 3.5 Check Company Profile Data Quality
-        const incompleteCompanies = companies.filter(c => !c.tax_id || !c.phone || !c.contact_email);
-        report.checks.push({
-            name: "Company Profile Quality",
-            status: incompleteCompanies.length > 0 ? "Warning" : "Pass",
-            details: incompleteCompanies.length > 0
-                ? `${incompleteCompanies.length} companies missing tax ID, phone, or email`
-                : "All company profiles have complete contact info"
-        });
-
         // 4. Check Catalogue
         const itemsWithoutImages = catalogue.filter(i => !i.image_url);
         report.checks.push({
