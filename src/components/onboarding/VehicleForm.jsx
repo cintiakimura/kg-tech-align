@@ -27,7 +27,6 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
   const { register, control, handleSubmit, formState: { errors, isSubmitting }, reset, setValue, watch } = useForm({
     defaultValues: formattedInitialData || {
         transmission_type: "Automatic",
-        brakes_type: "Disc",
         purpose: "Production",
         connectors: defaultConnectors
     }
@@ -177,24 +176,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                         </div>
 
                         {/* New/Modified Fields */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Brakes Type <span className="text-[#00C600]">*</span></label>
-                            <div className="relative">
-                                <Input 
-                                    list="brakes-options"
-                                    {...register("brakes_type", { required: "Brakes type is required" })} 
-                                    placeholder="Select or type..." 
-                                    className={InputStyle} 
-                                />
-                                <datalist id="brakes-options">
-                                    <option value="Disc" />
-                                    <option value="Drum" />
-                                    <option value="ABS" />
-                                    <option value="Ceramic" />
-                                    <option value="Regenerative" />
-                                </datalist>
-                            </div>
-                        </div>
+
 
 
 
