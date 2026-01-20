@@ -175,7 +175,19 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">VIN <span className="text-[#00C600]">*</span></label>
                             <div className="flex gap-2">
-                                <Input {...register("vin", { required: true })} className={InputStyle} placeholder="Enter 17-char VIN" />
+                                <Input 
+                                    {...register("vin", { required: true })} 
+                                    className={InputStyle} 
+                                    placeholder="Enter 17-char VIN" 
+                                    onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            await decodeVin();
+                                            // Focus the save button after decoding
+                                            setTimeout(() => document.getElementById('save-vehicle-btn')?.focus(), 100);
+                                        }
+                                    }}
+                                />
                                 <Button 
                                     type="button" 
                                     onClick={decodeVin} 
@@ -222,7 +234,12 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={onCancel}>CANCEL</Button>
-                        <Button type="submit" className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold" disabled={isSubmitting}>
+                        <Button 
+                            id="save-vehicle-btn"
+                            type="submit" 
+                            className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold" 
+                            disabled={isSubmitting}
+                        >
                             {isSubmitting ? <Loader2 className="animate-spin" /> : "Save Vehicle"}
                         </Button>
                     </div>
