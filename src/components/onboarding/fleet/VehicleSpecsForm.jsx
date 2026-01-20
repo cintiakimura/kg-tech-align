@@ -14,7 +14,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
     const [isDecoding, setIsDecoding] = React.useState(false);
 
     const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
-        defaultValues: {
+        defaultValues: initialData || {
             transmission_type: "Automatic",
             fuel: "Diesel",
             year: new Date().getFullYear()
