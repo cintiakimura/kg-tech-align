@@ -48,20 +48,39 @@ export default function AdminImportCatalogue() {
             for (let i = startIndex; i < lines.length; i++) {
                 // Simple regex to split by comma ignoring quotes
                 const cells = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                if (cells.length < 5) continue; // Skip empty rows
-                
-                // We need at least one part number
-                const part1 = cells[4];
-                const part2 = cells[8];
-                
+                if (cells.length < 2) continue; // Skip empty rows
+
+                // Strategy A: Standard (Brand, Pins, Colour, Type, Part1...)
+                let part1 = cells[4];
+                let part2 = cells[8];
+                let brand = cells[0];
+                let pins = cells[1];
+                let colour = cells[2];
+                let type = cells[3];
+
+                // Strategy B: User provided format ("product photo","connector/header", "pin quantity", "color")
+                // If column 0 looks like an image/file and no column 4
+                if ((!part1 && cells.length <= 4) || (cells[0] && (cells[0].includes('.jpg') || cells[0].includes('.png') || cells[0].includes('http')))) {
+                    // Try to extract part number from filename in col 0
+                    const filename = cells[0].split('/').pop();
+                    // Remove extension
+                    part1 = filename.split('.')[0]; 
+                    part2 = null;
+                    brand = "Unknown"; // Not in this format
+
+                    type = cells[1]; // connector/header
+                    pins = cells[2]; // pin quantity
+                    colour = cells[3]; // color
+                }
+
                 if (part1 || part2) {
                     rows.push({
-                        brand: cells[0] || "Unknown",
+                        brand: brand || "Unknown",
                         part1: part1,
                         part2: part2,
-                        original_pins: cells[1],   // Fallback
-                        original_colour: cells[2], // Fallback
-                        original_type: cells[3]    // Fallback
+                        original_pins: pins,
+                        original_colour: colour,
+                        original_type: type
                     });
                 }
             }

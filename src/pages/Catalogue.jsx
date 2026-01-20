@@ -62,7 +62,9 @@ export default function Catalogue() {
     };
 
     const filteredItems = catalogue?.filter(item => {
-        // Search by visible attributes only since PN is secret
+        // Strict filter: Only Connectors and Headers
+        if (item.type !== 'connector' && item.type !== 'header') return false;
+
         const search = searchTerm.toLowerCase();
         if (!search) return true;
         return (
@@ -172,31 +174,31 @@ export default function Catalogue() {
                                     {viewMode === 'grid' ? (
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Pins:</span>
+                                                <span className="font-semibold text-gray-500 w-24">Pin Quantity:</span>
                                                 <span className="font-bold">{item.pins || '-'}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Colour:</span>
+                                                <span className="font-semibold text-gray-500 w-24">Color:</span>
                                                 <span className="capitalize">{item.colour || '-'}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Type:</span>
-                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                                <span className="font-semibold text-gray-500 w-24">Type:</span>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
                                         </div>
                                     ) : (
                                         <>
                                             <div className="flex flex-col">
-                                                <span className="text-xs text-gray-500 uppercase">Pins</span>
+                                                <span className="text-xs text-gray-500 uppercase">Pin Quantity</span>
                                                 <span className="font-bold">{item.pins || '-'}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-xs text-gray-500 uppercase">Colour</span>
+                                                <span className="text-xs text-gray-500 uppercase">Color</span>
                                                 <span className="capitalize">{item.colour || '-'}</span>
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-xs text-gray-500 uppercase">Type</span>
-                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
                                         </>
                                     )}
