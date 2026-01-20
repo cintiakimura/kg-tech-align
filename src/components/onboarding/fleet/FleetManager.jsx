@@ -7,17 +7,26 @@ import VehicleDetail from './VehicleDetail';
 import ConnectorForm from './ConnectorForm';
 import { Loader2 } from 'lucide-react';
 
-export default function FleetManager({ clientEmail }) {
+export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     const [view, setView] = useState("list"); // list, add-vehicle, vehicle-detail, add-connector
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const queryClient = useQueryClient();
 
-    const { data: vehicles, isLoading } = useQuery({
+    const { data: fetchedVehicles, isLoading } = useQuery({
         queryKey: ['vehicles'],
-        queryFn: () => base44.entities.Vehicle.list()
+        queryFn: () => base44.entities.Vehicle.list(),
+        enabled: !propVehicles
     });
 
+    const vehicles = propVehicles || fetchedVehicles;
+
     const handleAddVehicle = () => {
+        setSelectedVehicle(null);
+        setView("add-vehicle");
+    };
+
+    const handleEditVehicle = (vehicle) => {
+        setSelectedVehicle(vehicle);
         setView("add-vehicle");
     };
 
@@ -50,12 +59,14 @@ export default function FleetManager({ clientEmail }) {
                     onAddVehicle={handleAddVehicle} 
                     onSelectVehicle={handleSelectVehicle}
                     onDeleteVehicle={handleDeleteVehicle}
+                    onEditVehicle={handleEditVehicle}
                 />
             )}
 
             {view === "add-vehicle" && (
                 <VehicleSpecsForm 
                     clientEmail={clientEmail}
+                    initialData={selectedVehicle}
                     onCancel={() => setView("list")} 
                     onSuccess={() => {
                         queryClient.invalidateQueries(['vehicles']);

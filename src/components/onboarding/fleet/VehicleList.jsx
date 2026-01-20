@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, Settings } from 'lucide-react';
 
-export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle }) {
+export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle, onEditVehicle }) {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
@@ -28,6 +28,17 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                     onClick={() => onSelectVehicle(vehicle)}
                                 >
                                     Connectors
+                                </Button>
+                                <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    className="uppercase text-xs font-bold"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEditVehicle(vehicle);
+                                    }}
+                                >
+                                    Edit
                                 </Button>
                                 <Button 
                                     variant="destructive" 
