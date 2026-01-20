@@ -45,12 +45,14 @@ export default function CompanyForm({ onComplete, initialData }) {
       const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
 
       // Check if exists to update, or create new
-      if (initialData?.id) {
-           await base44.entities.CompanyProfile.update(initialData.id, cleanData);
-      } else {
-           const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
-           await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
-      }
+      const dataToSave = initialData?.id 
+        ? cleanData 
+        : { ...cleanData, client_number: `CL-${Date.now().toString().slice(-5)}` };
+
+      await base44.functions.upsertCompanyProfile({
+          id: initialData?.id,
+          data: dataToSave
+      });
         if (onComplete) onComplete();
     } catch (error) {
         console.error("Failed to save company info", error);
