@@ -407,7 +407,21 @@ ${connectorDetails}
             
             {/* List of existing vehicles below the form */}
             <div className="mt-12 space-y-6">
-                <h2 className="text-xl font-semibold">My Fleet</h2>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">My Fleet</h2>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                            setEditingCar(null);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            setIsAddingCar(true);
+                        }}
+                        className="gap-2"
+                    >
+                        <Plus className="w-4 h-4" /> Add Another Vehicle
+                    </Button>
+                </div>
                 {isLoadingCars ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Skeleton className="h-64 w-full rounded-xl" />
