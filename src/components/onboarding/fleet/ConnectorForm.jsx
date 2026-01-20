@@ -52,9 +52,11 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
             </div>
 
             {/* Form */}
-            <div className="flex-1 bg-gray-100 p-6 rounded-lg">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="space-y-4">
+            <div className="flex-1">
+                <Card className="border-none shadow-sm bg-gray-50 dark:bg-white/5">
+                    <CardContent className="p-6">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="space-y-4">
                         <div className="flex items-center gap-4">
                             <label className="font-bold uppercase w-24">System</label>
                             <Input 

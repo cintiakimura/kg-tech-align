@@ -8,16 +8,17 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
 
-export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
+export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
     const InputStyle = "bg-white border-gray-200 focus:ring-[#00C600] focus:border-[#00C600]";
     
     const [isDecoding, setIsDecoding] = React.useState(false);
 
     const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
-        defaultValues: initialData || {
+        defaultValues: {
             transmission_type: "Automatic",
             fuel: "Diesel",
-            year: new Date().getFullYear()
+            year: new Date().getFullYear(),
+            ...(initialData || {})
         }
     });
 

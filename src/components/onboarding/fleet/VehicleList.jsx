@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, Trash2 } from 'lucide-react';
 
 export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle, onEditVehicle }) {
     return (
@@ -22,35 +22,37 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-2">
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex items-center justify-between gap-2 mt-4">
                                 <Button 
-                                    className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase text-xs"
+                                    className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase text-xs flex-1"
                                     onClick={() => onSelectVehicle(vehicle)}
                                 >
-                                    Connectors
+                                    Manage Connectors
                                 </Button>
-                                <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    className="uppercase text-xs font-bold"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEditVehicle(vehicle);
-                                    }}
-                                >
-                                    Edit
-                                </Button>
-                                <Button 
-                                    variant="destructive" 
-                                    size="sm"
-                                    className="uppercase text-xs font-bold"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteVehicle(vehicle.id);
-                                    }}
-                                >
-                                    Delete
-                                </Button>
+                                <div className="flex gap-1">
+                                    <Button 
+                                        variant="outline" 
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEditVehicle(vehicle);
+                                        }}
+                                    >
+                                        <Settings className="h-4 w-4" />
+                                    </Button>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon"
+                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteVehicle(vehicle.id);
+                                        }}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

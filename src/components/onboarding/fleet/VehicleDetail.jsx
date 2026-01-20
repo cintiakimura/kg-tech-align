@@ -15,19 +15,21 @@ export default function VehicleDetail({ vehicle, onBack, onAddConnector }) {
         <div className="flex gap-6 flex-col md:flex-row">
             {/* Vehicle Info Side Panel */}
             <div className="w-full md:w-1/3 space-y-4">
-                <div className="bg-gray-200 p-6 rounded-lg">
-                    <h2 className="text-xl font-bold uppercase mb-2">
-                        {vehicle.brand} {vehicle.model} {vehicle.year} {vehicle.fuel}
-                    </h2>
-                    <p className="text-sm font-semibold text-gray-700 uppercase leading-relaxed">
-                        {vehicle.engine_size} {vehicle.engine_power}<br/>
-                        {vehicle.engine_code}<br/>
-                        {vehicle.number_gears}-GEAR {vehicle.transmission_type}
-                    </p>
-                    <Button onClick={onBack} variant="outline" className="mt-6 w-full uppercase font-bold text-xs">
-                        Back to Vehicles
-                    </Button>
-                </div>
+                <Card className="bg-gray-50 dark:bg-white/5 border-none shadow-sm">
+                    <CardContent className="p-6">
+                        <h2 className="text-xl font-bold uppercase mb-2">
+                            {vehicle.brand} {vehicle.model} {vehicle.year} {vehicle.fuel}
+                        </h2>
+                        <p className="text-sm font-semibold text-muted-foreground uppercase leading-relaxed">
+                            {vehicle.engine_size} {vehicle.engine_power}<br/>
+                            {vehicle.engine_code}<br/>
+                            {vehicle.number_gears}-GEAR {vehicle.transmission_type}
+                        </p>
+                        <Button onClick={onBack} variant="outline" className="mt-6 w-full uppercase font-bold text-xs">
+                            Back to Vehicles
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Connectors List */}
