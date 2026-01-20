@@ -13,12 +13,23 @@ import { useLanguage } from '../LanguageContext';
 
 export default function VehicleForm({ onCancel, onSuccess, initialData, clientEmail }) {
   const { t } = useLanguage();
+  // Ensure calculator_system is initialized for existing data that might miss it
+  const defaultConnectors = [{ catalogue_id: "", custom_type_name: "", calculator_system: "Engine", quantity: 1, notes: "" }];
+  
+  const formattedInitialData = initialData ? {
+      ...initialData,
+      connectors: initialData.connectors?.map(c => ({
+          ...c,
+          calculator_system: c.calculator_system || "Engine"
+      })) || defaultConnectors
+  } : undefined;
+
   const { register, control, handleSubmit, formState: { errors, isSubmitting }, reset, setValue, watch } = useForm({
-    defaultValues: initialData || {
+    defaultValues: formattedInitialData || {
         transmission_type: "Automatic",
         brakes_type: "Disc",
         purpose: "Production",
-        connectors: [{ catalogue_id: "", custom_type_name: "", calculator_system: "Engine", quantity: 1, notes: "" }]
+        connectors: defaultConnectors
     }
   });
 
