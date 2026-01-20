@@ -195,6 +195,10 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                             <Input {...register("engine_code", { required: "Required" })} className={InputStyle} />
                         </div>
                         <div className="space-y-2">
+                            <label className="text-sm font-medium">Engine Type</label>
+                            <Input {...register("engine_type")} className={InputStyle} placeholder="e.g. V6, Inline-4" />
+                        </div>
+                        <div className="space-y-2">
                             <label className="text-sm font-medium">Transmission <span className="text-[#00C600]">*</span></label>
                             <Controller
                                 name="transmission_type"
