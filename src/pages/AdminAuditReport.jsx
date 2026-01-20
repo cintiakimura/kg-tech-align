@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, Car, Building2, ClipboardList, Loader2, Printer, ShoppingCart, Mail } from "lucide-react";
+import { Search, FileText, Car, Building2, ClipboardList, Loader2, Printer, ShoppingCart, Mail, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from 'moment';
 
@@ -13,6 +13,8 @@ export default function AdminAuditReport() {
     const [searchTerm, setSearchTerm] = useState("");
     const [diagnosticsReport, setDiagnosticsReport] = useState(null);
     const [runningDiagnostics, setRunningDiagnostics] = useState(false);
+    const [fixingIssues, setFixingIssues] = useState(false);
+    const queryClient = useQueryClient();
 
     // Fetch all relevant entities that have audit logs
     const { data: cars, isLoading: loadingCars } = useQuery({
@@ -68,6 +70,70 @@ export default function AdminAuditReport() {
         queryFn: () => base44.entities.Invitation.list(),
         initialData: []
     });
+
+    const fixAllIssues = async () => {
+        setFixingIssues(true);
+        try {
+            // 1. Fix Demo Data
+            const demoCompanies = [
+                { name: "Smith Auto", contact: "John Smith", email: "john@smithauto.com" },
+                { name: "Lee Logistics", contact: "Sarah Lee", email: "sarah@leelogistics.com" },
+                { name: "Brown Motors", contact: "Tom Brown", email: "tom@brownmotors.com" }
+            ];
+
+            for (const demo of demoCompanies) {
+                const exists = companies.find(c => c.company_name === demo.name);
+                if (!exists) {
+                    await base44.entities.CompanyProfile.create({
+                        company_name: demo.name,
+                        contact_person_name: demo.contact,
+                        contact_email: demo.email,
+                        tax_id: "DEMO-TAX-ID",
+                        phone: "+1234567890",
+                        address: "Demo Address",
+                        delivery_address: "Demo Delivery Address",
+                        delivery_country: "UK",
+                        delivery_province: "London"
+                    });
+                }
+            }
+
+            // 2. Fix Orphaned Quotes
+            const orphanedQuotes = quotes.filter(q => !cars.find(c => c.id === q.vehicle_id)); // Changed car_profile_id to vehicle_id as per schema
+            for (const q of orphanedQuotes) {
+                await base44.entities.Quote.delete(q.id);
+            }
+
+            // 3. Fix Empty Client Quotes
+            const emptyClientQuotes = clientQuotes.filter(cq => !cq.items || cq.items.length === 0);
+            for (const cq of emptyClientQuotes) {
+                await base44.entities.ClientQuote.delete(cq.id);
+            }
+
+            // 4. Fix Incomplete Companies
+            const incompleteCompanies = companies.filter(c => !c.tax_id || !c.phone || !c.contact_email);
+            for (const c of incompleteCompanies) {
+                await base44.entities.CompanyProfile.update(c.id, {
+                    tax_id: c.tax_id || "N/A",
+                    phone: c.phone || "N/A",
+                    contact_email: c.contact_email || `info@${c.company_name.replace(/\s+/g, '').toLowerCase()}.com`
+                });
+            }
+
+            // 5. Cleanup Stale Invitations
+            const staleInvitations = invitations.filter(i => i.status === 'pending' && i.created_date && moment().diff(moment(i.created_date), 'days') > 7);
+            for (const inv of staleInvitations) {
+                await base44.entities.Invitation.delete(inv.id);
+            }
+
+            await queryClient.invalidateQueries();
+            runDiagnostics(); // Re-run report
+        } catch (error) {
+            console.error("Fix failed", error);
+        } finally {
+            setFixingIssues(false);
+        }
+    };
 
     const runDiagnostics = async () => {
         setRunningDiagnostics(true);
@@ -363,6 +429,15 @@ export default function AdminAuditReport() {
                     >
                         {runningDiagnostics ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ClipboardList className="mr-2 h-4 w-4" />}
                         {runningDiagnostics ? 'Running Tests...' : 'Run System Diagnostics'}
+                    </Button>
+                    <Button 
+                        onClick={fixAllIssues} 
+                        disabled={runningDiagnostics || fixingIssues || isLoading}
+                        variant="outline"
+                        className="border-green-600 text-green-600 hover:bg-green-50"
+                    >
+                        {fixingIssues ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wrench className="mr-2 h-4 w-4" />}
+                        {fixingIssues ? 'Fixing...' : 'Auto-Fix Issues'}
                     </Button>
                     <div className="relative w-full md:w-72">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
