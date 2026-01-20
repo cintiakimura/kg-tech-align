@@ -11,13 +11,101 @@ import { Loader2 } from 'lucide-react';
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
     const InputStyle = "bg-white border-gray-200 focus:ring-[#00C600] focus:border-[#00C600]";
     
-    const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    const [isDecoding, setIsDecoding] = React.useState(false);
+
+    const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             transmission_type: "Automatic",
             fuel: "Diesel",
             year: new Date().getFullYear()
         }
     });
+
+    const decodeVin = async () => {
+        const vin = getValues("vin");
+        if (!vin || vin.length < 17) {
+            toast.error("Please enter a valid 17-character VIN");
+            return;
+        }
+
+        setIsDecoding(true);
+        try {
+            const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
+            const data = await response.json();
+            
+            if (data.Results && data.Results.length > 0) {
+                const vehicle = data.Results[0];
+                
+                if (vehicle.ErrorCode && vehicle.ErrorCode !== "0") {
+                     toast.warning(`VIN Decode Warning: ${vehicle.ErrorText}`);
+                }
+
+                // Map fields
+                if (vehicle.Make) setValue("brand", vehicle.Make);
+                if (vehicle.Model) setValue("model", vehicle.Model);
+                if (vehicle.ModelYear) setValue("year", parseInt(vehicle.ModelYear));
+                
+                // Fuel Mapping
+                if (vehicle.FuelTypePrimary) {
+                    const fuelMap = {
+                        "Gasoline": "Gasoline",
+                        "Diesel": "Diesel",
+                        "Electric": "Electric",
+                        "Hybrid": "Hybrid" 
+                    };
+                    // Simple fuzzy match or default to Other
+                    const fuelLower = vehicle.FuelTypePrimary.toLowerCase();
+                    if (fuelLower.includes("gas")) setValue("fuel", "Gasoline");
+                    else if (fuelLower.includes("diesel")) setValue("fuel", "Diesel");
+                    else if (fuelLower.includes("electric")) setValue("fuel", "Electric");
+                    else if (fuelLower.includes("hybrid")) setValue("fuel", "Hybrid");
+                    else setValue("fuel", "Other");
+                }
+
+                // Engine Size
+                if (vehicle.DisplacementCC) {
+                    setValue("engine_size", `${vehicle.DisplacementCC}cc`);
+                } else if (vehicle.DisplacementL) {
+                    setValue("engine_size", `${vehicle.DisplacementL}L`);
+                }
+
+                // Engine Power
+                if (vehicle.EngineHP) {
+                    setValue("engine_power", `${vehicle.EngineHP}HP`);
+                } else if (vehicle.EngineKW) {
+                    setValue("engine_power", `${vehicle.EngineKW}kW`);
+                }
+
+                // Engine Code - often not in public VIN decode, but sometimes in EngineConfiguration
+                if (vehicle.EngineConfiguration) {
+                     // Best effort
+                }
+
+                // Transmission
+                if (vehicle.TransmissionStyle) {
+                    const transLower = vehicle.TransmissionStyle.toLowerCase();
+                    if (transLower.includes("auto")) setValue("transmission_type", "Automatic");
+                    else if (transLower.includes("manual")) setValue("transmission_type", "Manual");
+                    else if (transLower.includes("cvt")) setValue("transmission_type", "CVT");
+                    else if (transLower.includes("dual")) setValue("transmission_type", "DCT");
+                }
+
+                // Gears
+                if (vehicle.TransmissionSpeeds) {
+                    setValue("number_gears", parseInt(vehicle.TransmissionSpeeds));
+                }
+
+                toast.success("Vehicle details decoded from VIN!");
+            } else {
+                toast.error("Could not decode VIN");
+            }
+        } catch (error) {
+            console.error("VIN Decode Error", error);
+            toast.error("Failed to connect to NHTSA database");
+        } finally {
+            setIsDecoding(false);
+        }
+    };
 
     const onSubmit = async (data) => {
         try {
@@ -77,7 +165,18 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">VIN <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("vin", { required: true })} className={InputStyle} />
+                            <div className="flex gap-2">
+                                <Input {...register("vin", { required: true })} className={InputStyle} placeholder="Enter 17-char VIN" />
+                                <Button 
+                                    type="button" 
+                                    onClick={decodeVin} 
+                                    disabled={isDecoding}
+                                    variant="outline"
+                                    className="border-[#00C600] text-[#00C600] hover:bg-[#00C600] hover:text-white uppercase font-bold text-xs"
+                                >
+                                    {isDecoding ? <Loader2 className="w-4 h-4 animate-spin" /> : "Decode"}
+                                </Button>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">Engine Size <span className="text-[#00C600]">*</span></label>
