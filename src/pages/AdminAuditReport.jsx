@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, Car, Building2, ClipboardList, Loader2, Printer } from "lucide-react";
+import { Search, FileText, Car, Building2, ClipboardList, Loader2, Printer, ShoppingCart, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from 'moment';
 
@@ -54,6 +54,18 @@ export default function AdminAuditReport() {
     const { data: quoteItems, isLoading: loadingQuoteItems } = useQuery({
         queryKey: ['quote_items_audit'],
         queryFn: () => base44.entities.QuoteItem.list(),
+        initialData: []
+    });
+
+    const { data: purchases, isLoading: loadingPurchases } = useQuery({
+        queryKey: ['purchases_audit'],
+        queryFn: () => base44.entities.Purchase.list(),
+        initialData: []
+    });
+
+    const { data: invitations, isLoading: loadingInvitations } = useQuery({
+        queryKey: ['invitations_audit'],
+        queryFn: () => base44.entities.Invitation.list(),
         initialData: []
     });
 
@@ -164,7 +176,39 @@ export default function AdminAuditReport() {
                 : "All production vehicles have winning quotes"
         });
 
-        // 9. Demo Data Verification
+        // 9. Logistics Data Quality
+        const incompletePurchases = purchases.filter(p => !p.supplier || !p.cost || !p.status);
+        const overduePurchases = purchases.filter(p => p.delivery_date && new Date(p.delivery_date) < new Date() && p.status !== 'delivered' && p.status !== 'cancelled');
+        report.checks.push({
+            name: "Logistics Data Quality",
+            status: (incompletePurchases.length > 0 || overduePurchases.length > 0) ? "Warning" : "Pass",
+            details: (incompletePurchases.length > 0 || overduePurchases.length > 0)
+                ? `${incompletePurchases.length} incomplete records, ${overduePurchases.length} overdue deliveries`
+                : "Logistics data is complete and on time"
+        });
+
+        // 10. Connector Documentation
+        const connectorsWithoutImages = vehicleConnectors.filter(vc => !vc.image_1);
+        const connectorsWithoutFiles = vehicleConnectors.filter(vc => !vc.file_wiring_diagram && !vc.file_pinning_list);
+        report.checks.push({
+            name: "Connector Documentation",
+            status: (connectorsWithoutImages.length > 0 || connectorsWithoutFiles.length > 0) ? "Warning" : "Pass",
+            details: (connectorsWithoutImages.length > 0 || connectorsWithoutFiles.length > 0)
+                ? `${connectorsWithoutImages.length} missing photos, ${connectorsWithoutFiles.length} missing diagrams`
+                : "All connectors have photos and diagrams"
+        });
+
+        // 11. Invitation Health
+        const staleInvitations = invitations.filter(i => i.status === 'pending' && i.created_date && moment().diff(moment(i.created_date), 'days') > 7);
+        report.checks.push({
+            name: "Invitation System",
+            status: staleInvitations.length > 0 ? "Warning" : "Pass",
+            details: staleInvitations.length > 0
+                ? `${staleInvitations.length} invitations pending for > 7 days`
+                : "No stale invitations found"
+        });
+
+        // 12. Demo Data Verification
         const john = companies.find(c => c.company_name?.includes("Smith Auto"));
         const sarah = companies.find(c => c.company_name?.includes("Lee Logistics"));
         const tom = companies.find(c => c.company_name?.includes("Brown Motors"));
@@ -295,7 +339,14 @@ export default function AdminAuditReport() {
         log.entityType.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const isLoading = loadingCars || loadingCompanies || loadingQuotes;
+    const isLoading = loadingCars || loadingCompanies || loadingQuotes || loadingPurchases || loadingInvitations;
+
+    // Auto-run on load if not run yet
+    React.useEffect(() => {
+        if (!diagnosticsReport && !runningDiagnostics && !isLoading && cars.length > 0) {
+            runDiagnostics();
+        }
+    }, [isLoading, cars.length]);
 
     return (
         <div className="space-y-6">
@@ -389,9 +440,9 @@ export default function AdminAuditReport() {
                         <CardTitle className="text-sm font-medium text-muted-foreground">Entities Tracked</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{cars.length + companies.length + quotes.length + clientQuotes.length}</div>
+                        <div className="text-2xl font-bold">{cars.length + companies.length + quotes.length + clientQuotes.length + purchases.length + invitations.length}</div>
                         <div className="text-xs text-muted-foreground mt-1">
-                            {cars.length} Cars, {quotes.length} S.Quotes, {clientQuotes.length} C.Quotes
+                            {cars.length} Cars, {quotes.length} S.Quotes, {purchases.length} POs
                         </div>
                     </CardContent>
                 </Card>
