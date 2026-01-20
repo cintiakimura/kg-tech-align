@@ -40,11 +40,11 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
         <div className="flex gap-6 flex-col md:flex-row">
             {/* Vehicle Info Side Panel */}
             <div className="w-full md:w-1/3 space-y-4">
-                <div className="bg-gray-200 p-6 rounded-lg">
+                <div className="bg-white dark:bg-[#2a2a2a] p-6 rounded-lg shadow-lg">
                     <h2 className="text-xl font-bold uppercase mb-2">
                         {vehicle.brand} {vehicle.model} {vehicle.year} {vehicle.fuel}
                     </h2>
-                    <p className="text-sm font-semibold text-gray-700 uppercase leading-relaxed">
+                    <p className="text-sm font-semibold text-muted-foreground uppercase leading-relaxed">
                         {vehicle.engine_size} {vehicle.engine_power}<br/>
                         {vehicle.engine_code}<br/>
                         {vehicle.number_gears}-GEAR {vehicle.transmission_type}
@@ -54,7 +54,7 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
             {/* Form */}
             <div className="flex-1">
-                <Card className="border-none shadow-sm bg-gray-50 dark:bg-white/5">
+                <Card className="border-none shadow-lg bg-white dark:bg-[#2a2a2a]">
                     <CardContent className="p-6">
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             <div className="space-y-4">
@@ -62,7 +62,7 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                             <label className="font-bold uppercase w-24">System</label>
                             <Input 
                                 {...register("calculator_system", { required: true })} 
-                                className="bg-white max-w-sm" 
+                                className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 max-w-sm" 
                                 placeholder="ABS"
                             />
                         </div>

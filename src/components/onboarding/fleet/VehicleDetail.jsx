@@ -15,7 +15,7 @@ export default function VehicleDetail({ vehicle, onBack, onAddConnector }) {
         <div className="flex gap-6 flex-col md:flex-row">
             {/* Vehicle Info Side Panel */}
             <div className="w-full md:w-1/3 space-y-4">
-                <Card className="bg-gray-50 dark:bg-white/5 border-none shadow-sm">
+                <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg">
                     <CardContent className="p-6">
                         <h2 className="text-xl font-bold uppercase mb-2">
                             {vehicle.brand} {vehicle.model} {vehicle.year} {vehicle.fuel}
@@ -43,11 +43,11 @@ export default function VehicleDetail({ vehicle, onBack, onAddConnector }) {
                 ) : connectors && connectors.length > 0 ? (
                     <div className="space-y-6">
                         {connectors.map((conn, index) => (
-                            <div key={conn.id} className="bg-gray-100 p-6 rounded-lg space-y-4">
+                            <div key={conn.id} className="bg-white dark:bg-[#2a2a2a] p-6 rounded-lg space-y-4 shadow-md">
                                 <h4 className="font-bold uppercase text-lg">
                                     {conn.calculator_system || "Unknown System"}
                                 </h4>
-                                {conn.notes && <p className="text-sm text-gray-600">{conn.notes}</p>}
+                                {conn.notes && <p className="text-sm text-muted-foreground">{conn.notes}</p>}
                                 
                                 <div className="flex flex-wrap gap-2">
                                     {[conn.image_1, conn.image_2, conn.image_3].filter(Boolean).map((img, i) => (
@@ -72,8 +72,8 @@ export default function VehicleDetail({ vehicle, onBack, onAddConnector }) {
                         ))}
                     </div>
                 ) : (
-                    <div className="p-8 text-center bg-gray-50 rounded-lg border-2 border-dashed">
-                        <p className="text-gray-500 font-medium">No connectors added yet.</p>
+                    <div className="p-8 text-center bg-white dark:bg-[#2a2a2a] rounded-lg border-2 border-dashed dark:border-gray-700 shadow-sm">
+                        <p className="text-muted-foreground font-medium">No connectors added yet.</p>
                     </div>
                 )}
                 

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
-    const InputStyle = "bg-white border-gray-200 focus:ring-[#00C600] focus:border-[#00C600]";
+    const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
     
     const [isDecoding, setIsDecoding] = React.useState(false);
 
@@ -134,7 +134,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
     };
 
     return (
-        <Card className="bg-gray-100 border-none shadow-none">
+        <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg">
             <CardHeader>
                 <CardTitle className="uppercase font-bold">{initialData ? "Edit Vehicle" : "New Vehicle"}</CardTitle>
             </CardHeader>
@@ -143,7 +143,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">Brand <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("brand", { required: true })} className={InputStyle} placeholder="RENAULT" />
+                            <Input {...register("brand", { required: true })} className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]" placeholder="RENAULT" />
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">Model <span className="text-[#00C600]">*</span></label>
