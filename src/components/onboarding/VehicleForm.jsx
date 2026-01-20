@@ -27,7 +27,6 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
   const { register, control, handleSubmit, formState: { errors, isSubmitting }, reset, setValue, watch } = useForm({
     defaultValues: formattedInitialData || {
         transmission_type: "Automatic",
-        purpose: "Production",
         connectors: defaultConnectors
     }
   });
@@ -120,8 +119,8 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
     <Card className="border-none shadow-none bg-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
         <CardHeader className="px-0 pt-0 flex flex-row items-center justify-between">
             <div>
-                <CardTitle className="text-2xl font-bold">My Training Vehicles</CardTitle>
-                <CardDescription>Add specifications for your training vehicle.</CardDescription>
+                <CardTitle className="text-2xl font-bold">My Fleet</CardTitle>
+                <CardDescription>Add specifications for your fleet vehicle.</CardDescription>
             </div>
             <Button variant="ghost" onClick={onCancel} size="sm" className="text-gray-500">
                 <ArrowLeft className="w-4 h-4 mr-2" /> {t('back')}
@@ -180,23 +179,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
 
 
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Purpose <span className="text-[#00C600]">*</span></label>
-                            <Controller
-                                name="purpose"
-                                control={control}
-                                rules={{ required: "Required" }}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <SelectTrigger className={InputStyle}><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Production">Production</SelectItem>
-                                            <SelectItem value="Sales">Sales</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
-                        </div>
+{/* Purpose field removed */}
 
                         {/* Existing Fields Continued */}
                         <div className="space-y-2">

@@ -154,7 +154,7 @@ function ClientRow({ clientEmail, company, cars }) {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-muted-foreground pl-6">No vehicles added yet.</p>
+                                        <p className="text-sm text-muted-foreground pl-6">No fleet items added yet.</p>
                                     )}
                                 </div>
                             </div>
