@@ -15,7 +15,8 @@ export default function EditProductModal({ product, open, onOpenChange }) {
         colour: '',
         type: 'other',
         secret_part_number: '',
-        pdf_url: ''
+        pdf_url: '',
+        calculator_system: ''
     });
 
     React.useEffect(() => {
@@ -25,7 +26,8 @@ export default function EditProductModal({ product, open, onOpenChange }) {
                 colour: product.colour || '',
                 type: product.type || 'other',
                 secret_part_number: product.secret_part_number || '',
-                pdf_url: product.pdf_url || ''
+                pdf_url: product.pdf_url || '',
+                calculator_system: product.calculator_system || ''
             });
         } else {
             setFormData({
@@ -33,7 +35,8 @@ export default function EditProductModal({ product, open, onOpenChange }) {
                 colour: '',
                 type: 'other',
                 secret_part_number: '',
-                pdf_url: ''
+                pdf_url: '',
+                calculator_system: ''
             });
         }
     }, [product, open]);
@@ -115,6 +118,16 @@ export default function EditProductModal({ product, open, onOpenChange }) {
                                 <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="system" className="text-right">System</Label>
+                        <Input 
+                            id="system" 
+                            value={formData.calculator_system} 
+                            onChange={(e) => setFormData({...formData, calculator_system: e.target.value})}
+                            placeholder="Optional (e.g. brakes)"
+                            className="col-span-3" 
+                        />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="pdf" className="text-right">PDF URL</Label>

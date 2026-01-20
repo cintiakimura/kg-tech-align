@@ -70,7 +70,8 @@ export default function Catalogue() {
         return (
             (item.colour && item.colour.toLowerCase().includes(search)) ||
             (item.type && item.type.toLowerCase().includes(search)) ||
-            (item.pins && item.pins.toString().includes(search))
+            (item.pins && item.pins.toString().includes(search)) ||
+            (item.calculator_system && item.calculator_system.toLowerCase().includes(search))
         );
     }) || [];
 
@@ -185,6 +186,12 @@ export default function Catalogue() {
                                                 <span className="font-semibold text-gray-500 w-24">Type:</span>
                                                 <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
+                                            {item.calculator_system && (
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <span className="font-semibold text-gray-500 w-24">System:</span>
+                                                    <span className="capitalize">{item.calculator_system}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         <>
@@ -200,6 +207,12 @@ export default function Catalogue() {
                                                 <span className="text-xs text-gray-500 uppercase">Type</span>
                                                 <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
+                                            {item.calculator_system && (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 uppercase">System</span>
+                                                    <span className="capitalize">{item.calculator_system}</span>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                     
