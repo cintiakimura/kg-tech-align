@@ -25,8 +25,12 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                 image_1: data.image_1,
                 image_2: data.image_2,
                 image_3: data.image_3,
+                image_4: data.image_4,
+                image_5: data.image_5,
                 file_wiring_diagram: data.file_wiring_diagram,
-                file_pinning_list: data.file_pinning_list
+                file_pinning_list: data.file_pinning_list,
+                file_other_1: data.file_other_1,
+                file_other_2: data.file_other_2
             });
             toast.success("Connector added successfully");
             onSuccess();
@@ -97,6 +101,24 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                                         </div>
                                     )}
                                 />
+                                <Controller
+                                    name="image_4"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="w-32">
+                                            <FileUpload label="+ PHOTO 4" value={field.value} onChange={field.onChange} compact />
+                                        </div>
+                                    )}
+                                />
+                                <Controller
+                                    name="image_5"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="w-32">
+                                            <FileUpload label="+ PHOTO 5" value={field.value} onChange={field.onChange} compact />
+                                        </div>
+                                    )}
+                                />
                             </div>
                         </div>
 
@@ -118,6 +140,24 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                                     render={({ field }) => (
                                         <div className="w-40">
                                             <FileUpload label="+ PINNING LIST" value={field.value} onChange={field.onChange} compact accept=".pdf,.csv,.xlsx" />
+                                        </div>
+                                    )}
+                                />
+                                <Controller
+                                    name="file_other_1"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="w-40">
+                                            <FileUpload label="+ OTHER DOC 1" value={field.value} onChange={field.onChange} compact accept=".pdf,.csv,.xlsx,.doc,.docx" />
+                                        </div>
+                                    )}
+                                />
+                                <Controller
+                                    name="file_other_2"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="w-40">
+                                            <FileUpload label="+ OTHER DOC 2" value={field.value} onChange={field.onChange} compact accept=".pdf,.csv,.xlsx,.doc,.docx" />
                                         </div>
                                     )}
                                 />
