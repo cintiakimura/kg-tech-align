@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
@@ -131,6 +132,8 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                         </Button>
                     </div>
                 </form>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
