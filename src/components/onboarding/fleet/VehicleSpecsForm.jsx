@@ -113,21 +113,17 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             // Strip system fields that cannot be updated
             const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
 
-            const vehicleNumber = initialData ? undefined : `VEH-${Date.now().toString().slice(-6)}`;
-            
-            await base44.functions.upsertVehicle({
-                id: initialData?.id,
-                data: initialData ? cleanData : {
+            if (initialData) {
+                await base44.entities.Vehicle.update(initialData.id, cleanData);
+                toast.success("Vehicle updated successfully");
+            } else {
+                const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
+                await base44.entities.Vehicle.create({
                     ...cleanData,
                     vehicle_number: vehicleNumber,
                     status: 'Open for Quotes',
                     client_email: clientEmail
-                }
-            });
-
-            if (initialData) {
-                toast.success("Vehicle updated successfully");
-            } else {
+                });
                 toast.success("Vehicle created successfully");
             }
             onSuccess();

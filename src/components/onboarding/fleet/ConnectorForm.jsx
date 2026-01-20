@@ -18,7 +18,7 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
     const onSubmit = async (data) => {
         try {
-            await base44.functions.createVehicleConnector({
+            await base44.entities.VehicleConnector.create({
                 vehicle_id: vehicle.id,
                 calculator_system: data.calculator_system,
                 quantity: 1, // Default to 1 as per screenshot flow implied
