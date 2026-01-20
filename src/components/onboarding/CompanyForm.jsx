@@ -53,6 +53,7 @@ export default function CompanyForm({ onComplete, initialData }) {
           id: initialData?.id,
           data: dataToSave
       });
+
         if (onComplete) onComplete();
     } catch (error) {
         console.error("Failed to save company info", error);
