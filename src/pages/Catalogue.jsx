@@ -26,7 +26,7 @@ export default function Catalogue() {
 
     const { data: catalogue, isLoading } = useQuery({
         queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(null, 1000),
+        queryFn: () => base44.entities.Catalogue.list(undefined, 1000),
     });
 
     const addToRequestMutation = useMutation({

@@ -154,11 +154,24 @@ export default function AdminImportCatalogue() {
 
                     // Prepare final data
                     // Use extracted data if available, fallback to CSV data
+                    const validTypes = ["connector", "header", "terminal", "housing", "seal", "lock", "other"];
+                    let rawType = (extractedData?.type || row.original_type || "other").toLowerCase();
+                    // Map common variations or fallback to 'other'
+                    if (!validTypes.includes(rawType)) {
+                        if (rawType.includes('terminal')) rawType = 'terminal';
+                        else if (rawType.includes('housing')) rawType = 'housing';
+                        else if (rawType.includes('seal')) rawType = 'seal';
+                        else if (rawType.includes('lock')) rawType = 'lock';
+                        else if (rawType.includes('header')) rawType = 'header';
+                        else if (rawType.includes('conn')) rawType = 'connector';
+                        else rawType = 'other';
+                    }
+
                     const finalData = {
                         secret_part_number: successPart || row.part1 || row.part2, // The part that yielded results or default
                         pins: extractedData?.pins || (row.original_pins ? parseInt(row.original_pins) : 0),
                         colour: extractedData?.colour || row.original_colour || "Unknown",
-                        type: (extractedData?.type || row.original_type || "other").toLowerCase(),
+                        type: rawType,
                         image_url: null, // Will upload below
                         pdf_url: null    // Will upload/set below
                     };
