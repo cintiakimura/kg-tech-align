@@ -90,13 +90,19 @@ export default function AdminImportCatalogue() {
                         // Web Search & Extraction via LLM
                         const prompt = `
                             Search for electronic component "${part}" (Brand: ${row.brand}).
-                            Look on DigiKey, Mouser, LCSC, or manufacturer sites.
+                            Perform an EXHAUSTIVE search across DigiKey, Mouser, LCSC, TE Connectivity, Aptiv, Molex, and all major distributors. Do not skip any potential source.
                             
                             TASKS:
-                            1. Find a LARGE, CLEAN product photo. NO watermarks, NO logos, white background preferred.
-                            2. Find the direct PDF URL for the datasheet.
-                            3. Extract technical specs from the product description:
-                               - Pins (integer)
+                            1. IMAGE: Find a HIGH-RESOLUTION, CRYSTAL CLEAR product photo.
+                               - MUST be on a WHITE or transparent background.
+                               - ABSOLUTELY NO watermarks, NO text overlays, NO company logos on the image.
+                               - NO blurry or low-quality images.
+                               - Add the image URL inline.
+
+                            2. DOCUMENTATION: Find the DIRECT hyperlink to the official PDF datasheet or technical drawing.
+                            
+                            3. SPECS: Extract accurate technical specs:
+                               - Pins (integer count)
                                - Colour (string, e.g. Black, Grey, Orange)
                                - Type (Connector, Header, Terminal, or Other)
 
