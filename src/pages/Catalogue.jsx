@@ -62,9 +62,6 @@ export default function Catalogue() {
     };
 
     const filteredItems = catalogue?.filter(item => {
-        // Strict filter: Only Connectors and Headers
-        if (item.type !== 'connector' && item.type !== 'header') return false;
-
         const search = searchTerm.toLowerCase();
         if (!search) return true;
         return (
