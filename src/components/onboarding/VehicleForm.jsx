@@ -75,7 +75,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                     vehicle_id: newVehicleId,
                     catalogue_id: conn.catalogue_id === "manual" ? null : (conn.catalogue_id || null),
                     custom_type_name: conn.custom_type_name,
-                    calculator_system: conn.calculator_system,
+                    calculator_system: conn.calculator_system || "Custom",
                     quantity: parseInt(conn.quantity),
                     notes: conn.notes
                 })
