@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X, Download, Loader2 } from 'lucide-react';
 import CompanyForm from '../components/onboarding/CompanyForm';
-import VehicleForm from '../components/onboarding/VehicleForm';
+import FleetManager from '../components/onboarding/fleet/FleetManager';
 import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -388,100 +388,7 @@ ${connectorDetails}
 
         {/* FLEET TAB */}
         <TabsContent value="fleet" className="mt-6">
-            <div className="bg-white dark:bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
-                <VehicleForm 
-                    initialData={editingCar}
-                    onCancel={() => {
-                        setEditingCar(null);
-                        // If we are always showing the form, cancel might just clear the edit state to "new" mode
-                        // or we might want to navigate elsewhere. For now, let's keep it resetting to "add new".
-                        setEditingCar(null); 
-                    }} 
-                    onSuccess={() => {
-                        setEditingCar(null);
-                        queryClient.invalidateQueries(['vehicles']);
-                        toast.success("Vehicle saved!");
-                    }} 
-                />
-            </div>
-            
-            {/* List of existing vehicles below the form */}
-            <div className="mt-12 space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">My Vehicles</h2>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => {
-                            setEditingCar(null);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            setIsAddingCar(true);
-                        }}
-                        className="gap-2"
-                    >
-                        <Plus className="w-4 h-4" /> Add Another Vehicle
-                    </Button>
-                </div>
-                {isLoadingCars ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Skeleton className="h-64 w-full rounded-xl" />
-                        <Skeleton className="h-64 w-full rounded-xl" />
-                        <Skeleton className="h-64 w-full rounded-xl" />
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {carProfiles?.map((car) => (
-                            <Card key={car.id} className="overflow-hidden bg-white dark:bg-[#2a2a2a] border-none shadow-md hover:shadow-xl transition-all group">
-                                <div className="aspect-[4/3] relative bg-gray-100 dark:bg-black">
-                                    {car.image_connector_front ? (
-                                        <img 
-                                            src={car.image_connector_front} 
-                                            alt={car.model} 
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <Car className="w-12 h-12" />
-                                        </div>
-                                    )}
-                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                        <Button size="icon" variant="secondary" className="h-8 w-8 bg-white/90 text-black hover:bg-white" onClick={() => {
-                                            setEditingCar(car);
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        }}>
-                                            <Edit2 className="w-4 h-4" />
-                                        </Button>
-                                        <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => handleDeleteCar(car.id)}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                                <CardContent className="p-5">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
-                                            <p className="text-sm text-muted-foreground">{car.engine_model || 'No engine info'}</p>
-                                        </div>
-                                        <Badge variant="secondary" className="font-mono">
-                                            {car.transmission_type}
-                                        </Badge>
-                                    </div>
-                                    <div className="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                        <div className="flex items-center gap-1">
-                                            <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                            {t('docs')}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <CheckCircle2 className="w-3 h-3 text-[#00C600]" />
-                                            {t('photos')}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <FleetManager clientEmail={companyProfile?.contact_email} />
         </TabsContent>
       </Tabs>
       </div>
