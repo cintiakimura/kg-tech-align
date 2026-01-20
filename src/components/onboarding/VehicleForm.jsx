@@ -31,6 +31,13 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
     }
   });
 
+  React.useEffect(() => {
+    reset(formattedInitialData || {
+        transmission_type: "Automatic",
+        connectors: defaultConnectors
+    });
+  }, [initialData]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "connectors"

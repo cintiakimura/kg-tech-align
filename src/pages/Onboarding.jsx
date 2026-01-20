@@ -408,7 +408,7 @@ ${connectorDetails}
             {/* List of existing vehicles below the form */}
             <div className="mt-12 space-y-6">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">My Fleet</h2>
+                    <h2 className="text-xl font-semibold">My Vehicles</h2>
                     <Button 
                         variant="outline" 
                         size="sm" 
