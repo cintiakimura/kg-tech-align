@@ -17,9 +17,8 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
     defaultValues: initialData || {
         transmission_type: "Automatic",
         brakes_type: "Disc",
-        calculator_system: "Engine",
         purpose: "Production",
-        connectors: [{ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" }]
+        connectors: [{ catalogue_id: "", custom_type_name: "", calculator_system: "Engine", quantity: 1, notes: "" }]
     }
   });
 
@@ -67,6 +66,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                     vehicle_id: newVehicleId,
                     catalogue_id: conn.catalogue_id === "manual" ? null : (conn.catalogue_id || null),
                     custom_type_name: conn.custom_type_name,
+                    calculator_system: conn.calculator_system,
                     quantity: parseInt(conn.quantity),
                     notes: conn.notes
                 })
@@ -78,14 +78,14 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
         if (!initialData?.id) {
              // "Add Another" flow: Reset relevant fields but keep context
              reset({
-                ...data,
-                brand: "",
-                model: "",
-                version: "",
-                vin: "",
-                // Keep purpose/system/fuel if typical for batch, or reset. Let's reset main identifiers.
-                connectors: [{ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" }],
-                image_connector_front: "",
+             ...data,
+             brand: "",
+             model: "",
+             version: "",
+             vin: "",
+             // Keep purpose/system/fuel if typical for batch, or reset. Let's reset main identifiers.
+             connectors: [{ catalogue_id: "", custom_type_name: "", calculator_system: "Engine", quantity: 1, notes: "" }],
+             image_connector_front: "",
                 image_lever_side: "",
                 image_ecu_part_number: "",
                 image_ecu_front: "",
@@ -158,7 +158,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                                     <Select onValueChange={field.onChange} value={field.value}>
                                         <SelectTrigger className={InputStyle}><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            {["Petrol", "Diesel", "Electric", "Hybrid", "Other"].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                                            {["Gasoline", "Diesel", "Electric", "Hybrid", "Other"].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 )}
@@ -185,41 +185,7 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Calculator System <span className="text-[#00C600]">*</span></label>
-                            <Controller
-                                name="calculator_system"
-                                control={control}
-                                rules={{ required: "Required" }}
-                                render={({ field }) => (
-                                    <div className="space-y-2">
-                                        <Select onValueChange={(val) => {
-                                            field.onChange(val);
-                                        }} value={["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value) ? field.value : "Custom"}>
-                                            <SelectTrigger className={InputStyle}><SelectValue placeholder="Select system" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Brakes">Brakes</SelectItem>
-                                                <SelectItem value="Engine">Engine</SelectItem>
-                                                <SelectItem value="Suspension">Suspension</SelectItem>
-                                                <SelectItem value="Body">Body</SelectItem>
-                                                <SelectItem value="Electrics">Electrics</SelectItem>
-                                                <SelectItem value="Energy Management">Energy Management</SelectItem>
-                                                <SelectItem value="Custom">Custom / Other</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {/* If Custom or not in list, show text input */}
-                                        {(field.value === "Custom" || !["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value)) && (
-                                            <Input 
-                                                placeholder="Type custom system name..." 
-                                                value={field.value === "Custom" ? "" : field.value}
-                                                onChange={(e) => field.onChange(e.target.value)}
-                                                className={InputStyle}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                            />
-                        </div>
+
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Purpose <span className="text-[#00C600]">*</span></label>
@@ -275,94 +241,128 @@ export default function VehicleForm({ onCancel, onSuccess, initialData, clientEm
                     </div>
                 </div>
 
-                {/* Connectors Needed (Repeating Group) - Updated to be fully editable */}
+                {/* Connectors (Repeating Group) - Updated to be fully editable */}
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-semibold flex items-center gap-2 text-[#00C600]">
-                            <Package className="w-5 h-5" /> Connectors Needed
+                            <Package className="w-5 h-5" /> Connectors
                         </h3>
-                        <Button type="button" onClick={() => append({ catalogue_id: "", custom_type_name: "", quantity: 1, notes: "" })} size="sm" variant="outline">
+                        <Button type="button" onClick={() => append({ catalogue_id: "", custom_type_name: "", calculator_system: "Engine", quantity: 1, notes: "" })} size="sm" variant="outline">
                             <Plus className="w-4 h-4 mr-2" /> Add Connector
                         </Button>
                     </div>
                     
                     <div className="space-y-4">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 flex flex-col md:flex-row gap-4 items-start relative group">
-                                <div className="flex-1 w-full md:w-auto">
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Type (Select or Type)</label>
-                                    <div className="space-y-2">
+                            <div key={field.id} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 flex flex-col gap-4 relative group">
+                                <div className="flex flex-col md:flex-row gap-4 w-full">
+                                    <div className="flex-1 w-full md:w-auto">
+                                        <label className="text-xs font-medium text-gray-500 mb-1 block">Calculator System</label>
                                         <Controller
-                                            name={`connectors.${index}.catalogue_id`}
+                                            name={`connectors.${index}.calculator_system`}
                                             control={control}
+                                            rules={{ required: "Required" }}
                                             render={({ field }) => (
-                                                <Select 
-                                                    onValueChange={(val) => {
-                                                        if (val === "manual") {
-                                                            field.onChange("manual");
-                                                            setValue(`connectors.${index}.custom_type_name`, ""); 
-                                                        } else {
-                                                            field.onChange(val);
-                                                            setValue(`connectors.${index}.custom_type_name`, ""); 
-                                                        }
-                                                    }} 
-                                                    value={field.value || "manual"}
-                                                >
-                                                    <SelectTrigger className="bg-white">
-                                                        <SelectValue placeholder="Select or type below..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="manual">Manual Entry</SelectItem>
-                                                        {catalogueItems?.map(item => (
-                                                            <SelectItem key={item.id} value={item.id}>
-                                                                {item.type} - {item.colour} ({item.pins} pins)
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                <div className="space-y-2">
+                                                    <Select onValueChange={(val) => {
+                                                        field.onChange(val);
+                                                    }} value={["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value) ? field.value : "Custom"}>
+                                                        <SelectTrigger className="bg-white"><SelectValue placeholder="Select system" /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="Brakes">Brakes</SelectItem>
+                                                            <SelectItem value="Engine">Engine</SelectItem>
+                                                            <SelectItem value="Suspension">Suspension</SelectItem>
+                                                            <SelectItem value="Body">Body</SelectItem>
+                                                            <SelectItem value="Electrics">Electrics</SelectItem>
+                                                            <SelectItem value="Energy Management">Energy Management</SelectItem>
+                                                            <SelectItem value="Custom">Custom / Other</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {(field.value === "Custom" || !["Brakes", "Engine", "Suspension", "Body", "Electrics", "Energy Management"].includes(field.value)) && (
+                                                        <Input 
+                                                            placeholder="Type custom system name..." 
+                                                            value={field.value === "Custom" ? "" : field.value}
+                                                            onChange={(e) => field.onChange(e.target.value)}
+                                                            className="bg-white"
+                                                        />
+                                                    )}
+                                                </div>
                                             )}
                                         />
+                                    </div>
+                                    <div className="flex-1 w-full md:w-auto">
+                                        <label className="text-xs font-medium text-gray-500 mb-1 block">Type (Select or Manual)</label>
+                                        <div className="space-y-2">
+                                            <Controller
+                                                name={`connectors.${index}.catalogue_id`}
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Select 
+                                                        onValueChange={(val) => {
+                                                            field.onChange(val);
+                                                            if (val !== "manual") {
+                                                                setValue(`connectors.${index}.custom_type_name`, "");
+                                                            }
+                                                        }} 
+                                                        value={field.value}
+                                                    >
+                                                        <SelectTrigger className="bg-white">
+                                                            <SelectValue placeholder="Select from Catalogue..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {catalogueItems?.map(item => (
+                                                                <SelectItem key={item.id} value={item.id}>
+                                                                    {item.type} - {item.colour} ({item.pins} pins)
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                            <Input 
+                                                placeholder="Or type manual name..."
+                                                {...register(`connectors.${index}.custom_type_name`)}
+                                                className="bg-white"
+                                            />
+                                        </div>
+                                        
+                                        {/* Preview selected item */}
+                                        {(() => {
+                                            const selectedId = watch(`connectors.${index}.catalogue_id`);
+                                            const item = catalogueItems?.find(i => i.id === selectedId);
+                                            if (item && item.image_url) {
+                                                return <img src={item.image_url} className="w-16 h-16 object-contain mt-2 border bg-white rounded" />;
+                                            }
+                                        })()}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col md:flex-row gap-4 w-full items-start">
+                                    <div className="w-full md:w-24">
+                                        <label className="text-xs font-medium text-gray-500 mb-1 block">Qty</label>
                                         <Input 
-                                            placeholder="Or type connector name..."
-                                            {...register(`connectors.${index}.custom_type_name`)}
-                                            className="bg-white"
+                                            type="number" 
+                                            {...register(`connectors.${index}.quantity`, { valueAsNumber: true, min: 1 })} 
+                                            className="bg-white" 
                                         />
                                     </div>
-                                    
-                                    {/* Preview selected item */}
-                                    {(() => {
-                                        const selectedId = watch(`connectors.${index}.catalogue_id`);
-                                        const item = catalogueItems?.find(i => i.id === selectedId);
-                                        if (item && item.image_url) {
-                                            return <img src={item.image_url} className="w-16 h-16 object-contain mt-2 border bg-white rounded" />;
-                                        }
-                                    })()}
+                                    <div className="flex-1 w-full md:w-auto">
+                                        <label className="text-xs font-medium text-gray-500 mb-1 block">Notes</label>
+                                        <Input 
+                                            {...register(`connectors.${index}.notes`)} 
+                                            placeholder="e.g. Specific coding" 
+                                            className="bg-white" 
+                                        />
+                                    </div>
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="text-gray-400 hover:text-red-500 mt-6"
+                                        onClick={() => remove(index)}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
                                 </div>
-                                <div className="w-full md:w-24">
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Qty</label>
-                                    <Input 
-                                        type="number" 
-                                        {...register(`connectors.${index}.quantity`, { valueAsNumber: true, min: 1 })} 
-                                        className="bg-white" 
-                                    />
-                                </div>
-                                <div className="flex-1 w-full md:w-auto">
-                                    <label className="text-xs font-medium text-gray-500 mb-1 block">Notes</label>
-                                    <Input 
-                                        {...register(`connectors.${index}.notes`)} 
-                                        placeholder="e.g. Specific coding" 
-                                        className="bg-white" 
-                                    />
-                                </div>
-                                <Button 
-                                    type="button" 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="text-gray-400 hover:text-red-500 mt-6"
-                                    onClick={() => remove(index)}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
                             </div>
                         ))}
                     </div>
