@@ -42,7 +42,7 @@ export default function CompanyForm({ onComplete, initialData }) {
       };
 
       // Strip system fields that cannot be updated
-      const { id, created_date, updated_date, created_by, updated_by, ...cleanData } = computedData;
+      const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
 
       // Check if exists to update, or create new
       if (initialData?.id) {
