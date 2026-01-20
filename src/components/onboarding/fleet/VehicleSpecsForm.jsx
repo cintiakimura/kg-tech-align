@@ -109,14 +109,19 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
 
     const onSubmit = async (data) => {
         try {
-            const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
-            await base44.entities.Vehicle.create({
-                ...data,
-                vehicle_number: vehicleNumber,
-                status: 'Open for Quotes',
-                client_email: clientEmail
-            });
-            toast.success("Vehicle created successfully");
+            if (initialData) {
+                await base44.entities.Vehicle.update(initialData.id, data);
+                toast.success("Vehicle updated successfully");
+            } else {
+                const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
+                await base44.entities.Vehicle.create({
+                    ...data,
+                    vehicle_number: vehicleNumber,
+                    status: 'Open for Quotes',
+                    client_email: clientEmail
+                });
+                toast.success("Vehicle created successfully");
+            }
             onSuccess();
         } catch (error) {
             console.error(error);
@@ -127,7 +132,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail }) {
     return (
         <Card className="bg-gray-100 border-none shadow-none">
             <CardHeader>
-                <CardTitle className="uppercase font-bold">New Vehicle</CardTitle>
+                <CardTitle className="uppercase font-bold">{initialData ? "Edit Vehicle" : "New Vehicle"}</CardTitle>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
