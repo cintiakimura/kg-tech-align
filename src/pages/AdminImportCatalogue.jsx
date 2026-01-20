@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,13 +12,16 @@ export default function AdminImportCatalogue() {
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState("idle"); // idle, importing, done
     const [logs, setLogs] = useState([]);
-    
-    // Using the export format to get CSV directly
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1S-YdOVM9Ajf8miBAakJY-yDH7--w-HabUcg1mtovTjs/export?format=csv&gid=583597950";
+    const [csvFile, setCsvFile] = useState(null);
 
     const addLog = (msg) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 100));
 
     const handleImport = async () => {
+        if (!csvFile) {
+            toast.error("Please select a CSV file");
+            return;
+        }
+
         if (!confirm("This will overwrite existing catalogue data. Continue?")) return;
 
         setStatus("importing");
@@ -25,11 +29,9 @@ export default function AdminImportCatalogue() {
         setLogs([]);
         
         try {
-            // 1. Fetch CSV
-            addLog("Fetching Google Sheet CSV...");
-            const response = await fetch(GOOGLE_SHEET_CSV_URL);
-            if (!response.ok) throw new Error("Failed to fetch CSV");
-            const csvText = await response.text();
+            // 1. Read CSV
+            addLog("Reading CSV file...");
+            const csvText = await csvFile.text();
             
             // Parse CSV (Handling quoted fields properly)
             // Columns based on Sheet: 
@@ -233,7 +235,7 @@ export default function AdminImportCatalogue() {
                 <div>
                     <h1 className="text-3xl font-bold">Catalogue Import</h1>
                     <p className="text-muted-foreground">
-                        Full import from Google Sheet with intelligent image and metadata extraction.
+                        Full import from CSV with intelligent image and metadata extraction.
                     </p>
                 </div>
             </div>
@@ -249,10 +251,22 @@ export default function AdminImportCatalogue() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Select CSV File</label>
+                            <Input 
+                                type="file" 
+                                accept=".csv" 
+                                onChange={(e) => setCsvFile(e.target.files[0])}
+                                disabled={status === 'importing'}
+                            />
+                        </div>
+                    </div>
+
                     <div className="bg-slate-50 p-4 rounded-lg border text-sm space-y-2">
                         <div className="font-semibold">Import Strategy:</div>
                         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                            <li>Fetches all 117+ rows from Google Sheet</li>
+                            <li>Reads rows from uploaded CSV</li>
                             <li>Tries <strong>Part 1</strong> first; if no clean image found, tries <strong>Part 2</strong></li>
                             <li>Searches DigiKey/Mouser/LCSC for large, clean (no watermark) images</li>
                             <li>Extracts Pins, Colour, and Type from web description</li>

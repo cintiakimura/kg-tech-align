@@ -84,7 +84,7 @@ export default function Catalogue() {
                 {/* Admin Import Button - Only visible to admins */}
                 {user.role === 'admin' && (
                      <Button variant="outline" onClick={() => window.location.href = '/AdminImportCatalogue'}>
-                        Import from Google Sheet
+                        Upload CSV
                      </Button>
                 )}
                 <div className="flex items-center gap-2 w-full md:w-auto">
