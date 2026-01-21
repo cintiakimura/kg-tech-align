@@ -19,7 +19,6 @@ import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
-import VehicleConnectors from './pages/VehicleConnectors';
 import __Layout from './Layout.jsx';
 
 
@@ -45,7 +44,6 @@ export const PAGES = {
     "SupplierDashboard": SupplierDashboard,
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
-    "VehicleConnectors": VehicleConnectors,
 }
 
 export const pagesConfig = {
