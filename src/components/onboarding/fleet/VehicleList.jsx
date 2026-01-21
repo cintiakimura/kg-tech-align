@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle, onEditVehicle }) {
     return (
@@ -9,7 +10,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
             <div className="flex justify-between items-center bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
                 <h3 className="text-xl font-bold uppercase tracking-wider">Vehicles</h3>
                 <Button 
-                    onClick={onAddVehicle}
+                    onClick={() => window.location.href = createPageUrl('VehicleEdit')}
                     className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
                 >
                     <Plus className="w-4 h-4 mr-2" />
@@ -32,10 +33,10 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                             
                             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                                 <Button 
-                                    className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase text-xs"
-                                    onClick={() => onSelectVehicle(vehicle)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-xs"
+                                    onClick={() => window.location.href = createPageUrl('VehicleView') + `?vehicleId=${vehicle.id}`}
                                 >
-                                    Manage Connectors
+                                    View Details
                                 </Button>
                                 <div className="flex gap-1 border-l pl-3 dark:border-gray-700">
                                     <Button 
@@ -44,10 +45,11 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                         className="h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onEditVehicle(vehicle);
+                                            window.location.href = createPageUrl('VehicleEdit') + `?vehicleId=${vehicle.id}`;
                                         }}
+                                        title="Edit Vehicle"
                                     >
-                                        <Settings className="h-4 w-4" />
+                                        <Pencil className="h-4 w-4" />
                                     </Button>
                                     <Button 
                                         variant="ghost" 
@@ -57,6 +59,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                             e.stopPropagation();
                                             onDeleteVehicle(vehicle.id);
                                         }}
+                                        title="Delete Vehicle"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
