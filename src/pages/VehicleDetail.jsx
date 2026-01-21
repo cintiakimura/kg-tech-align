@@ -20,7 +20,7 @@ export default function VehicleDetail() {
         queryKey: ['vehicle', vehicleId],
         queryFn: async () => {
             const res = await base44.entities.Vehicle.list({ id: vehicleId });
-            return res[0];
+            return res[0] || null;
         },
         enabled: !!vehicleId
     });
@@ -38,8 +38,9 @@ export default function VehicleDetail() {
 
     useEffect(() => {
         if (user && vehicle) {
-            // Check ownership
-            if (vehicle.client_id !== user.id) {
+            // Check ownership - allow admin and manager to view all
+            const isManager = user.role === 'admin' || user.user_type === 'manager';
+            if (!isManager && vehicle.client_id !== user.id) {
                 setAccessDenied(true);
             } else {
                 setAccessDenied(false);

@@ -20,9 +20,9 @@ import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
 import VehicleConnectors from './pages/VehicleConnectors';
+import VehicleDetail from './pages/VehicleDetail';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
-import VehicleDetail from './pages/VehicleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -49,9 +49,9 @@ export const PAGES = {
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
     "VehicleConnectors": VehicleConnectors,
+    "VehicleDetail": VehicleDetail,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
-    "VehicleDetail": VehicleDetail,
 }
 
 export const pagesConfig = {
