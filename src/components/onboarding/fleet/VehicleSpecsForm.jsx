@@ -135,32 +135,19 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             setSavedVehicle({ ...savedVehicle, ...cleanData, id: vehicleId });
             toast.success(`Vehicle saved. Number: ${savedVehicle?.vehicle_number || initialData?.vehicle_number}`);
         } else {
-            // VEH- + 6 random digits
-            const random6 = Math.floor(100000 + Math.random() * 900000);
-            const vehicleNumber = `VEH-${random6}`;
+            // VEH- + padded number
+            const randomNum = Math.floor(Math.random() * 1000000);
+            const vehicleNumber = `VEH-${randomNum.toString().padStart(6, '0')}`;
             
             // Get current user ID
             const currentUser = await base44.auth.me();
-            let finalClientId = currentUser?.id;
-
-            // If we have a specific client email and it's different from current user, try to resolve that user's ID
-            if (clientEmail && clientEmail !== currentUser?.email) {
-                try {
-                     const users = await base44.entities.User.list({ email: clientEmail });
-                     if (users && users.length > 0) {
-                         finalClientId = users[0].id;
-                     }
-                } catch (e) {
-                    console.warn("Could not resolve client ID for email", clientEmail);
-                }
-            }
 
             const newVehicle = await base44.entities.Vehicle.create({
                 ...cleanData,
                 vehicle_number: vehicleNumber,
                 status: 'Open for Quotes',
                 client_email: clientEmail || "",
-                client_id: finalClientId
+                client_id: currentUser?.id
             });
             setSavedVehicle(newVehicle);
             toast.success(`Vehicle created! Number: ${vehicleNumber}`);
