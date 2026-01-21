@@ -35,7 +35,7 @@ export default function VehicleConnectors() {
         enabled: !!vehicleId,
     });
 
-    const { data: connectors, isLoading: isLoadingConnectors } = useQuery({
+    const { data: connectors, isLoading: isLoadingConnectors, refetch: getConnectors } = useQuery({
         queryKey: ['connectors', vehicleId],
         queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: vehicleId }),
         enabled: !!vehicleId,
@@ -51,8 +51,8 @@ export default function VehicleConnectors() {
         onSuccess: (savedConnector) => {
             // Update local cache immediately to add the new card to the list
             queryClient.setQueryData(['connectors', vehicleId], (old) => old ? [...old, savedConnector] : [savedConnector]);
-            // Also invalidate to ensure consistency with server
-            queryClient.invalidateQueries(['connectors', vehicleId]);
+            // Also call getConnectors to ensure consistency with server
+            getConnectors();
             
             toast.success("Saved");
             setNewConnector({
