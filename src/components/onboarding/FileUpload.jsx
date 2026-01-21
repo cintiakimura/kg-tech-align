@@ -10,8 +10,7 @@ export default function FileUpload({
   onChange, 
   accept = "image/*", 
   helperText,
-  required = false,
-  compact = false
+  required = false
 }) {
   const { t } = useLanguage();
   const [isUploading, setIsUploading] = useState(false);
@@ -42,20 +41,17 @@ export default function FileUpload({
   const isImage = accept.startsWith("image");
 
   return (
-    <div className="w-full space-y-2 h-full">
-      {!compact && (
-          <label className="block text-sm font-medium mb-1">
-            {label} {required && <span className="text-[#00C600]">*</span>}
-          </label>
-      )}
+    <div className="w-full space-y-2">
+      <label className="block text-sm font-medium mb-1">
+        {label} {required && <span className="text-[#00C600]">*</span>}
+      </label>
       
       {!value ? (
         <div className={cn(
           "relative group cursor-pointer border-2 border-dashed rounded-xl transition-all duration-300",
           "hover:border-[#00C600] hover:bg-[#00C600]/5",
           "border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2a2a2a]",
-          "flex items-center justify-center",
-          compact ? "h-full min-h-[80px] p-2" : "h-32"
+          "flex items-center justify-center h-32"
         )}>
           <input
             type="file"
@@ -74,11 +70,7 @@ export default function FileUpload({
             ) : (
               <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400 group-hover:text-[#00C600] transition-colors">
                 {isImage ? <ImageIcon className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
-                {compact ? (
-                    <span className="text-[10px] font-bold uppercase text-[#00C600]">{label}</span>
-                ) : (
-                    <span className="text-xs font-medium">{t('upload_click') || 'Click to upload'}</span>
-                )}
+                <span className="text-xs font-medium">{t('upload_click') || 'Click to upload'}</span>
               </div>
             )}
           </div>
