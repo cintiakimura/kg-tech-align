@@ -157,6 +157,7 @@ export default function SupplierDashboard() {
                 note: data.note,
                 vehicle_id: selectedProject.id,
                 supplier_email: user.email,
+                supplier_id: user.id,
                 status: 'pending',
                 is_winner: false,
                 weight_kg: parseFloat(data.weight),
@@ -409,6 +410,7 @@ export default function SupplierDashboard() {
                 note: `${data.note} (Supplier detected: ${data.supplier_name})`,
                 vehicle_id: data.vehicle_id,
                 supplier_email: user.email,
+                supplier_id: user.id,
                 status: 'pending',
                 is_winner: false,
                 // Default dims if not extracted
