@@ -115,6 +115,10 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         // Strip system fields that cannot be updated
         const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
         
+        // Ensure numeric fields are valid or undefined
+        if (isNaN(cleanData.year)) delete cleanData.year;
+        if (isNaN(cleanData.number_gears)) delete cleanData.number_gears;
+
         let vehicleId = initialData?.id;
 
         if (vehicleId) {
