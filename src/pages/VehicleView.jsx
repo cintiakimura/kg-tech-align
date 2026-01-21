@@ -71,27 +71,120 @@ export default function VehicleView() {
                 </Button>
             </div>
 
-            {/* Vehicle Details Card */}
-            <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-sm">
-                <CardContent className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <span className="text-xs uppercase text-muted-foreground block">Transmission</span>
-                        <span className="font-bold">{vehicle.transmission_type}</span>
+            {/* System Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-sm">
+                    <CardContent className="p-6">
+                        <h3 className="text-sm font-bold uppercase mb-4 border-b pb-2">Technical Specs</h3>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Version</span>
+                                <span className="font-bold">{vehicle.version || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Transmission</span>
+                                <span className="font-bold">{vehicle.transmission_type || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Gears</span>
+                                <span className="font-bold">{vehicle.number_gears || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Engine Power</span>
+                                <span className="font-bold">{vehicle.engine_power || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Engine Code</span>
+                                <span className="font-bold">{vehicle.engine_code || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Engine Type</span>
+                                <span className="font-bold">{vehicle.engine_type || '-'}</span>
+                            </div>
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Engine Model</span>
+                                <span className="font-bold">{vehicle.engine_model || '-'}</span>
+                            </div>
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Brakes</span>
+                                <span className="font-bold">{vehicle.brakes_type || '-'}</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-sm">
+                    <CardContent className="p-6">
+                         <h3 className="text-sm font-bold uppercase mb-4 border-b pb-2">System Information</h3>
+                         <div className="space-y-4">
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Vehicle ID</span>
+                                <code className="text-xs bg-gray-100 dark:bg-gray-800 p-1 rounded font-mono select-all">
+                                    {vehicle.id}
+                                </code>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Client ID</span>
+                                <code className="text-xs bg-gray-100 dark:bg-gray-800 p-1 rounded font-mono select-all">
+                                    {vehicle.client_id || 'Not Recorded'}
+                                </code>
+                            </div>
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Client Email</span>
+                                <span className="font-bold text-sm">{vehicle.client_email || '-'}</span>
+                            </div>
+                            <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Date Created</span>
+                                <span className="font-bold text-sm">
+                                    {vehicle.created_date ? new Date(vehicle.created_date).toLocaleDateString() : '-'}
+                                </span>
+                            </div>
+                         </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Photos & Documents */}
+            {(vehicle.image_connector_front || vehicle.image_lever_side || vehicle.image_ecu_part_number || vehicle.image_ecu_front || vehicle.image_extra_1 || vehicle.image_extra_2 || vehicle.file_electrical_scheme || vehicle.file_sensors_actuators) && (
+                <div className="space-y-4">
+                     <h3 className="text-sm font-bold uppercase flex items-center gap-2 mt-8 mb-4">
+                        Photos & Documents
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {[
+                            { label: "Connector Front", src: vehicle.image_connector_front },
+                            { label: "Lever Side", src: vehicle.image_lever_side },
+                            { label: "ECU Part #", src: vehicle.image_ecu_part_number },
+                            { label: "ECU Front", src: vehicle.image_ecu_front },
+                            { label: "Extra 1", src: vehicle.image_extra_1 },
+                            { label: "Extra 2", src: vehicle.image_extra_2 },
+                        ].map((img, i) => img.src && (
+                            <Card key={i} className="overflow-hidden border-none shadow-sm bg-white dark:bg-[#2a2a2a]">
+                                <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative group cursor-pointer" onClick={() => window.open(img.src, '_blank')}>
+                                    <img src={img.src} alt={img.label} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold uppercase">
+                                        View Full
+                                    </div>
+                                </div>
+                                <div className="p-2 text-xs font-bold uppercase text-center">{img.label}</div>
+                            </Card>
+                        ))}
+
+                        {[
+                            { label: "Electrical Scheme", url: vehicle.file_electrical_scheme },
+                            { label: "Sensors/Actuators", url: vehicle.file_sensors_actuators },
+                        ].map((doc, i) => doc.url && (
+                             <Card key={`doc-${i}`} className="overflow-hidden border-none shadow-sm bg-white dark:bg-[#2a2a2a]">
+                                <div className="aspect-square bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center text-[#00C600] cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => window.open(doc.url, '_blank')}>
+                                    <FileText className="w-12 h-12 mb-2" />
+                                    <span className="text-[10px] uppercase font-bold">Open File</span>
+                                </div>
+                                <div className="p-2 text-xs font-bold uppercase text-center">{doc.label}</div>
+                            </Card>
+                        ))}
                     </div>
-                    <div>
-                        <span className="text-xs uppercase text-muted-foreground block">Gears</span>
-                        <span className="font-bold">{vehicle.number_gears}</span>
-                    </div>
-                    <div>
-                        <span className="text-xs uppercase text-muted-foreground block">Engine Power</span>
-                        <span className="font-bold">{vehicle.engine_power}</span>
-                    </div>
-                    <div>
-                        <span className="text-xs uppercase text-muted-foreground block">Engine Code</span>
-                        <span className="font-bold">{vehicle.engine_code}</span>
-                    </div>
-                </CardContent>
-            </Card>
+                </div>
+            )}
 
             {/* Connectors Grid - Read Only */}
             <h3 className="text-sm font-bold uppercase flex items-center gap-2 mt-8 mb-4">
