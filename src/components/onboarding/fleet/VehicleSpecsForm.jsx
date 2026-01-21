@@ -6,13 +6,61 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { Loader2, ImageIcon, FileText } from 'lucide-react';
+import { Loader2, ImageIcon, FileText, Plug, Plus, Trash2 } from 'lucide-react';
 import FileUpload from '../FileUpload';
+import { useQuery } from "@tanstack/react-query";
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
     
     const [isDecoding, setIsDecoding] = React.useState(false);
+    const [connectors, setConnectors] = React.useState([]);
+
+    const { data: catalogueItems } = useQuery({
+        queryKey: ['catalogue'],
+        queryFn: () => base44.entities.Catalogue.list(),
+    });
+
+    // Load existing connectors if editing
+    React.useEffect(() => {
+        if (initialData?.id) {
+            base44.entities.VehicleConnector.list({ vehicle_id: initialData.id }).then(setConnectors);
+        }
+    }, [initialData]);
+
+    const handleAddConnector = () => {
+        setConnectors([...connectors, { 
+            tempId: Date.now(), 
+            calculator_system: '', 
+            connector_color: '', 
+            pin_quantity: '', 
+            catalogue_id: 'none',
+            quantity: 1
+        }]);
+    };
+
+    const handleRemoveConnector = async (index) => {
+        const connector = connectors[index];
+        if (connector.id) {
+             try {
+                await base44.entities.VehicleConnector.delete(connector.id);
+                toast.success("Connector removed");
+             } catch (e) {
+                console.error(e);
+                toast.error("Failed to remove connector");
+                return;
+             }
+        }
+        const newConnectors = [...connectors];
+        newConnectors.splice(index, 1);
+        setConnectors(newConnectors);
+    };
+
+    const handleConnectorChange = (index, field, value) => {
+        const newConnectors = [...connectors];
+        newConnectors[index][field] = value;
+        setConnectors(newConnectors);
+    };
 
     const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
@@ -113,24 +161,45 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         try {
             // Strip system fields that cannot be updated
             const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
+            
+            let vehicleId = initialData?.id;
 
-            if (initialData) {
-                await base44.entities.Vehicle.update(initialData.id, cleanData);
-                toast.success("saved successfully");
+            if (vehicleId) {
+                await base44.entities.Vehicle.update(vehicleId, cleanData);
             } else {
                 const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
-                await base44.entities.Vehicle.create({
+                const newVehicle = await base44.entities.Vehicle.create({
                     ...cleanData,
                     vehicle_number: vehicleNumber,
                     status: 'Open for Quotes',
                     client_email: clientEmail
                 });
-                toast.success("saved successfully");
+                vehicleId = newVehicle.id;
             }
+
+            // Save connectors
+            for (const conn of connectors) {
+                const connectorData = {
+                    vehicle_id: vehicleId,
+                    calculator_system: conn.calculator_system,
+                    connector_color: conn.connector_color,
+                    pin_quantity: conn.pin_quantity, // Keep as string as requested
+                    catalogue_id: conn.catalogue_id !== 'none' ? conn.catalogue_id : null,
+                    quantity: parseInt(conn.quantity) || 1
+                };
+
+                if (conn.id) {
+                    await base44.entities.VehicleConnector.update(conn.id, connectorData);
+                } else {
+                    await base44.entities.VehicleConnector.create(connectorData);
+                }
+            }
+
+            toast.success("Saved successfully");
             onSuccess();
         } catch (error) {
             console.error(error);
-            toast.error("Failed to create vehicle");
+            toast.error("Failed to save vehicle");
         }
     };
 
@@ -347,6 +416,87 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                                 />
                             </CardContent>
                         </Card>
+                    </div>
+
+                    <div className="pt-8 border-t">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold uppercase flex items-center gap-2">
+                                <Plug className="w-5 h-5"/> Connectors
+                            </h3>
+                            <Button type="button" onClick={handleAddConnector} variant="outline" size="sm" className="uppercase font-bold text-xs border-[#00C600] text-[#00C600] hover:bg-[#00C600] hover:text-white">
+                                <Plus className="w-4 h-4 mr-2" /> Add Connector
+                            </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {connectors.map((conn, index) => (
+                                <div key={conn.id || conn.tempId} className="p-4 border rounded-lg bg-gray-50 dark:bg-black/20 space-y-4 relative">
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        onClick={() => handleRemoveConnector(index)}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pr-8">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase">Calculator System</label>
+                                            <Input 
+                                                value={conn.calculator_system} 
+                                                onChange={(e) => handleConnectorChange(index, 'calculator_system', e.target.value)}
+                                                className={InputStyle}
+                                                placeholder="e.g. ABS"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase">Connector Color</label>
+                                            <Input 
+                                                value={conn.connector_color} 
+                                                onChange={(e) => handleConnectorChange(index, 'connector_color', e.target.value)}
+                                                className={InputStyle}
+                                                placeholder="e.g. Black"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase">Pin Quantity</label>
+                                            <Input 
+                                                value={conn.pin_quantity} 
+                                                onChange={(e) => handleConnectorChange(index, 'pin_quantity', e.target.value)}
+                                                className={InputStyle}
+                                                placeholder="e.g. 16 or 8+2"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase">Catalogue Product</label>
+                                            <Select 
+                                                value={conn.catalogue_id || 'none'} 
+                                                onValueChange={(val) => handleConnectorChange(index, 'catalogue_id', val)}
+                                            >
+                                                <SelectTrigger className={InputStyle}>
+                                                    <SelectValue placeholder="Select..." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">None</SelectItem>
+                                                    {catalogueItems?.map(item => (
+                                                        <SelectItem key={item.id} value={item.id}>
+                                                            {item.secret_part_number} ({item.colour})
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            {connectors.length === 0 && (
+                                <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+                                    No connectors added yet. Click "Add Connector" to start.
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">
