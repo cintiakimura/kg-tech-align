@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { Loader2, ImageIcon, FileText, Trash2 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import FileUpload from '../FileUpload';
-import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from '@/utils';
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
