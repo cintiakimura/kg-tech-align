@@ -59,6 +59,8 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
         
         if (newConnector.catalogue_id && newConnector.catalogue_id !== 'none') {
             payload.catalogue_id = newConnector.catalogue_id;
+        } else {
+            payload.catalogue_id = null; // Ensure we don't send 'none' string or leave it ambiguous
         }
 
         createConnectorMutation.mutate(payload);

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { base44 } from "@/api/base44Client";
+import { Toaster } from "@/components/ui/sonner";
 import { LanguageProvider, useLanguage } from './components/LanguageContext';
 
 function LayoutContent({ children }) {
@@ -313,6 +314,7 @@ function LayoutContent({ children }) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 print:py-0 print:px-0">
         {!showRoleSelector && children}
       </main>
+      <Toaster />
 
       {/* CSS Variables for Theme Colors */}
       <style>{`
