@@ -3,15 +3,20 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText, User, Briefcase, Truck } from 'lucide-react';
+import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText, User, Briefcase, Truck, CreditCard, Image as ImageIcon } from 'lucide-react';
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from '../LanguageContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FileUpload from './FileUpload';
 
 export default function CompanyForm({ onComplete, initialData }) {
   const { t } = useLanguage();
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
-    defaultValues: initialData || {}
+    defaultValues: initialData || {
+        company_name: "",
+        payment_terms: "Prepaid"
+    }
   });
 
   // If initialData loads later
@@ -43,24 +48,28 @@ export default function CompanyForm({ onComplete, initialData }) {
       // Strip system fields that cannot be updated
       const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
 
-      // Check if exists to update, or create new
-      let finalClientNumber = initialData?.client_number;
-
       if (initialData?.id) {
            await base44.entities.CompanyProfile.update(initialData.id, cleanData);
-           toast.success("Client saved. Client Number: " + (initialData.client_number || 'N/A'));
+           toast.success("Profile updated successfully");
+           if (onComplete) onComplete(initialData.id);
       } else {
-           // KGCL- + 6 random digits
+           // Create new Company
            const random6 = Math.floor(100000 + Math.random() * 900000);
            const clientNumber = `KGCL-${random6}`;
-           finalClientNumber = clientNumber;
-           const newCompany = await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
-           // Link user to company
+           
+           const newCompany = await base44.entities.CompanyProfile.create({ 
+               ...cleanData, 
+               client_number: clientNumber 
+           });
+           
+           // Link user to company immediately
            await base44.auth.updateMe({ company_id: newCompany.id });
-           toast.success(`Client created! Number: ${clientNumber}`);
+           
+           toast.success(`Company profile created successfully!`);
+           
+           // Redirect to Garage immediately for new users
+           if (onComplete) onComplete(newCompany.id);
       }
-
-      if (onComplete) onComplete();
   };
 
   return (
@@ -244,9 +253,9 @@ export default function CompanyForm({ onComplete, initialData }) {
                     <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="bg-[#00C600] hover:bg-[#00b300] text-white min-w-[140px]"
+                        className="bg-[#00C600] hover:bg-[#00b300] text-white min-w-[200px] h-12 text-lg font-semibold shadow-lg shadow-[#00C600]/20"
                     >
-                        {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save_continue')}
+                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (initialData?.id ? "Save Changes" : "Save & Continue to Garage")}
                     </Button>
                 </div>
             </form>

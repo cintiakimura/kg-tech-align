@@ -42,6 +42,10 @@ export default function Onboarding() {
 
 
 
+  // If user already has a company, this page acts as the "Edit" page
+  // If user does NOT have a company, this is the "Create" page
+  // Logic handled by CompanyForm passing initialData or not
+
   const handlePrint = () => {
     window.print();
   };
@@ -155,11 +159,15 @@ ${connectorDetails}
 
       {/* Main App Content (Hidden on print) */}
       <div className="print:hidden space-y-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t('onboarding_title')}</h1>
-                <p className="text-muted-foreground mt-1">{t('onboarding_desc')}</p>
-            </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+              {companyProfile ? "Company Profile" : "Create Your Company Profile"}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+              {companyProfile ? "Manage your company details and settings." : "Please complete your company profile to continue."}
+          </p>
+      </div>
             <div className="flex items-center gap-3">
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={handlePrint} className="gap-2">

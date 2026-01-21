@@ -84,7 +84,8 @@ function LayoutContent({ children }) {
                   // Redirect based on new role
                   if (invite.target_user_type === 'manager') window.location.href = '/ManagerDashboard';
                   else if (invite.target_user_type === 'supplier') window.location.href = '/SupplierDashboard';
-                  else window.location.href = '/Onboarding'; // client
+                  else if (!updated.company_id) window.location.href = '/Onboarding'; // client needing onboarding
+                  else window.location.href = '/Garage';
                   return;
               }
           } catch (e) {
@@ -93,16 +94,30 @@ function LayoutContent({ children }) {
 
           // No invitation found? Show selector (but restricted)
           setShowRoleSelector(true);
-      } 
-      // Removed smart routing redirect block
-    } catch (e) {
-      console.error("Auth check failed", e);
-      base44.auth.redirectToLogin();
-    }
-  }
+          } 
 
-  const handleRoleSelect = async (type) => {
-      try {
+          // Onboarding Routing Checks
+          if (currentUser.user_type === 'client') {
+          if (!currentUser.company_id && window.location.pathname !== '/Onboarding') {
+              window.location.href = '/Onboarding';
+          }
+          if (currentUser.company_id && window.location.pathname === '/Onboarding' && !window.location.search.includes('edit')) {
+              // Assuming Onboarding is reused for edit with ?edit=true, or just protect it if strictly create
+              // The user wanted "Edit icon re-opens the same company profile form".
+              // So we allow /Onboarding IF it's for editing. 
+              // But for now, if they just land on /Onboarding with a company_id, send them to Garage.
+              // We'll treat /Onboarding as the "Profile" page too for simplicity, or redirect to Garage by default.
+              window.location.href = '/Garage';
+          }
+          }
+          } catch (e) {
+          console.error("Auth check failed", e);
+          base44.auth.redirectToLogin();
+          }
+          }
+
+          const handleRoleSelect = async (type) => {
+          try {
           await base44.auth.updateMe({ user_type: type });
           setShowRoleSelector(false);
           // Force reload user to get update
@@ -110,10 +125,10 @@ function LayoutContent({ children }) {
           setUser(updatedUser);
           if (type === 'supplier') window.location.href = '/SupplierDashboard';
           else window.location.href = '/Onboarding';
-      } catch (e) {
+          } catch (e) {
           console.error("Failed to set role", e);
-      }
-  };
+          }
+          };
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -202,6 +217,13 @@ function LayoutContent({ children }) {
                                    </a>
                                </DropdownMenuItem>
                            )}
+                     {user.user_type === 'client' && user.company_id && (
+                         <DropdownMenuItem asChild>
+                             <a href="/Onboarding" className="w-full cursor-pointer font-medium flex items-center gap-2">
+                               <span className="text-xl">✏️</span> Edit Company Profile
+                             </a>
+                         </DropdownMenuItem>
+                     )}
                            {(user.role === 'admin' || user.email === 'georg@kgprotech.com') && (
                                <>
                                    <DropdownMenuItem asChild>
