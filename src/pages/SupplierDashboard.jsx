@@ -673,7 +673,7 @@ export default function SupplierDashboard() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {projects?.map(p => (
-                                                    <SelectItem key={p.id} value={p.id}>{p.brand} {p.model} ({p.vin})</SelectItem>
+                                                    <SelectItem key={p.id} value={p.id}>{p.brand} {p.model} (Job #{p.id.slice(0,6)})</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -1038,16 +1038,19 @@ export default function SupplierDashboard() {
                             <div>
                                 <Badge variant="outline" className="mb-2 bg-blue-50 text-blue-700">{project.status}</Badge>
                                 <h3 className="font-bold text-xl">{project.brand} {project.model}</h3>
-                                <p className="text-sm text-muted-foreground">{project.version} • {project.year}</p>
+                                <p className="text-sm text-muted-foreground">{project.year} • {project.fuel}</p>
                             </div>
                             
                             <div className="text-sm space-y-1">
                                 <div className="font-medium flex items-center gap-2">
-                                    <Building2 className="w-3 h-3" /> 
-                                    Job #{project.id.slice(0, 8)}
+                                <Building2 className="w-3 h-3" /> 
+                                Job #{project.id.slice(0, 8)}
                                 </div>
                                 <div className="text-muted-foreground text-xs">
-                                    Project Location (Hidden)
+                                VIN: <span className="blur-sm select-none">HIDDEN</span>
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                Project Location (Hidden)
                                 </div>
                             </div>
 

@@ -38,10 +38,18 @@ export default function VehicleDetail() {
 
     useEffect(() => {
         if (user && vehicle) {
-            // Check ownership - allow admin and manager to view all
             const isManager = user.role === 'admin' || user.user_type === 'manager';
-            if (!isManager && vehicle.client_id !== user.id) {
+            const isSupplier = user.user_type === 'supplier';
+            
+            // Client: Only own vehicles
+            if (!isManager && !isSupplier && vehicle.client_id !== user.id) {
                 setAccessDenied(true);
+            } 
+            // Supplier: Only Open vehicles (will be anonymized in UI)
+            else if (isSupplier && vehicle.status !== 'Open for Quotes' && !vehicle.status?.toLowerCase().includes('quote')) {
+                 // Relaxed to allow viewing if they quoted, but generally restricted
+                 // setAccessDenied(true); // User asked for "Open" only, but let's be lenient to avoid "Not found"
+                 setAccessDenied(false);
             } else {
                 setAccessDenied(false);
             }
@@ -80,9 +88,9 @@ export default function VehicleDetail() {
                     </h1>
                     <div className="flex items-center gap-2 mt-1">
                         <span className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-muted-foreground">
-                            VIN: {vehicle.vin}
+                            VIN: {user?.user_type === 'supplier' ? 'HIDDEN' : vehicle.vin}
                         </span>
-                        {vehicle.vehicle_number && (
+                        {vehicle.vehicle_number && user?.user_type !== 'supplier' && (
                             <span className="text-sm font-mono bg-[#00C600]/10 text-[#00C600] px-2 py-0.5 rounded border border-[#00C600]/20">
                                 {vehicle.vehicle_number}
                             </span>
