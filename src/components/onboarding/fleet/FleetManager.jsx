@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
-    const [view, setView] = useState("list"); // list, add-vehicle, vehicle-detail
+    const [view, setView] = useState("list"); // list, add-vehicle
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const queryClient = useQueryClient();
 
@@ -33,9 +33,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
         window.location.href = createPageUrl('connectors') + `?vehicleId=${vehicle.id}`;
     };
 
-    const handleAddConnector = () => {
-        setView("add-connector");
-    };
+
 
     const handleDeleteVehicle = async (id) => {
         if (confirm("Are you sure you want to delete this vehicle and all its connectors?")) {

@@ -349,9 +349,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         </Card>
                     </div>
 
-                    <div className="pt-2 text-center text-sm text-muted-foreground">
-                        You will be able to add connectors after saving the vehicle details.
-                    </div>
+
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={onCancel}>CANCEL</Button>
