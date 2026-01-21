@@ -288,7 +288,11 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         <Button 
                             type="button"
                             disabled={!savedVehicle?.id}
-                            onClick={() => navigate(`/VehicleConnectors?vehicleId=${savedVehicle.id}`)}
+                            onClick={() => {
+                                // Save to localStorage as backup for "No missing ID"
+                                localStorage.setItem('lastVehicleId', savedVehicle.id);
+                                navigate(`/VehicleConnectors?vehicleId=${savedVehicle.id}`);
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white uppercase font-bold"
                         >
                             ADD CONNECTORS
