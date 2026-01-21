@@ -99,10 +99,10 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                             <div className="space-y-2">
                                 <label className="font-bold uppercase text-xs">Pin Quantity</label>
                                 <Input 
-                                    type="number"
+                                    type="text"
                                     {...register("pin_quantity")} 
                                     className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700" 
-                                    placeholder="16"
+                                    placeholder="e.g. 16 or 8+2"
                                 />
                             </div>
                             <div className="space-y-2">
