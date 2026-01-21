@@ -17,6 +17,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
     
     const [isDecoding, setIsDecoding] = React.useState(false);
+    const [savedVehicle, setSavedVehicle] = React.useState(initialData || null);
 
     const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
@@ -121,12 +122,12 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         if (isNaN(cleanData.year)) delete cleanData.year;
         if (isNaN(cleanData.number_gears)) delete cleanData.number_gears;
 
-        let vehicleId = initialData?.id;
+        let vehicleId = savedVehicle?.id || initialData?.id;
 
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
-            toast.success(`Vehicle saved. Number: ${initialData.vehicle_number || 'N/A'}`);
-            navigate(`/VehicleConnectors?vehicleId=${vehicleId}`);
+            setSavedVehicle({ ...savedVehicle, ...cleanData, id: vehicleId });
+            toast.success(`Vehicle saved. Number: ${savedVehicle?.vehicle_number || initialData?.vehicle_number}`);
         } else {
             // VEH- + 6 random digits
             const random6 = Math.floor(100000 + Math.random() * 900000);
@@ -138,8 +139,8 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 status: 'Open for Quotes',
                 client_email: clientEmail || ""
             });
+            setSavedVehicle(newVehicle);
             toast.success(`Vehicle created! Number: ${vehicleNumber}`);
-            navigate(`/VehicleConnectors?vehicleId=${newVehicle.id}`);
         }
     };
 
@@ -151,19 +152,21 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             <CardContent>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {initialData?.vehicle_number && (
+                        {(savedVehicle?.vehicle_number || initialData?.vehicle_number) && (
                             <div className="col-span-1 md:col-span-2 space-y-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-dashed border-[#00C600]">
                                 <label className="text-sm font-bold uppercase flex items-center gap-2">
                                     <FileText className="w-4 h-4 text-[#00C600]" /> Vehicle Number
                                 </label>
                                 <div className="flex gap-2">
-                                    <code className="text-lg font-mono font-bold text-[#00C600]">{initialData.vehicle_number}</code>
+                                    <code className="text-lg font-mono font-bold text-[#00C600]">
+                                        {savedVehicle?.vehicle_number || initialData?.vehicle_number}
+                                    </code>
                                     <Button 
                                         type="button" 
                                         variant="ghost" 
                                         size="sm"
                                         onClick={() => {
-                                            navigator.clipboard.writeText(initialData.vehicle_number);
+                                            navigator.clipboard.writeText(savedVehicle?.vehicle_number || initialData?.vehicle_number);
                                             toast.success("Copied");
                                         }}
                                         className="h-7 text-xs"
@@ -271,13 +274,24 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={onCancel}>CANCEL</Button>
+                        
                         <Button 
                             id="save-vehicle-btn"
                             type="submit" 
                             className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold" 
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? <Loader2 className="animate-spin" /> : "SAVE & CONTINUE"}
+                            {isSubmitting ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
+                            SAVE VEHICLE
+                        </Button>
+
+                        <Button 
+                            type="button"
+                            disabled={!savedVehicle?.id}
+                            onClick={() => navigate(`/VehicleConnectors?vehicleId=${savedVehicle.id}`)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white uppercase font-bold"
+                        >
+                            ADD CONNECTORS
                         </Button>
                     </div>
                 </form>
