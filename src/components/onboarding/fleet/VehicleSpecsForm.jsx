@@ -132,8 +132,10 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
-            setSavedVehicle({ ...savedVehicle, ...cleanData, id: vehicleId });
-            toast.success(`Vehicle saved. Number: ${savedVehicle?.vehicle_number || initialData?.vehicle_number}`);
+            const updatedVehicle = { ...savedVehicle, ...cleanData, id: vehicleId };
+            setSavedVehicle(updatedVehicle);
+            toast.success(`Vehicle saved. Number: ${updatedVehicle.vehicle_number}`);
+            if (onSuccess) onSuccess(updatedVehicle);
         } else {
             // VEH- + padded number
             const randomNum = Math.floor(Math.random() * 1000000);
@@ -151,6 +153,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             });
             setSavedVehicle(newVehicle);
             toast.success(`Vehicle created! Number: ${vehicleNumber}`);
+            if (onSuccess) onSuccess(newVehicle);
         }
     };
 
@@ -328,7 +331,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
-                            SAVE VEHICLE
+                            SAVE & CONTINUE
                         </Button>
 
                         <Button 
