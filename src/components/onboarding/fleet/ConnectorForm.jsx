@@ -18,6 +18,10 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
     const onSubmit = async (data) => {
         try {
+            // Debug user status
+            const user = await base44.auth.me();
+            console.log("Current User:", user);
+            
             console.log("Submitting connector:", { vehicle_id: vehicle.id, ...data });
             await base44.entities.VehicleConnector.create({
                 vehicle_id: vehicle.id,
