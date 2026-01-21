@@ -79,7 +79,7 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                             <div className="space-y-2">
                                 <label className="font-bold uppercase text-xs">Calculator System</label>
                                 <Input 
-                                    {...register("calculator_system", { required: true })} 
+                                    {...register("calculator_system")} 
                                     className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700" 
                                     placeholder="ABS"
                                 />
