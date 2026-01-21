@@ -181,19 +181,19 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Brand</Label>
-                        <Input {...register("brand", { required: true })} />
+                        <Input {...register("brand")} />
                     </div>
                     <div className="space-y-2">
                         <Label>Model</Label>
-                        <Input {...register("model", { required: true })} />
+                        <Input {...register("model")} />
                     </div>
                     <div className="space-y-2">
                         <Label>Year</Label>
-                        <Input type="number" {...register("year", { required: true, valueAsNumber: true })} />
+                        <Input type="number" {...register("year", { valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                         <Label>VIN</Label>
-                        <Input {...register("vin", { required: true })} />
+                        <Input {...register("vin")} />
                     </div>
                     <div className="space-y-2">
                         <Label>Fuel</Label>
