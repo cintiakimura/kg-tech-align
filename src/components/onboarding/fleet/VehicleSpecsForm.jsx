@@ -139,11 +139,15 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             const random6 = Math.floor(100000 + Math.random() * 900000);
             const vehicleNumber = `VEH-${random6}`;
             
+            // Get current user ID
+            const currentUser = await base44.auth.me();
+
             const newVehicle = await base44.entities.Vehicle.create({
                 ...cleanData,
                 vehicle_number: vehicleNumber,
                 status: 'Open for Quotes',
-                client_email: clientEmail || ""
+                client_email: clientEmail || "",
+                client_id: currentUser?.id
             });
             setSavedVehicle(newVehicle);
             toast.success(`Vehicle created! Number: ${vehicleNumber}`);
