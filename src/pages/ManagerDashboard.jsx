@@ -55,27 +55,32 @@ export default function ManagerDashboard() {
   const { data: notifications } = useQuery({
       queryKey: ['dashboard-notifications'],
       queryFn: async () => {
-          // New Clients (last 3 days)
-          const threeDaysAgo = new Date();
-          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-          
-          // Since we can't filter by date range easily in list() without knowing implementation details, 
-          // we fetch and filter in memory for now (assuming reasonable dataset size for this demo)
-          const allCompanies = await base44.entities.CompanyProfile.list();
-          const newClients = allCompanies.filter(c => new Date(c.created_date) > threeDaysAgo).length;
+          try {
+              // New Clients (last 3 days)
+              const threeDaysAgo = new Date();
+              threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+              
+              // Since we can't filter by date range easily in list() without knowing implementation details, 
+              // we fetch and filter in memory for now (assuming reasonable dataset size for this demo)
+              const allCompanies = await base44.entities.CompanyProfile.list();
+              const newClients = allCompanies ? allCompanies.filter(c => new Date(c.created_date) > threeDaysAgo).length : 0;
 
-          // Pending Quotes
-          const pendingQuotes = await base44.entities.Quote.list({ status: 'pending' });
-          
-          // Shipping Updates (Purchases updated recently)
-          const purchases = await base44.entities.Purchase.list();
-          const recentShipping = purchases.filter(p => new Date(p.updated_date) > threeDaysAgo).length;
+              // Pending Quotes
+              const pendingQuotes = await base44.entities.Quote.list({ status: 'pending' });
+              
+              // Shipping Updates (Purchases updated recently)
+              const purchases = await base44.entities.Purchase.list();
+              const recentShipping = purchases ? purchases.filter(p => new Date(p.updated_date) > threeDaysAgo).length : 0;
 
-          return {
-              newClients,
-              pendingQuotes: pendingQuotes.length,
-              recentShipping
-          };
+              return {
+                  newClients,
+                  pendingQuotes: pendingQuotes ? pendingQuotes.length : 0,
+                  recentShipping
+              };
+          } catch (e) {
+              console.warn("Error fetching dashboard notifications (likely extension interference)", e);
+              return { newClients: 0, pendingQuotes: 0, recentShipping: 0 };
+          }
       },
       enabled: !!isManagerOrAdmin,
       refetchInterval: 30000 // Refresh every 30s
@@ -114,6 +119,9 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="space-y-6">
+            {/* Dashboard Stats */}
+            <DashboardStats companies={companies || []} cars={cars || []} />
+
             {/* Menu Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card 
