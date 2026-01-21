@@ -80,13 +80,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
                 />
             )}
 
-            {view === "vehicle-detail" && selectedVehicle && (
-                <VehicleDetail 
-                    vehicle={selectedVehicle} 
-                    onBack={() => setView("list")} 
-                    onAddConnector={() => window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${selectedVehicle.id}`}
-                />
-            )}
+            {/* Removed embedded vehicle detail view */}
         </div>
     );
 }
