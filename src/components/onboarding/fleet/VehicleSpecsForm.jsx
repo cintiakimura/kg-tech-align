@@ -150,23 +150,23 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Brand <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("brand", { required: true })} className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]" placeholder="RENAULT" />
+                            <label className="text-sm font-bold uppercase">Brand</label>
+                            <Input {...register("brand")} className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]" placeholder="RENAULT" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Model <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("model", { required: true })} className={InputStyle} placeholder="CAPTUR II" />
+                            <label className="text-sm font-bold uppercase">Model</label>
+                            <Input {...register("model")} className={InputStyle} placeholder="CAPTUR II" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Version <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("version", { required: true })} className={InputStyle} />
+                            <label className="text-sm font-bold uppercase">Version</label>
+                            <Input {...register("version")} className={InputStyle} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Year <span className="text-[#00C600]">*</span></label>
-                            <Input type="number" {...register("year", { required: true, valueAsNumber: true })} className={InputStyle} />
+                            <label className="text-sm font-bold uppercase">Year</label>
+                            <Input type="number" {...register("year", { valueAsNumber: true })} className={InputStyle} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Fuel <span className="text-[#00C600]">*</span></label>
+                            <label className="text-sm font-bold uppercase">Fuel</label>
                             <Controller
                                 name="fuel"
                                 control={control}
@@ -181,10 +181,10 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">VIN <span className="text-[#00C600]">*</span></label>
+                            <label className="text-sm font-bold uppercase">VIN</label>
                             <div className="flex gap-2">
                                 <Input 
-                                    {...register("vin", { required: true })} 
+                                    {...register("vin")} 
                                     className={InputStyle} 
                                     placeholder="Enter 17-char VIN" 
                                     onKeyDown={async (e) => {
@@ -208,19 +208,19 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Engine Size <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("engine_size", { required: true })} className={InputStyle} placeholder="1500cm3" />
+                            <label className="text-sm font-bold uppercase">Engine Size</label>
+                            <Input {...register("engine_size")} className={InputStyle} placeholder="1500cm3" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Engine Power <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("engine_power", { required: true })} className={InputStyle} placeholder="120PS" />
+                            <label className="text-sm font-bold uppercase">Engine Power</label>
+                            <Input {...register("engine_power")} className={InputStyle} placeholder="120PS" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Engine Code <span className="text-[#00C600]">*</span></label>
-                            <Input {...register("engine_code", { required: true })} className={InputStyle} placeholder="K9K" />
+                            <label className="text-sm font-bold uppercase">Engine Code</label>
+                            <Input {...register("engine_code")} className={InputStyle} placeholder="K9K" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Transmission <span className="text-[#00C600]">*</span></label>
+                            <label className="text-sm font-bold uppercase">Transmission</label>
                             <Controller
                                 name="transmission_type"
                                 control={control}
@@ -235,8 +235,8 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-bold uppercase">Gears <span className="text-[#00C600]">*</span></label>
-                            <Input type="number" {...register("number_gears", { required: true, valueAsNumber: true })} className={InputStyle} />
+                            <label className="text-sm font-bold uppercase">Gears</label>
+                            <Input type="number" {...register("number_gears", { valueAsNumber: true })} className={InputStyle} />
                         </div>
                     </div>
 
