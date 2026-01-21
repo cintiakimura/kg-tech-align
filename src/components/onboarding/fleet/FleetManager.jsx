@@ -5,11 +5,11 @@ import VehicleList from './VehicleList';
 import VehicleSpecsForm from './VehicleSpecsForm';
 import VehicleDetail from './VehicleDetail';
 import ConnectorForm from './ConnectorForm';
-import VehicleConnectorsPage from './VehicleConnectorsPage';
 import { Loader2 } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
-    const [view, setView] = useState("list"); // list, add-vehicle, vehicle-detail, add-connector, vehicle-connectors
+    const [view, setView] = useState("list"); // list, add-vehicle, vehicle-detail
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const queryClient = useQueryClient();
 
@@ -73,8 +73,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
                         queryClient.invalidateQueries(['vehicles']);
                         // After saving, go to connectors page
                         if (vehicle) {
-                            setSelectedVehicle(vehicle);
-                            setView("vehicle-connectors");
+                            window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicle.id}`;
                         } else {
                             setView("list");
                         }
@@ -82,18 +81,11 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
                 />
             )}
 
-            {view === "vehicle-connectors" && selectedVehicle && (
-                <VehicleConnectorsPage 
-                    vehicle={selectedVehicle} 
-                    onBack={() => setView("list")} 
-                />
-            )}
-
             {view === "vehicle-detail" && selectedVehicle && (
                 <VehicleDetail 
                     vehicle={selectedVehicle} 
                     onBack={() => setView("list")} 
-                    onAddConnector={() => setView("vehicle-connectors")}
+                    onAddConnector={() => window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${selectedVehicle.id}`}
                 />
             )}
         </div>
