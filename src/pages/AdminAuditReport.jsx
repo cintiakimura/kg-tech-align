@@ -137,15 +137,15 @@ export default function AdminAuditReport() {
 
     const runDiagnostics = async () => {
         setRunningDiagnostics(true);
-        
-        // Simulate checking delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            // Simulate checking delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const report = {
-            timestamp: new Date().toISOString(),
-            status: "Healthy",
-            checks: []
-        };
+            const report = {
+                timestamp: new Date().toISOString(),
+                status: "Healthy",
+                checks: []
+            };
 
         // 1. Check Data Integrity: Cars
         const carsWithoutDocs = cars.filter(c => !c.file_electrical_scheme && !c.file_sensors_actuators);
@@ -295,8 +295,12 @@ export default function AdminAuditReport() {
         if (report.checks.some(c => c.status === "Fail")) report.status = "Critical";
         else if (report.checks.some(c => c.status === "Warning")) report.status = "Warning";
 
-        setDiagnosticsReport(report);
-        setRunningDiagnostics(false);
+            setDiagnosticsReport(report);
+        } catch (error) {
+            console.error("Diagnostics failed", error);
+        } finally {
+            setRunningDiagnostics(false);
+        }
     };
 
     // Aggregate and normalize logs
