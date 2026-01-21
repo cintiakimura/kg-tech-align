@@ -14,8 +14,8 @@ import FileUpload from '../components/onboarding/FileUpload';
 
 export default function VehicleConnectors() {
     const queryClient = useQueryClient();
-    // Read ID from URL or fallback to last saved (No missing ID)
-    const vehicleId = new URLSearchParams(location.search).get('vehicleId') || localStorage.getItem('lastVehicleId');
+    const params = new URLSearchParams(window.location.search);
+    const vehicleId = params.get('vehicleId');
 
     const [newConnector, setNewConnector] = useState({
         calculator_system: '',
@@ -125,8 +125,8 @@ export default function VehicleConnectors() {
         );
     }
 
-    if (!vehicle && !isLoadingVehicle) {
-        return <div className="p-8 text-center text-red-500">Vehicle ID missing or not found.</div>;
+    if (!vehicleId) {
+        return <div className="p-8 text-center text-red-500">Go back and save a vehicle first</div>;
     }
 
     return (
