@@ -18,23 +18,38 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     });
 
     const { data: fetchedVehicles, isLoading } = useQuery({
-        queryKey: ['vehicles', user?.id, user?.company_id],
+        queryKey: ['vehicles', user?.id, user?.company_id, user?.email],
         queryFn: async () => {
             if (!user) return [];
             const isManager = user.role === 'admin' || user.user_type === 'manager';
             if (isManager) {
                 return base44.entities.Vehicle.list();
-            } else if (user.company_id) {
-                // Fetch both company vehicles AND personal vehicles to ensure none are lost during transition
-                const [companyVehicles, personalVehicles] = await Promise.all([
-                    base44.entities.Vehicle.list({ client_id: user.company_id }),
-                    base44.entities.Vehicle.list({ client_id: user.id })
-                ]);
-                return _.uniqBy([...companyVehicles, ...personalVehicles], 'id');
-            } else {
-                // Fallback for users without company_id (legacy)
-                return base44.entities.Vehicle.list({ client_id: user.id });
             }
+
+            // Robust Fetching Strategy:
+            // 1. By Company ID (if exists)
+            // 2. By User ID (personal/legacy)
+            // 3. By Creator Email (safety net for items created but not linked correctly)
+            
+            const queries = [];
+            
+            if (user.company_id) {
+                queries.push(base44.entities.Vehicle.list({ client_id: user.company_id }));
+            }
+            
+            // Always fetch by personal ID just in case
+            queries.push(base44.entities.Vehicle.list({ client_id: user.id }));
+            
+            // Safety net: fetch everything created by this user
+            if (user.email) {
+                queries.push(base44.entities.Vehicle.list({ created_by: user.email }));
+            }
+
+            const results = await Promise.all(queries);
+            const allVehicles = results.flat();
+            
+            // Deduplicate by ID
+            return _.uniqBy(allVehicles, 'id');
         },
         enabled: !propVehicles && !!user
     });
