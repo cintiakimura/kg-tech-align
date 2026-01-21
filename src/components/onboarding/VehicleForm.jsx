@@ -102,19 +102,11 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
         setIsSubmitting(true);
         try {
             let vehicleId = currentVehicleId;
-            const currentUser = await base44.auth.me();
-            const userEmail = currentUser?.email;
-
-            // Ensure client_email is set for the vehicle if not present
-            const vehicleData = {
-                ...data,
-                client_email: data.client_email || userEmail
-            };
 
             if (vehicleId) {
-                await base44.entities.Vehicle.update(vehicleId, vehicleData);
+                await base44.entities.Vehicle.update(vehicleId, data);
             } else {
-                const newVehicle = await base44.entities.Vehicle.create(vehicleData);
+                const newVehicle = await base44.entities.Vehicle.create(data);
                 vehicleId = newVehicle.id;
                 setCurrentVehicleId(vehicleId);
             }
@@ -127,8 +119,7 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
                     connector_color: conn.connector_color,
                     pin_quantity: parseInt(conn.pin_quantity) || 0,
                     catalogue_id: conn.catalogue_id,
-                    quantity: parseInt(conn.quantity) || 1,
-                    owner_email: userEmail // Add ownership field for RLS
+                    quantity: parseInt(conn.quantity) || 1
                 };
 
                 if (conn.id) {
