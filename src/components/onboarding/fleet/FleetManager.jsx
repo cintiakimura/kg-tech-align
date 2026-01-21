@@ -30,7 +30,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     };
 
     const handleSelectVehicle = (vehicle) => {
-        window.location.href = createPageUrl('connectors') + `?vehicleId=${vehicle.id}`;
+        window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicle.id}`;
     };
 
 
@@ -68,7 +68,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
                         queryClient.invalidateQueries(['vehicles']);
                         // After saving, go to connectors page
                         if (vehicle) {
-                            window.location.href = createPageUrl('connectors') + `?vehicleId=${vehicle.id}`;
+                            window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicle.id}`;
                         } else {
                             setView("list");
                         }
