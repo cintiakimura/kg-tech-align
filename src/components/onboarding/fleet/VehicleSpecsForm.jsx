@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { Loader2 } from 'lucide-react';
+import { Loader2, ImageIcon, FileText } from 'lucide-react';
+import FileUpload from '../FileUpload';
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
@@ -115,7 +116,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
             if (initialData) {
                 await base44.entities.Vehicle.update(initialData.id, cleanData);
-                toast.success("Vehicle updated successfully");
+                toast.success("saved successfully");
             } else {
                 const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
                 await base44.entities.Vehicle.create({
@@ -124,7 +125,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                     status: 'Open for Quotes',
                     client_email: clientEmail
                 });
-                toast.success("Vehicle created successfully");
+                toast.success("saved successfully");
             }
             onSuccess();
         } catch (error) {
@@ -232,6 +233,122 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         </div>
                     </div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Front View</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="image_connector_front"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload Front View" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Side View (Lever)</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="image_lever_side"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload Side View" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> ECU Front View</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="image_ecu_front"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload ECU Front" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> ECU Showing PN</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="image_ecu_part_number"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload ECU PN" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Additional Photos</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Controller
+                                    name="image_extra_1"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Additional Photo 1" />
+                                    )}
+                                />
+                                <Controller
+                                    name="image_extra_2"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Additional Photo 2" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><FileText className="w-4 h-4"/> Electrical Scheme</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="file_electrical_scheme"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} label="Upload Scheme" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><FileText className="w-4 h-4"/> List of Functions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Controller
+                                    name="file_sensors_actuators"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FileUpload value={field.value} onChange={field.onChange} label="Upload List" />
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={onCancel}>CANCEL</Button>
                         <Button 
@@ -240,7 +357,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold" 
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? <Loader2 className="animate-spin" /> : "Save Vehicle"}
+                            {isSubmitting ? <Loader2 className="animate-spin" /> : "save"}
                         </Button>
                     </div>
                 </form>

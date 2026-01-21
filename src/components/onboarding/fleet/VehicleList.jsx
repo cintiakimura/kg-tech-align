@@ -63,7 +63,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                         onClick={onAddVehicle}
                         className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
                     >
-                        + Vehicle
+                        create new vehicle
                     </Button>
                 </div>
             </div>

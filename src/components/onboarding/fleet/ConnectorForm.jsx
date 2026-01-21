@@ -2,18 +2,28 @@ import React from 'react';
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
 import FileUpload from '../FileUpload';
+import { useQuery } from "@tanstack/react-query";
 
 export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
     const { control, register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             calculator_system: "",
-            quantity: 1
+            quantity: 1,
+            connector_color: "",
+            pin_quantity: "",
+            catalogue_id: "none"
         }
+    });
+
+    const { data: catalogueItems } = useQuery({
+        queryKey: ['catalogue'],
+        queryFn: () => base44.entities.Catalogue.list(),
     });
 
     const onSubmit = async (data) => {
@@ -21,7 +31,10 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
             await base44.entities.VehicleConnector.create({
                 vehicle_id: vehicle.id,
                 calculator_system: data.calculator_system,
-                quantity: 1, // Default to 1 as per screenshot flow implied
+                connector_color: data.connector_color,
+                pin_quantity: parseInt(data.pin_quantity) || 0,
+                catalogue_id: data.catalogue_id === "none" ? null : data.catalogue_id,
+                quantity: 1, 
                 image_1: data.image_1,
                 image_2: data.image_2,
                 image_3: data.image_3,
@@ -62,13 +75,54 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                     <CardContent className="p-6">
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <label className="font-bold uppercase w-24">System</label>
-                            <Input 
-                                {...register("calculator_system", { required: true })} 
-                                className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 max-w-sm" 
-                                placeholder="ABS"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="font-bold uppercase text-xs">Calculator System</label>
+                                <Input 
+                                    {...register("calculator_system", { required: true })} 
+                                    className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700" 
+                                    placeholder="ABS"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-bold uppercase text-xs">Connector Color</label>
+                                <Input 
+                                    {...register("connector_color")} 
+                                    className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700" 
+                                    placeholder="Black"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-bold uppercase text-xs">Pin Quantity</label>
+                                <Input 
+                                    type="number"
+                                    {...register("pin_quantity")} 
+                                    className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700" 
+                                    placeholder="16"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="font-bold uppercase text-xs">Catalogue Product</label>
+                                <Controller
+                                    name="catalogue_id"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700">
+                                                <SelectValue placeholder="Select product..." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none">None</SelectItem>
+                                                {catalogueItems?.map(item => (
+                                                    <SelectItem key={item.id} value={item.id}>
+                                                        {item.secret_part_number} ({item.colour}) - {item.type}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -168,7 +222,7 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                     <div className="flex justify-end pt-6">
                         <Button type="button" variant="ghost" onClick={onCancel} className="mr-4 uppercase font-bold text-xs">Cancel</Button>
                         <Button type="submit" className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold text-lg px-8 py-6" disabled={isSubmitting}>
-                            {isSubmitting ? <Loader2 className="animate-spin" /> : "SAVE"}
+                            {isSubmitting ? <Loader2 className="animate-spin" /> : "add connector"}
                         </Button>
                     </div>
                 </form>
