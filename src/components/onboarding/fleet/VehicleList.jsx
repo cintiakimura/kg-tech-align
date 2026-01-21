@@ -10,7 +10,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
             <div className="flex justify-between items-center bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
                 <h3 className="text-xl font-bold uppercase tracking-wider">Vehicles</h3>
                 <Button 
-                    onClick={() => window.location.href = createPageUrl('VehicleEdit')}
+                    onClick={() => window.location.href = createPageUrl('VehicleCreate')}
                     className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
                 >
                     <Plus className="w-4 h-4 mr-2" />
