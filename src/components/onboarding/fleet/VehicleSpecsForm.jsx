@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2, ImageIcon, FileText } from 'lucide-react';
 import FileUpload from '../FileUpload';
 import { useQuery } from "@tanstack/react-query";
+import { createPageUrl } from '@/utils';
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
@@ -120,7 +121,8 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             if (vehicleId) {
                 await base44.entities.Vehicle.update(vehicleId, cleanData);
                 toast.success("Vehicle updated successfully");
-                onSuccess(initialData); // Pass vehicle data back to view details/connectors
+                // Redirect to connectors page
+                window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicleId}`;
             } else {
                 const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
                 const newVehicle = await base44.entities.Vehicle.create({
@@ -130,7 +132,8 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                     client_email: clientEmail
                 });
                 toast.success("Vehicle created successfully");
-                onSuccess(newVehicle); // Pass new vehicle to move to connector step
+                // Redirect to connectors page
+                window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${newVehicle.id}`;
             }
         } catch (error) {
             console.error(error);
