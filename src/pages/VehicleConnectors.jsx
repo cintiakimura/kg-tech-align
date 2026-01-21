@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, ArrowLeft, ImageIcon, FileText } from 'lucide-react';
+import { Loader2, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
-import FileUpload from '@/components/onboarding/FileUpload';
 import { createPageUrl } from '@/utils';
 
 export default function VehicleConnectors() {
@@ -20,11 +19,7 @@ export default function VehicleConnectors() {
         calculator_system: '',
         connector_color: '',
         pin_quantity: '',
-        catalogue_id: 'none',
-        quantity: 1,
-        image_1: '',
-        file_wiring_diagram: '',
-        file_pinning_list: ''
+        catalogue_id: 'none'
     });
 
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
@@ -53,16 +48,12 @@ export default function VehicleConnectors() {
                 calculator_system: '',
                 connector_color: '',
                 pin_quantity: '',
-                catalogue_id: 'none',
-                quantity: 1,
-                image_1: '',
-                file_wiring_diagram: '',
-                file_pinning_list: ''
+                catalogue_id: 'none'
             });
         },
         onError: (err) => {
             console.error("Save error", err);
-            toast.error("Error saving data");
+            // No error blocking, but logging it.
         }
     });
 
@@ -81,16 +72,14 @@ export default function VehicleConnectors() {
             calculator_system: newConnector.calculator_system || "",
             connector_color: newConnector.connector_color || "",
             pin_quantity: newConnector.pin_quantity || "",
-            quantity: parseInt(newConnector.quantity) || 1,
-            image_1: newConnector.image_1 || "",
-            file_wiring_diagram: newConnector.file_wiring_diagram || "",
-            file_pinning_list: newConnector.file_pinning_list || ""
+            quantity: 1 // Default to 1 as requested implicitly (no input for quantity)
         };
         
         if (newConnector.catalogue_id && newConnector.catalogue_id !== 'none') {
             payload.catalogue_id = newConnector.catalogue_id;
         }
 
+        // Always save, no validation
         createConnectorMutation.mutate(payload);
     };
 
@@ -109,7 +98,7 @@ export default function VehicleConnectors() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-6">
             {/* Header / Vehicle Info */}
             <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
@@ -130,7 +119,7 @@ export default function VehicleConnectors() {
             <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg">
                 <CardHeader>
                     <CardTitle className="uppercase font-bold text-sm flex items-center gap-2">
-                        <Plus className="w-4 h-4 text-[#00C600]" /> Add New Connector
+                        Add Connectors to Vehicle
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -164,19 +153,24 @@ export default function VehicleConnectors() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">Catalogue Product (Optional)</Label>
+                                <Label className="text-xs uppercase font-bold">Catalogue Product</Label>
                                 <Select 
                                     value={newConnector.catalogue_id} 
                                     onValueChange={(val) => setNewConnector({...newConnector, catalogue_id: val})}
                                 >
                                     <SelectTrigger className={InputStyle}>
-                                        <SelectValue placeholder="Select..." />
+                                        <SelectValue placeholder="Select from Catalogue..." />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="none">None</SelectItem>
                                         {catalogueItems?.map(item => (
                                             <SelectItem key={item.id} value={item.id}>
-                                                {item.secret_part_number} ({item.colour})
+                                                <div className="flex items-center gap-2">
+                                                    {item.image_url && (
+                                                        <img src={item.image_url} alt="" className="w-6 h-6 object-cover rounded" />
+                                                    )}
+                                                    <span>{item.secret_part_number} ({item.colour})</span>
+                                                </div>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -184,38 +178,13 @@ export default function VehicleConnectors() {
                             </div>
                         </div>
 
-                        {/* Quick File Uploads for convenience */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <FileUpload 
-                                value={newConnector.image_1}
-                                onChange={(url) => setNewConnector({...newConnector, image_1: url})}
-                                label="Photo"
-                                compact
-                                accept="image/*"
-                            />
-                            <FileUpload 
-                                value={newConnector.file_wiring_diagram}
-                                onChange={(url) => setNewConnector({...newConnector, file_wiring_diagram: url})}
-                                label="Wiring Diagram"
-                                compact
-                                accept=".pdf,.png,.jpg"
-                            />
-                            <FileUpload 
-                                value={newConnector.file_pinning_list}
-                                onChange={(url) => setNewConnector({...newConnector, file_pinning_list: url})}
-                                label="Pinning List"
-                                compact
-                                accept=".pdf,.csv,.xlsx"
-                            />
-                        </div>
-
-                        <div className="flex justify-end">
+                        <div className="flex justify-end pt-2">
                             <Button 
                                 type="submit" 
-                                disabled={createConnectorMutation.isPending}
-                                className="bg-[#00C600] hover:bg-[#00b300] uppercase font-bold"
+                                className="bg-[#00C600] hover:bg-[#00b300] uppercase font-bold w-full md:w-auto"
                             >
-                                {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4" /> : "Add Connector"}
+                                {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                Add Connector
                             </Button>
                         </div>
                     </form>
@@ -223,43 +192,61 @@ export default function VehicleConnectors() {
             </Card>
 
             {/* Connectors List - 6 Columns */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 {isLoadingConnectors ? (
                     Array.from({ length: 6 }).map((_, i) => (
-                        <Card key={i} className="relative group hover:shadow-md transition-all border-l-4 border-l-[#00C600] h-32 animate-pulse bg-gray-100 dark:bg-gray-800"></Card>
+                        <Card key={i} className="h-32 animate-pulse bg-gray-100 dark:bg-gray-800"></Card>
                     ))
-                ) : connectors?.map((conn) => (
-                    <Card key={conn.id} className="relative group hover:shadow-md transition-all border-l-4 border-l-[#00C600] flex flex-col">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => deleteConnectorMutation.mutate(conn.id)}
-                        >
-                            <Trash2 className="w-3 h-3" />
-                        </Button>
-                        <CardContent className="p-3 space-y-2 flex-grow">
-                            <h4 className="font-bold uppercase text-xs truncate" title={conn.calculator_system}>
-                                {conn.calculator_system || "Unknown"}
-                            </h4>
-                            <div className="text-[10px] text-muted-foreground space-y-0.5">
-                                <p>Color: {conn.connector_color || '-'}</p>
-                                <p>Pins: {conn.pin_quantity || '-'}</p>
-                                {conn.catalogue_id && (
-                                    <p>Cat: {catalogueItems?.find(c => c.id === conn.catalogue_id)?.secret_part_number || 'N/A'}</p>
+                ) : connectors?.map((conn) => {
+                    const catalogueItem = catalogueItems?.find(c => c.id === conn.catalogue_id);
+                    return (
+                        <Card key={conn.id} className="relative group hover:shadow-md transition-all border-l-4 border-l-[#00C600] flex flex-col overflow-hidden">
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-1 right-1 h-6 w-6 opacity-100 z-10"
+                                onClick={() => deleteConnectorMutation.mutate(conn.id)}
+                            >
+                                <Trash2 className="w-3 h-3" />
+                            </Button>
+                            
+                            <CardContent className="p-3 space-y-2 flex-grow">
+                                {catalogueItem?.image_url && (
+                                    <div className="w-full h-24 mb-2 bg-gray-50 rounded overflow-hidden">
+                                        <img src={catalogueItem.image_url} alt="" className="w-full h-full object-contain" />
+                                    </div>
                                 )}
-                            </div>
-                        </CardContent>
-                        <div className="flex gap-1 p-3 pt-0">
-                            {conn.image_1 && <ImageIcon className="w-3 h-3 text-[#00C600]" />}
-                            {(conn.file_wiring_diagram || conn.file_pinning_list) && <FileText className="w-3 h-3 text-blue-500" />}
-                        </div>
-                    </Card>
-                ))}
+                                
+                                <div>
+                                    <h4 className="font-bold uppercase text-xs truncate" title={conn.calculator_system}>
+                                        {conn.calculator_system || "Unknown System"}
+                                    </h4>
+                                    
+                                    {catalogueItem && (
+                                        <div className="text-xs font-semibold text-blue-600 truncate mt-1">
+                                            {catalogueItem.secret_part_number}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="text-[10px] text-muted-foreground space-y-0.5 mt-2">
+                                    <div className="flex justify-between">
+                                        <span>Color:</span>
+                                        <span className="font-medium text-foreground">{conn.connector_color || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Pins:</span>
+                                        <span className="font-medium text-foreground">{conn.pin_quantity || '-'}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
             
             {(!isLoadingConnectors && connectors?.length === 0) && (
-                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg bg-gray-50/50">
                     No connectors added yet. Use the form above to add one.
                 </div>
             )}
