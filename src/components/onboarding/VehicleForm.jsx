@@ -16,6 +16,7 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
     const queryClient = useQueryClient();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [connectors, setConnectors] = useState(initialData?.connectors || []); 
+    const [currentVehicleId, setCurrentVehicleId] = useState(initialData?.id || null);
 
     // Because connectors are a separate entity, we handle them slightly differently if we are editing an existing vehicle.
     // However, for simplicity in this form, we might want to fetch them if initialData is provided.
@@ -29,10 +30,10 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
 
     // Merge existing connectors into state when loaded
     React.useEffect(() => {
-        if (existingConnectors) {
+        if (existingConnectors && currentVehicleId === initialData?.id) {
             setConnectors(existingConnectors);
         }
-    }, [existingConnectors]);
+    }, [existingConnectors, currentVehicleId, initialData]);
 
     const { register, handleSubmit, setValue, watch, control, reset, formState: { errors } } = useForm({
         defaultValues: initialData || {
@@ -100,13 +101,14 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
     const onSubmit = async (data) => {
         setIsSubmitting(true);
         try {
-            let vehicleId = initialData?.id;
+            let vehicleId = currentVehicleId;
 
             if (vehicleId) {
                 await base44.entities.Vehicle.update(vehicleId, data);
             } else {
                 const newVehicle = await base44.entities.Vehicle.create(data);
                 vehicleId = newVehicle.id;
+                setCurrentVehicleId(vehicleId);
             }
 
             // Save connectors
