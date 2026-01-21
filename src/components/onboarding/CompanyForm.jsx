@@ -34,29 +34,24 @@ export default function CompanyForm({ onComplete, initialData }) {
   }, [initialData, reset]);
 
   const onSubmit = async (data) => {
-      try {
-          // Compute composite fields
-          const computedData = {
-              ...data,
-              contact_person_name: `${data.contact_person_first_name || ''} ${data.contact_person_last_name || ''}`.trim()
-          };
+      // Compute composite fields
+      const computedData = {
+          ...data,
+          contact_person_name: `${data.contact_person_first_name || ''} ${data.contact_person_last_name || ''}`.trim()
+      };
 
-          // Strip system fields that cannot be updated
-          const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
+      // Strip system fields that cannot be updated
+      const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
 
-          // Check if exists to update, or create new
-          if (initialData?.id) {
-               await base44.entities.CompanyProfile.update(initialData.id, cleanData);
-          } else {
-               const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
-               await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
-          }
-
-          if (onComplete) onComplete();
-      } catch (error) {
-          console.error("Company profile save error:", error);
-          toast.error("Error saving company profile: " + (error.message || "Unknown error"));
+      // Check if exists to update, or create new
+      if (initialData?.id) {
+           await base44.entities.CompanyProfile.update(initialData.id, cleanData);
+      } else {
+           const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
+           await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
       }
+
+      if (onComplete) onComplete();
   };
 
   return (
