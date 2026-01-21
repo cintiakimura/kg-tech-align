@@ -47,6 +47,9 @@ export default function VehicleDetail() {
             
             if (!isManager && !isSupplier && !isOwner) {
                 setAccessDenied(true);
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn(`[Security Alert] Access denied for user ${user.email} (Company: ${user.company_id}) to vehicle ${vehicle.id} (Client: ${vehicle.client_id})`);
+                }
             } 
             // Supplier: Only Open vehicles (will be anonymized in UI)
             else if (isSupplier && vehicle.status !== 'Open for Quotes' && !vehicle.status?.toLowerCase().includes('quote')) {
