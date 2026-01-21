@@ -126,11 +126,16 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                             <SelectItem value="none">None</SelectItem>
                             {catalogueItems?.map(item => (
                                 <SelectItem key={item.id} value={item.id}>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 max-w-[300px] overflow-hidden">
                                         {item.image_url && (
-                                            <img src={item.image_url} alt="" className="w-6 h-6 object-cover rounded" />
+                                            <img 
+                                                src={item.image_url} 
+                                                alt="" 
+                                                className="w-6 h-6 object-cover rounded flex-shrink-0" 
+                                                onError={(e) => e.target.style.display = 'none'}
+                                            />
                                         )}
-                                        <span>{item.secret_part_number} ({item.colour})</span>
+                                        <span className="truncate">{item.secret_part_number} ({item.colour})</span>
                                     </div>
                                 </SelectItem>
                             ))}
