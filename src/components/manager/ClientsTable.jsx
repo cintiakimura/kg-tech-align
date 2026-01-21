@@ -44,7 +44,7 @@ function ClientRow({ clientEmail, company, cars }) {
                             navigate(`/ClientDetails?email=${encodeURIComponent(clientEmail)}`);
                         }}>
                             <span className="text-sm font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1">
-                                {company?.company_name || clientEmail} 
+                                {company?.company_name || <span className="italic font-normal text-muted-foreground">{clientEmail}</span>} 
                                 <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </span>
                         </div>
