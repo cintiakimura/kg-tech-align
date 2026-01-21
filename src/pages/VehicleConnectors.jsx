@@ -138,7 +138,14 @@ export default function VehicleConnectors() {
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h2 className="text-xl font-bold uppercase">{vehicle?.brand} {vehicle?.model} - Connectors</h2>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-xl font-bold uppercase">{vehicle?.brand} {vehicle?.model} - Connectors</h2>
+                          {vehicle?.vehicle_number && (
+                              <span className="text-xs bg-[#00C600]/10 text-[#00C600] px-2 py-0.5 rounded border border-[#00C600]/20 font-mono font-bold">
+                                  {vehicle.vehicle_number}
+                              </span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground uppercase">{vehicle?.engine_size} {vehicle?.fuel} | {vehicle?.vin}</p>
                     </div>
                 </div>
