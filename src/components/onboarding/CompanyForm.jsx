@@ -54,7 +54,9 @@ export default function CompanyForm({ onComplete, initialData }) {
            const random6 = Math.floor(100000 + Math.random() * 900000);
            const clientNumber = `KGCL-${random6}`;
            finalClientNumber = clientNumber;
-           await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
+           const newCompany = await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
+           // Link user to company
+           await base44.auth.updateMe({ company_id: newCompany.id });
            toast.success(`Client created! Number: ${clientNumber}`);
       }
 

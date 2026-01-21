@@ -11,10 +11,26 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const queryClient = useQueryClient();
 
+    const { data: user } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me(),
+    });
+
     const { data: fetchedVehicles, isLoading } = useQuery({
-        queryKey: ['vehicles'],
-        queryFn: () => base44.entities.Vehicle.list(),
-        enabled: !propVehicles
+        queryKey: ['vehicles', user?.id, user?.company_id],
+        queryFn: async () => {
+            if (!user) return [];
+            const isManager = user.role === 'admin' || user.user_type === 'manager';
+            if (isManager) {
+                return base44.entities.Vehicle.list();
+            } else if (user.company_id) {
+                return base44.entities.Vehicle.list({ client_id: user.company_id });
+            } else {
+                // Fallback for users without company_id (legacy)
+                return base44.entities.Vehicle.list({ client_id: user.id });
+            }
+        },
+        enabled: !propVehicles && !!user
     });
 
     const vehicles = propVehicles || fetchedVehicles;

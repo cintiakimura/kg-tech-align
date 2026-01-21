@@ -147,7 +147,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 vehicle_number: vehicleNumber,
                 status: 'Open for Quotes',
                 client_email: clientEmail || "",
-                client_id: currentUser?.id
+                client_id: currentUser?.company_id || currentUser?.id // Fallback to user ID if no company
             });
             setSavedVehicle(newVehicle);
             toast.success(`Vehicle created! Number: ${vehicleNumber}`);

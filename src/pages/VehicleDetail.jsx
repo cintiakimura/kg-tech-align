@@ -41,8 +41,11 @@ export default function VehicleDetail() {
             const isManager = user.role === 'admin' || user.user_type === 'manager';
             const isSupplier = user.user_type === 'supplier';
             
-            // Client: Only own vehicles
-            if (!isManager && !isSupplier && vehicle.client_id !== user.id) {
+            // Client: Only own vehicles (checked via company_id)
+            // Allow if vehicle.client_id matches user.company_id OR user.id (legacy)
+            const isOwner = vehicle.client_id === user.company_id || vehicle.client_id === user.id;
+            
+            if (!isManager && !isSupplier && !isOwner) {
                 setAccessDenied(true);
             } 
             // Supplier: Only Open vehicles (will be anonymized in UI)
