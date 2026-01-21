@@ -22,6 +22,7 @@ import SupplierQuotations from './pages/SupplierQuotations';
 import VehicleConnectors from './pages/VehicleConnectors';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
+import VehicleDetail from './pages/VehicleDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "VehicleConnectors": VehicleConnectors,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
+    "VehicleDetail": VehicleDetail,
 }
 
 export const pagesConfig = {
