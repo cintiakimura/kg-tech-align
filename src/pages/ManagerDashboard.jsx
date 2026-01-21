@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import DashboardShell from '../components/DashboardShell';
 import SharedDataGrid from '../components/SharedDataGrid';
-import { Activity, DollarSign, Package, Users, Truck, AlertTriangle } from 'lucide-react';
+import { Activity, DollarSign, Package, Users, Truck, AlertTriangle, FileText } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from 'react-router-dom';
 
 export default function ManagerDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
 
   const { data: requests = [] } = useQuery({ queryKey: ['mgrRequests'], queryFn: () => base44.entities.PartRequest.list() });
   const { data: quotes = [] } = useQuery({ queryKey: ['mgrQuotes'], queryFn: () => base44.entities.Quote.list() });
@@ -19,7 +21,16 @@ export default function ManagerDashboard() {
     { id: 'quotes', label: 'Quote Review', icon: DollarSign },
     { id: 'logistics', label: 'Logistics', icon: Truck },
     { id: 'directory', label: 'Directory', icon: Users },
+    { id: 'audit', label: 'Audit Report', icon: FileText },
   ];
+
+  const handleTabChange = (tabId) => {
+    if (tabId === 'audit') {
+        navigate('/admin-audit-report');
+    } else {
+        setActiveTab(tabId);
+    }
+  };
 
   const requestColumns = [
     { key: 'id', label: 'ID', render: (row) => <span className="font-mono text-xs">#{row.id.slice(-6)}</span> },
@@ -49,7 +60,7 @@ export default function ManagerDashboard() {
       userRole="Admin" 
       sidebarItems={sidebarItems} 
       activeTab={activeTab} 
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
     >
       {activeTab === 'overview' && (
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
