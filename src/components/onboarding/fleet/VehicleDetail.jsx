@@ -41,9 +41,9 @@ export default function VehicleDetail({ vehicle, onBack, onAddConnector }) {
                 {isLoading ? (
                     <Loader2 className="animate-spin w-8 h-8 text-[#00C600]" />
                 ) : connectors && connectors.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {connectors.map((conn, index) => (
-                            <div key={conn.id} className="bg-white dark:bg-[#2a2a2a] p-6 rounded-lg space-y-4 shadow-md">
+                            <div key={conn.id} className="bg-white dark:bg-[#2a2a2a] p-6 rounded-lg space-y-4 shadow-md flex flex-col h-full">
                                 <h4 className="font-bold uppercase text-lg">
                                     {conn.calculator_system || "Unknown System"}
                                 </h4>

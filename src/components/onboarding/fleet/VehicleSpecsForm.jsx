@@ -365,7 +365,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                             className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold" 
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? <Loader2 className="animate-spin" /> : "save"}
+                            {isSubmitting ? <Loader2 className="animate-spin" /> : "SAVE & CONTINUE"}
                         </Button>
                     </div>
                 </form>
