@@ -50,9 +50,8 @@ export default function VehicleDetail() {
             } 
             // Supplier: Only Open vehicles (will be anonymized in UI)
             else if (isSupplier && vehicle.status !== 'Open for Quotes' && !vehicle.status?.toLowerCase().includes('quote')) {
-                 // Relaxed to allow viewing if they quoted, but generally restricted
-                 // setAccessDenied(true); // User asked for "Open" only, but let's be lenient to avoid "Not found"
-                 setAccessDenied(false);
+                 // Strict: Suppliers cannot view vehicles that are not open or in quoting phase
+                 setAccessDenied(true);
             } else {
                 setAccessDenied(false);
             }
