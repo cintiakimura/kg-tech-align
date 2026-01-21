@@ -68,9 +68,15 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
                     clientEmail={clientEmail}
                     initialData={selectedVehicle}
                     onCancel={() => setView("list")} 
-                    onSuccess={() => {
+                    onSuccess={(vehicle) => {
                         queryClient.invalidateQueries(['vehicles']);
-                        setView("list");
+                        // After saving, go to detail view to manage connectors
+                        if (vehicle) {
+                            setSelectedVehicle(vehicle);
+                            setView("vehicle-detail");
+                        } else {
+                            setView("list");
+                        }
                     }}
                 />
             )}
