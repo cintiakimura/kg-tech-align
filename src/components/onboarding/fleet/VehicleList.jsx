@@ -34,7 +34,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
                                 <Button 
                                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-xs"
-                                    onClick={() => window.location.href = createPageUrl('VehicleView') + `?vehicleId=${vehicle.id}`}
+                                    onClick={() => window.location.href = createPageUrl('VehicleDetail') + `?id=${vehicle.id}`}
                                 >
                                     View Details
                                 </Button>

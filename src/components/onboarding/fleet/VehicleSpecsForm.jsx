@@ -307,7 +307,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                                             </div>
                                         </div>
                                         <a 
-                                            href={createPageUrl(`VehicleConnectors?vehicleId=${savedVehicle.id}`)}
+                                            href={createPageUrl('VehicleDetail') + `?id=${savedVehicle.id}`}
                                             className="ml-4 text-[#00C600] hover:underline text-xs font-bold uppercase"
                                         >
                                             View
