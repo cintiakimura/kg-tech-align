@@ -19,7 +19,7 @@ import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
-import Connectors from './pages/Connectors';
+import connectors from './pages/connectors';
 import __Layout from './Layout.jsx';
 
 
@@ -45,7 +45,7 @@ export const PAGES = {
     "SupplierDashboard": SupplierDashboard,
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
-    "Connectors": Connectors,
+    "connectors": connectors,
 }
 
 export const pagesConfig = {
