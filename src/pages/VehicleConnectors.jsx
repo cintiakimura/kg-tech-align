@@ -80,6 +80,7 @@ export default function VehicleConnectors() {
         e.preventDefault();
         const payload = {
             vehicle_id: vehicleId,
+            client_email: vehicle?.client_email || "", // Required for RLS
             calculator_system: newConnector.calculator_system || "",
             connector_color: newConnector.connector_color || "",
             pin_quantity: newConnector.pin_quantity || "",
