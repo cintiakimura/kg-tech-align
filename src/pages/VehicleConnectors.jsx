@@ -207,11 +207,11 @@ export default function VehicleConnectors() {
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs uppercase font-bold">List of Functions</Label>
-                                <Textarea 
+                                <FileUpload 
                                     value={newConnector.list_of_functions}
-                                    onChange={(e) => setNewConnector({...newConnector, list_of_functions: e.target.value})}
-                                    placeholder="Enter functions list..."
-                                    className={`${InputStyle} min-h-[100px]`}
+                                    onChange={(url) => setNewConnector({...newConnector, list_of_functions: url})}
+                                    label="Upload Functions List"
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                                 />
                             </div>
                         </div>
