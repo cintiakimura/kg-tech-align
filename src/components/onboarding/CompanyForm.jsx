@@ -44,11 +44,18 @@ export default function CompanyForm({ onComplete, initialData }) {
       const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = computedData;
 
       // Check if exists to update, or create new
+      let finalClientNumber = initialData?.client_number;
+
       if (initialData?.id) {
            await base44.entities.CompanyProfile.update(initialData.id, cleanData);
+           toast.success("Client saved. Client Number: " + (initialData.client_number || 'N/A'));
       } else {
-           const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
+           // KGCL- + 6 random digits
+           const random6 = Math.floor(100000 + Math.random() * 900000);
+           const clientNumber = `KGCL-${random6}`;
+           finalClientNumber = clientNumber;
            await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
+           toast.success(`Client created! Number: ${clientNumber}`);
       }
 
       if (onComplete) onComplete();
@@ -74,6 +81,31 @@ export default function CompanyForm({ onComplete, initialData }) {
                         />
                         {errors.company_name && <span className="text-xs text-red-500">{errors.company_name.message}</span>}
                     </div>
+
+                    {initialData?.client_number && (
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-[#00C600]" /> Client Number
+                            </label>
+                            <div className="flex gap-2">
+                                <Input 
+                                    value={initialData.client_number} 
+                                    readOnly 
+                                    className="bg-gray-100 dark:bg-gray-800 font-mono font-bold"
+                                />
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(initialData.client_number);
+                                        toast.success("Copied to clipboard");
+                                    }}
+                                >
+                                    Copy
+                                </Button>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">

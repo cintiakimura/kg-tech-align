@@ -125,17 +125,20 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
-            toast.success("Saved successfully");
+            toast.success(`Vehicle saved. Number: ${initialData.vehicle_number || 'N/A'}`);
             navigate(`/VehicleConnectors?vehicleId=${vehicleId}`);
         } else {
-            const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
+            // VEH- + 6 random digits
+            const random6 = Math.floor(100000 + Math.random() * 900000);
+            const vehicleNumber = `VEH-${random6}`;
+            
             const newVehicle = await base44.entities.Vehicle.create({
                 ...cleanData,
                 vehicle_number: vehicleNumber,
                 status: 'Open for Quotes',
                 client_email: clientEmail || ""
             });
-            toast.success("Saved successfully");
+            toast.success(`Vehicle created! Number: ${vehicleNumber}`);
             navigate(`/VehicleConnectors?vehicleId=${newVehicle.id}`);
         }
     };
@@ -148,6 +151,29 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             <CardContent>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {initialData?.vehicle_number && (
+                            <div className="col-span-1 md:col-span-2 space-y-2 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-dashed border-[#00C600]">
+                                <label className="text-sm font-bold uppercase flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-[#00C600]" /> Vehicle Number
+                                </label>
+                                <div className="flex gap-2">
+                                    <code className="text-lg font-mono font-bold text-[#00C600]">{initialData.vehicle_number}</code>
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(initialData.vehicle_number);
+                                            toast.success("Copied");
+                                        }}
+                                        className="h-7 text-xs"
+                                    >
+                                        Copy
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <label className="text-sm font-bold uppercase">Brand</label>
                             <Input {...register("brand")} className="bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]" placeholder="RENAULT" />
