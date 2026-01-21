@@ -18,25 +18,26 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
     const onSubmit = async (data) => {
         try {
+            console.log("Submitting connector:", { vehicle_id: vehicle.id, ...data });
             await base44.entities.VehicleConnector.create({
                 vehicle_id: vehicle.id,
                 calculator_system: data.calculator_system,
-                quantity: 1, // Default to 1 as per screenshot flow implied
-                image_1: data.image_1,
-                image_2: data.image_2,
-                image_3: data.image_3,
-                image_4: data.image_4,
-                image_5: data.image_5,
-                file_wiring_diagram: data.file_wiring_diagram,
-                file_pinning_list: data.file_pinning_list,
-                file_other_1: data.file_other_1,
-                file_other_2: data.file_other_2
+                quantity: 1,
+                image_1: data.image_1 || null,
+                image_2: data.image_2 || null,
+                image_3: data.image_3 || null,
+                image_4: data.image_4 || null,
+                image_5: data.image_5 || null,
+                file_wiring_diagram: data.file_wiring_diagram || null,
+                file_pinning_list: data.file_pinning_list || null,
+                file_other_1: data.file_other_1 || null,
+                file_other_2: data.file_other_2 || null
             });
             toast.success("Connector added successfully");
             onSuccess();
         } catch (error) {
-            console.error(error);
-            toast.error("Failed to add connector");
+            console.error("Connector creation failed:", error);
+            toast.error(`Failed to add connector: ${error.message || "Unknown error"}`);
         }
     };
 
