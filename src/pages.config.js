@@ -1,23 +1,23 @@
-import Home from './pages/Home';
-import Onboarding from './pages/Onboarding';
-import Catalogue from './pages/Catalogue';
-import SupplierPortal from './pages/SupplierPortal';
-import ManagerDashboard from './pages/ManagerDashboard';
-import ClientDashboard from './pages/ClientDashboard';
-import SupplierDashboard from './pages/SupplierDashboard';
 import AdminAuditReport from './pages/AdminAuditReport';
+import Catalogue from './pages/Catalogue';
+import ClientDashboard from './pages/ClientDashboard';
+import Home from './pages/Home';
+import ManagerDashboard from './pages/ManagerDashboard';
+import Onboarding from './pages/Onboarding';
+import SupplierDashboard from './pages/SupplierDashboard';
+import SupplierPortal from './pages/SupplierPortal';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Onboarding": Onboarding,
-    "Catalogue": Catalogue,
-    "SupplierPortal": SupplierPortal,
-    "ManagerDashboard": ManagerDashboard,
-    "ClientDashboard": ClientDashboard,
-    "SupplierDashboard": SupplierDashboard,
     "AdminAuditReport": AdminAuditReport,
+    "Catalogue": Catalogue,
+    "ClientDashboard": ClientDashboard,
+    "Home": Home,
+    "ManagerDashboard": ManagerDashboard,
+    "Onboarding": Onboarding,
+    "SupplierDashboard": SupplierDashboard,
+    "SupplierPortal": SupplierPortal,
 }
 
 export const pagesConfig = {
