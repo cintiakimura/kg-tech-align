@@ -34,7 +34,6 @@ export default function CompanyForm({ onComplete, initialData }) {
   }, [initialData, reset]);
 
   const onSubmit = async (data) => {
-  try {
       // Compute composite fields
       const computedData = {
           ...data,
@@ -52,11 +51,7 @@ export default function CompanyForm({ onComplete, initialData }) {
            await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
       }
 
-        if (onComplete) onComplete();
-    } catch (error) {
-        console.error("Failed to save company info", error);
-        toast.error("Failed to save company info. Please try again.");
-    }
+      if (onComplete) onComplete();
   };
 
   return (
