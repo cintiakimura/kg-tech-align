@@ -112,32 +112,25 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
     };
 
     const onSubmit = async (data) => {
-        try {
-            // Strip system fields that cannot be updated
-            const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
-            
-            let vehicleId = initialData?.id;
+        // Strip system fields that cannot be updated
+        const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
+        
+        let vehicleId = initialData?.id;
 
-            if (vehicleId) {
-                await base44.entities.Vehicle.update(vehicleId, cleanData);
-                toast.success("Vehicle updated successfully");
-                // Redirect to connectors page
-                window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicleId}`;
-            } else {
-                const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
-                const newVehicle = await base44.entities.Vehicle.create({
-                    ...cleanData,
-                    vehicle_number: vehicleNumber,
-                    status: 'Open for Quotes',
-                    client_email: clientEmail
-                });
-                toast.success("Vehicle created successfully");
-                // Redirect to connectors page
-                window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${newVehicle.id}`;
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to save vehicle");
+        if (vehicleId) {
+            await base44.entities.Vehicle.update(vehicleId, cleanData);
+            toast.success("Vehicle updated");
+            window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicleId}`;
+        } else {
+            const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
+            const newVehicle = await base44.entities.Vehicle.create({
+                ...cleanData,
+                vehicle_number: vehicleNumber,
+                status: 'Open for Quotes',
+                client_email: clientEmail
+            });
+            toast.success("Vehicle created");
+            window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${newVehicle.id}`;
         }
     };
 
