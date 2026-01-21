@@ -247,7 +247,7 @@ export default function ClientsTable({ companies, cars: vehicles }) {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[50px]"></TableHead>
-                            <TableHead>Company / Client</TableHead>
+                            <TableHead>Organization</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Fleet Size</TableHead>
                             <TableHead className="text-right">Last Update</TableHead>
