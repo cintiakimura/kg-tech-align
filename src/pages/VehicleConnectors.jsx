@@ -275,17 +275,15 @@ export default function VehicleConnectors() {
                                         {newConnector.ecu_images.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
                                                 {newConnector.ecu_images.map((img, idx) => (
-                                                    <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden">
-                                                        <img 
+                                                    <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden bg-gray-50">
+                                                        <ImageWithFallback 
                                                             src={img} 
-                                                            alt="" 
-                                                            className="w-full h-full object-cover" 
-                                                            onError={(e) => e.target.style.display = 'none'}
+                                                            className="w-full h-full object-cover"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => removeEcuImage(idx)}
-                                                            className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                                         >
                                                             <X className="w-3 h-3" />
                                                         </button>
@@ -312,16 +310,21 @@ export default function VehicleConnectors() {
                                     <SelectItem value="none">None</SelectItem>
                                     {catalogueItems?.map(item => (
                                         <SelectItem key={item.id} value={item.id}>
-                                            <div className="flex items-center gap-2">
-                                                {item.image_url && (
-                                                    <img 
-                                                        src={item.image_url} 
-                                                        alt="" 
-                                                        className="w-6 h-6 object-cover rounded" 
-                                                        onError={(e) => e.target.style.display = 'none'}
-                                                    />
-                                                )}
-                                                <span>{item.secret_part_number} ({item.colour})</span>
+                                            <div className="flex items-center gap-2 w-full overflow-hidden">
+                                                <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                                                    {item.image_url ? (
+                                                        <ImageWithFallback 
+                                                            src={item.image_url} 
+                                                            className="w-full h-full" 
+                                                            contain={true}
+                                                        />
+                                                    ) : (
+                                                        <ImageIcon className="w-3 h-3 text-gray-300" />
+                                                    )}
+                                                </div>
+                                                <span className="truncate max-w-[240px] block" title={`${item.secret_part_number} (${item.colour})`}>
+                                                    {item.secret_part_number} ({item.colour})
+                                                </span>
                                             </div>
                                         </SelectItem>
                                     ))}
