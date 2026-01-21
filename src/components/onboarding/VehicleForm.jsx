@@ -189,11 +189,27 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
                     </div>
                     <div className="space-y-2">
                         <Label>Year</Label>
-                        <Input type="number" {...register("year", { required: true })} />
+                        <Input type="number" {...register("year", { required: true, valueAsNumber: true })} />
                     </div>
                     <div className="space-y-2">
                         <Label>VIN</Label>
                         <Input {...register("vin", { required: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Fuel</Label>
+                         <Select onValueChange={(val) => setValue("fuel", val)} defaultValue={initialData?.fuel || "Gasoline"}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select fuel type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Gasoline">Gasoline</SelectItem>
+                                <SelectItem value="Diesel">Diesel</SelectItem>
+                                <SelectItem value="Electric">Electric</SelectItem>
+                                <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                <SelectItem value="Petrol">Petrol</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label>Engine Code</Label>
@@ -221,6 +237,14 @@ export default function VehicleForm({ initialData, onSuccess, onCancel }) {
                                 <SelectItem value="Other">Other</SelectItem>
                             </SelectContent>
                         </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Number of Gears</Label>
+                        <Input type="number" {...register("number_gears", { valueAsNumber: true })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Brakes Type</Label>
+                        <Input {...register("brakes_type")} />
                     </div>
                 </CardContent>
             </Card>
