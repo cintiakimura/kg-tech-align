@@ -26,7 +26,7 @@ export default function Catalogue() {
 
     const { data: catalogue, isLoading } = useQuery({
         queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(null, 1000),
+        queryFn: () => base44.entities.Catalogue.list(undefined, 1000),
     });
 
     const addToRequestMutation = useMutation({
@@ -62,13 +62,13 @@ export default function Catalogue() {
     };
 
     const filteredItems = catalogue?.filter(item => {
-        // Search by visible attributes only since PN is secret
         const search = searchTerm.toLowerCase();
         if (!search) return true;
         return (
             (item.colour && item.colour.toLowerCase().includes(search)) ||
             (item.type && item.type.toLowerCase().includes(search)) ||
-            (item.pins && item.pins.toString().includes(search))
+            (item.pins && item.pins.toString().includes(search)) ||
+            (item.calculator_system && item.calculator_system.toLowerCase().includes(search))
         );
     }) || [];
 
@@ -84,7 +84,7 @@ export default function Catalogue() {
                 {/* Admin Import Button - Only visible to admins */}
                 {user.role === 'admin' && (
                      <Button variant="outline" onClick={() => window.location.href = '/AdminImportCatalogue'}>
-                        Import from Google Sheet
+                        Upload CSV
                      </Button>
                 )}
                 <div className="flex items-center gap-2 w-full md:w-auto">
@@ -172,32 +172,44 @@ export default function Catalogue() {
                                     {viewMode === 'grid' ? (
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Pins:</span>
+                                                <span className="font-semibold text-gray-500 w-24">Pin Quantity:</span>
                                                 <span className="font-bold">{item.pins || '-'}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Colour:</span>
+                                                <span className="font-semibold text-gray-500 w-24">Color:</span>
                                                 <span className="capitalize">{item.colour || '-'}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-semibold text-gray-500 w-14">Type:</span>
-                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                                <span className="font-semibold text-gray-500 w-24">Type:</span>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
+                                            {item.calculator_system && (
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <span className="font-semibold text-gray-500 w-24">System:</span>
+                                                    <span className="capitalize">{item.calculator_system}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         <>
                                             <div className="flex flex-col">
-                                                <span className="text-xs text-gray-500 uppercase">Pins</span>
+                                                <span className="text-xs text-gray-500 uppercase">Pin Quantity</span>
                                                 <span className="font-bold">{item.pins || '-'}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-xs text-gray-500 uppercase">Colour</span>
+                                                <span className="text-xs text-gray-500 uppercase">Color</span>
                                                 <span className="capitalize">{item.colour || '-'}</span>
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-xs text-gray-500 uppercase">Type</span>
-                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Connector'}</Badge>
                                             </div>
+                                            {item.calculator_system && (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 uppercase">System</span>
+                                                    <span className="capitalize">{item.calculator_system}</span>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                     

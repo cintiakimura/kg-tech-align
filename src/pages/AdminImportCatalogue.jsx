@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,13 +12,16 @@ export default function AdminImportCatalogue() {
     const [progress, setProgress] = useState(0);
     const [status, setStatus] = useState("idle"); // idle, importing, done
     const [logs, setLogs] = useState([]);
-    
-    // Using the export format to get CSV directly
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1S-YdOVM9Ajf8miBAakJY-yDH7--w-HabUcg1mtovTjs/export?format=csv&gid=583597950";
+    const [csvFile, setCsvFile] = useState(null);
 
     const addLog = (msg) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 100));
 
     const handleImport = async () => {
+        if (!csvFile) {
+            toast.error("Please select a CSV file");
+            return;
+        }
+
         if (!confirm("This will overwrite existing catalogue data. Continue?")) return;
 
         setStatus("importing");
@@ -25,11 +29,9 @@ export default function AdminImportCatalogue() {
         setLogs([]);
         
         try {
-            // 1. Fetch CSV
-            addLog("Fetching Google Sheet CSV...");
-            const response = await fetch(GOOGLE_SHEET_CSV_URL);
-            if (!response.ok) throw new Error("Failed to fetch CSV");
-            const csvText = await response.text();
+            // 1. Read CSV
+            addLog("Reading CSV file...");
+            const csvText = await csvFile.text();
             
             // Parse CSV (Handling quoted fields properly)
             // Columns based on Sheet: 
@@ -46,20 +48,39 @@ export default function AdminImportCatalogue() {
             for (let i = startIndex; i < lines.length; i++) {
                 // Simple regex to split by comma ignoring quotes
                 const cells = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
-                if (cells.length < 5) continue; // Skip empty rows
-                
-                // We need at least one part number
-                const part1 = cells[4];
-                const part2 = cells[8];
-                
+                if (cells.length < 2) continue; // Skip empty rows
+
+                // Strategy A: Standard (Brand, Pins, Colour, Type, Part1...)
+                let part1 = cells[4];
+                let part2 = cells[8];
+                let brand = cells[0];
+                let pins = cells[1];
+                let colour = cells[2];
+                let type = cells[3];
+
+                // Strategy B: User provided format ("product photo","connector/header", "pin quantity", "color")
+                // If column 0 looks like an image/file and no column 4
+                if ((!part1 && cells.length <= 4) || (cells[0] && (cells[0].includes('.jpg') || cells[0].includes('.png') || cells[0].includes('http')))) {
+                    // Try to extract part number from filename in col 0
+                    const filename = cells[0].split('/').pop();
+                    // Remove extension
+                    part1 = filename.split('.')[0]; 
+                    part2 = null;
+                    brand = "Unknown"; // Not in this format
+
+                    type = cells[1]; // connector/header
+                    pins = cells[2]; // pin quantity
+                    colour = cells[3]; // color
+                }
+
                 if (part1 || part2) {
                     rows.push({
-                        brand: cells[0] || "Unknown",
+                        brand: brand || "Unknown",
                         part1: part1,
                         part2: part2,
-                        original_pins: cells[1],   // Fallback
-                        original_colour: cells[2], // Fallback
-                        original_type: cells[3]    // Fallback
+                        original_pins: pins,
+                        original_colour: colour,
+                        original_type: type
                     });
                 }
             }
@@ -88,13 +109,19 @@ export default function AdminImportCatalogue() {
                         // Web Search & Extraction via LLM
                         const prompt = `
                             Search for electronic component "${part}" (Brand: ${row.brand}).
-                            Look on DigiKey, Mouser, LCSC, or manufacturer sites.
+                            Perform an EXHAUSTIVE search across DigiKey, Mouser, LCSC, TE Connectivity, Aptiv, Molex, and all major distributors. Do not skip any potential source.
                             
                             TASKS:
-                            1. Find a LARGE, CLEAN product photo. NO watermarks, NO logos, white background preferred.
-                            2. Find the direct PDF URL for the datasheet.
-                            3. Extract technical specs from the product description:
-                               - Pins (integer)
+                            1. IMAGE: Find a HIGH-RESOLUTION, CRYSTAL CLEAR product photo.
+                               - MUST be on a WHITE or transparent background.
+                               - ABSOLUTELY NO watermarks, NO text overlays, NO company logos on the image.
+                               - NO blurry or low-quality images.
+                               - Add the image URL inline.
+
+                            2. DOCUMENTATION: Find the DIRECT hyperlink to the official PDF datasheet or technical drawing.
+                            
+                            3. SPECS: Extract accurate technical specs:
+                               - Pins (integer count)
                                - Colour (string, e.g. Black, Grey, Orange)
                                - Type (Connector, Header, Terminal, or Other)
 
@@ -146,11 +173,24 @@ export default function AdminImportCatalogue() {
 
                     // Prepare final data
                     // Use extracted data if available, fallback to CSV data
+                    const validTypes = ["connector", "header", "terminal", "housing", "seal", "lock", "other"];
+                    let rawType = (extractedData?.type || row.original_type || "other").toLowerCase();
+                    // Map common variations or fallback to 'other'
+                    if (!validTypes.includes(rawType)) {
+                        if (rawType.includes('terminal')) rawType = 'terminal';
+                        else if (rawType.includes('housing')) rawType = 'housing';
+                        else if (rawType.includes('seal')) rawType = 'seal';
+                        else if (rawType.includes('lock')) rawType = 'lock';
+                        else if (rawType.includes('header')) rawType = 'header';
+                        else if (rawType.includes('conn')) rawType = 'connector';
+                        else rawType = 'other';
+                    }
+
                     const finalData = {
                         secret_part_number: successPart || row.part1 || row.part2, // The part that yielded results or default
                         pins: extractedData?.pins || (row.original_pins ? parseInt(row.original_pins) : 0),
                         colour: extractedData?.colour || row.original_colour || "Unknown",
-                        type: (extractedData?.type || row.original_type || "other").toLowerCase(),
+                        type: rawType,
                         image_url: null, // Will upload below
                         pdf_url: null    // Will upload/set below
                     };
@@ -233,7 +273,7 @@ export default function AdminImportCatalogue() {
                 <div>
                     <h1 className="text-3xl font-bold">Catalogue Import</h1>
                     <p className="text-muted-foreground">
-                        Full import from Google Sheet with intelligent image and metadata extraction.
+                        Full import from CSV with intelligent image and metadata extraction.
                     </p>
                 </div>
             </div>
@@ -249,10 +289,22 @@ export default function AdminImportCatalogue() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Select CSV File</label>
+                            <Input 
+                                type="file" 
+                                accept=".csv" 
+                                onChange={(e) => setCsvFile(e.target.files[0])}
+                                disabled={status === 'importing'}
+                            />
+                        </div>
+                    </div>
+
                     <div className="bg-slate-50 p-4 rounded-lg border text-sm space-y-2">
                         <div className="font-semibold">Import Strategy:</div>
                         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                            <li>Fetches all 117+ rows from Google Sheet</li>
+                            <li>Reads rows from uploaded CSV</li>
                             <li>Tries <strong>Part 1</strong> first; if no clean image found, tries <strong>Part 2</strong></li>
                             <li>Searches DigiKey/Mouser/LCSC for large, clean (no watermark) images</li>
                             <li>Extracts Pins, Colour, and Type from web description</li>

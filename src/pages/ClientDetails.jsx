@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import FileUpload from '@/components/onboarding/FileUpload';
-
+import FleetManager from '@/components/onboarding/fleet/FleetManager';
 
 
 export default function ClientDetails() {
@@ -317,93 +317,7 @@ export default function ClientDetails() {
 
                 {/* FLEET TAB */}
                 <TabsContent value="fleet">
-                    {isAddingVehicle ? (
-                        <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl border shadow-sm">
-                            <VehicleForm 
-                                clientEmail={email}
-                                initialData={editingVehicle}
-                                onCancel={() => {
-                                    setIsAddingVehicle(false);
-                                    setEditingVehicle(null);
-                                }}
-                                onSuccess={() => {
-                                    setIsAddingVehicle(false);
-                                    setEditingVehicle(null);
-                                    queryClient.invalidateQueries(['vehicles', email]);
-                                    toast.success("Vehicle saved to fleet");
-                                }}
-                            />
-                        </div>
-                    ) : (
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Car className="w-5 h-5" /> Vehicle Fleet
-                                    </CardTitle>
-                                    <CardDescription>List of all vehicles registered by this client.</CardDescription>
-                                </div>
-                                <Button onClick={() => setIsAddingVehicle(true)} className="bg-[#00C600] hover:bg-[#00b300]">
-                                    <Plus className="w-4 h-4 mr-2" /> Add Vehicle
-                                </Button>
-                            </CardHeader>
-                            <CardContent>
-                                {fleet.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {fleet.map(car => (
-                                        <div key={car.id} className="border rounded-xl overflow-hidden hover:shadow-md transition-shadow bg-white dark:bg-[#1e1e1e]">
-                                            {/* Car Image Preview */}
-                                            <div className="h-40 bg-gray-100 dark:bg-gray-800 w-full relative">
-                                                {car.image_connector_front ? (
-                                                    <img src={car.image_connector_front} alt={car.model} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="flex items-center justify-center h-full text-gray-400">
-                                                        <Car className="w-10 h-10" />
-                                                    </div>
-                                                )}
-                                                <Badge className="absolute top-2 right-2 bg-white/90 text-black hover:bg-white">
-                                                    {car.transmission_type}
-                                                </Badge>
-                                            </div>
-                                            
-                                            <div className="p-4 space-y-3">
-                                                <div>
-                                                    <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
-                                                    <p className="text-xs text-muted-foreground">{car.engine_model}</p>
-                                                </div>
-                                                
-                                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                                    <div className="bg-gray-50 dark:bg-white/5 p-2 rounded">
-                                                        <span className="block text-muted-foreground">Brakes</span>
-                                                        <span className="font-medium">{car.brakes_type || 'N/A'}</span>
-                                                    </div>
-                                                    <div className="bg-gray-50 dark:bg-white/5 p-2 rounded">
-                                                        <span className="block text-muted-foreground">Created</span>
-                                                        <span className="font-medium">{format(new Date(car.created_date), 'MMM d, yyyy')}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="pt-2 flex justify-end gap-2">
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
-                                                        setEditingVehicle(car);
-                                                        setIsAddingVehicle(true);
-                                                    }}>
-                                                        <FileText className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <Car className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                    <p>No vehicles in fleet.</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                )}
+                     <FleetManager clientEmail={email} vehicles={fleet} />
                 </TabsContent>
 
                 {/* DOCUMENTS TAB */}
