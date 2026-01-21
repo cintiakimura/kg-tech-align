@@ -19,18 +19,6 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
 
     const vehicles = propVehicles || fetchedVehicles;
 
-    React.useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const editingId = params.get('editingVehicleId');
-        if (editingId && vehicles) {
-            const car = vehicles.find(v => v.id === editingId);
-            if (car) {
-                setSelectedVehicle(car);
-                setView("add-vehicle");
-            }
-        }
-    }, [vehicles]);
-
     const handleAddVehicle = () => {
         setSelectedVehicle(null);
         setView("add-vehicle");
