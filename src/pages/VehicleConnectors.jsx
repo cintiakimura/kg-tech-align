@@ -48,8 +48,12 @@ export default function VehicleConnectors() {
 
     const createConnectorMutation = useMutation({
         mutationFn: (data) => base44.entities.VehicleConnector.create(data),
-        onSuccess: () => {
+        onSuccess: (savedConnector) => {
+            // Update local cache immediately to add the new card to the list
+            queryClient.setQueryData(['connectors', vehicleId], (old) => old ? [...old, savedConnector] : [savedConnector]);
+            // Also invalidate to ensure consistency with server
             queryClient.invalidateQueries(['connectors', vehicleId]);
+            
             toast.success("Saved");
             setNewConnector({
                 calculator_system: '',
