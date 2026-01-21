@@ -75,22 +75,73 @@ export default function PrintableReport({ companyProfile, carProfiles }) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <span className="font-semibold block text-xs text-gray-500 mb-1">{t('required_photos')}</span>
-                        <ul className="list-disc list-inside text-xs">
-                            {car.image_connector_front && <li>{t('conn_front')}</li>}
-                            {car.image_lever_side && <li>{t('lever_side')}</li>}
-                            {car.image_ecu_part_number && <li>{t('ecu_part')}</li>}
-                            {car.image_ecu_front && <li>{t('ecu_front')}</li>}
-                        </ul>
+                {/* Embedded Photos */}
+                <div className="mb-4">
+                    <span className="font-semibold block text-sm text-gray-700 mb-2">{t('required_photos')}</span>
+                    <div className="grid grid-cols-4 gap-2">
+                        {car.image_connector_front && (
+                            <div>
+                                <img src={car.image_connector_front} alt={t('conn_front')} className="w-full h-24 object-cover border rounded" />
+                                <p className="text-xs text-center mt-1">{t('conn_front')}</p>
+                            </div>
+                        )}
+                        {car.image_lever_side && (
+                            <div>
+                                <img src={car.image_lever_side} alt={t('lever_side')} className="w-full h-24 object-cover border rounded" />
+                                <p className="text-xs text-center mt-1">{t('lever_side')}</p>
+                            </div>
+                        )}
+                        {car.image_ecu_part_number && (
+                            <div>
+                                <img src={car.image_ecu_part_number} alt={t('ecu_part')} className="w-full h-24 object-cover border rounded" />
+                                <p className="text-xs text-center mt-1">{t('ecu_part')}</p>
+                            </div>
+                        )}
+                        {car.image_ecu_front && (
+                            <div>
+                                <img src={car.image_ecu_front} alt={t('ecu_front')} className="w-full h-24 object-cover border rounded" />
+                                <p className="text-xs text-center mt-1">{t('ecu_front')}</p>
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <span className="font-semibold block text-xs text-gray-500 mb-1">{t('tech_docs')}</span>
-                        <ul className="list-disc list-inside text-xs">
-                            {car.file_electrical_scheme && <li>{t('elec_scheme')}</li>}
-                            {car.file_sensors_actuators && <li>{t('sensors_list')}</li>}
-                        </ul>
+                    {car.image_extra_1 || car.image_extra_2 ? (
+                        <div className="grid grid-cols-4 gap-2 mt-2">
+                            {car.image_extra_1 && (
+                                <div>
+                                    <img src={car.image_extra_1} alt={`${t('extra_photo')} 1`} className="w-full h-24 object-cover border rounded" />
+                                    <p className="text-xs text-center mt-1">{t('extra_photo')} 1</p>
+                                </div>
+                            )}
+                            {car.image_extra_2 && (
+                                <div>
+                                    <img src={car.image_extra_2} alt={`${t('extra_photo')} 2`} className="w-full h-24 object-cover border rounded" />
+                                    <p className="text-xs text-center mt-1">{t('extra_photo')} 2</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : null}
+                </div>
+
+                {/* Technical Documents with Links */}
+                <div>
+                    <span className="font-semibold block text-sm text-gray-700 mb-2">{t('tech_docs')}</span>
+                    <div className="space-y-1">
+                        {car.file_electrical_scheme && (
+                            <div className="text-xs">
+                                <span className="font-medium">{t('elec_scheme')}: </span>
+                                <a href={car.file_electrical_scheme} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">
+                                    {car.file_electrical_scheme}
+                                </a>
+                            </div>
+                        )}
+                        {car.file_sensors_actuators && (
+                            <div className="text-xs">
+                                <span className="font-medium">{t('sensors_list')}: </span>
+                                <a href={car.file_sensors_actuators} className="text-blue-600 underline break-all" target="_blank" rel="noopener noreferrer">
+                                    {car.file_sensors_actuators}
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
               </div>

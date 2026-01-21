@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText } from 'lucide-react';
+import { Loader2, CheckCircle, Building2, Mail, Phone, MapPin, FileText, User, Briefcase, Truck } from 'lucide-react';
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from '../LanguageContext';
 
@@ -19,17 +20,21 @@ export default function CompanyForm({ onComplete, initialData }) {
   }, [initialData, reset]);
 
   const onSubmit = async (data) => {
-    try {
-        // Check if exists to update, or create new
-        // For simplicity in this flow, we'll create or assume update if passed
-        if (initialData?.id) {
-             await base44.entities.CompanyProfile.update(initialData.id, data);
-        } else {
-             await base44.entities.CompanyProfile.create(data);
-        }
+  try {
+      // Strip system fields that cannot be updated
+      const { id, created_date, updated_date, created_by, updated_by, ...cleanData } = data;
+
+      // Check if exists to update, or create new
+      if (initialData?.id) {
+           await base44.entities.CompanyProfile.update(initialData.id, cleanData);
+      } else {
+           const clientNumber = `CL-${Date.now().toString().slice(-5)}`;
+           await base44.entities.CompanyProfile.create({ ...cleanData, client_number: clientNumber });
+      }
         if (onComplete) onComplete();
     } catch (error) {
         console.error("Failed to save company info", error);
+        toast.error("Failed to save company info. Please try again.");
     }
   };
 
@@ -76,6 +81,17 @@ export default function CompanyForm({ onComplete, initialData }) {
                         />
                     </div>
 
+                    <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium flex items-center gap-2">
+                            <Truck className="w-4 h-4 text-[#00C600]" /> {t('delivery_address')}
+                        </label>
+                        <Input 
+                            {...register("delivery_address")} 
+                            placeholder="If different from billing address"
+                            className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
+                        />
+                    </div>
+
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
                             <Mail className="w-4 h-4 text-[#00C600]" /> {t('contact_email')}
@@ -99,6 +115,56 @@ export default function CompanyForm({ onComplete, initialData }) {
                             placeholder="+1 (555) 000-0000"
                             className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
                         />
+                    </div>
+
+                    <div className="md:col-span-2 pt-4 border-t">
+                        <h3 className="font-semibold text-lg flex items-center gap-2 mb-4">
+                            <User className="w-5 h-5" /> {t('contact_person')}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium flex items-center gap-2">
+                                    <User className="w-4 h-4 text-[#00C600]" /> {t('contact_person_name')}
+                                </label>
+                                <Input 
+                                    {...register("contact_person_name")} 
+                                    placeholder="Full Name"
+                                    className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium flex items-center gap-2">
+                                    <Briefcase className="w-4 h-4 text-[#00C600]" /> {t('position')}
+                                </label>
+                                <Input 
+                                    {...register("contact_person_position")} 
+                                    placeholder="Job Title"
+                                    className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium flex items-center gap-2">
+                                    <Mail className="w-4 h-4 text-[#00C600]" /> {t('contact_person_email')}
+                                </label>
+                                <Input 
+                                    {...register("contact_person_email", { 
+                                        pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }
+                                    })} 
+                                    placeholder="person@company.com"
+                                    className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium flex items-center gap-2">
+                                    <Phone className="w-4 h-4 text-[#00C600]" /> {t('contact_person_phone')}
+                                </label>
+                                <Input 
+                                    {...register("contact_person_phone")} 
+                                    placeholder="Direct Phone / Mobile"
+                                    className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -1,216 +1,261 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, ShoppingCart, Plus, Minus, Info } from 'lucide-react';
-import { useLanguage } from '../components/LanguageContext';
+import { Search, Loader2, Package, Paperclip, Camera, LayoutGrid, List, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import EditProductModal from "@/components/catalogue/EditProductModal";
 
 export default function Catalogue() {
-  const { t } = useLanguage();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [cart, setCart] = useState([]);
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const queryClient = useQueryClient();
+    const [searchTerm, setSearchTerm] = useState("");
+    const [viewMode, setViewMode] = useState("list");
+    const [editingProduct, setEditingProduct] = useState(null);
+    const queryClient = useQueryClient();
+    const [user, setUser] = useState(null);
 
-  // Fetch Parts
-  const { data: parts = [] } = useQuery({
-    queryKey: ['parts'],
-    queryFn: () => base44.entities.Part.list(),
-  });
+    React.useEffect(() => {
+        base44.auth.me().then(u => {
+            if (!u) base44.auth.redirectToLogin();
+            setUser(u);
+        }).catch(() => base44.auth.redirectToLogin());
+    }, []);
 
-  // Fetch User's Cars
-  const { data: myCars = [] } = useQuery({
-    queryKey: ['myCars'],
-    queryFn: () => base44.entities.CarProfile.list(),
-  });
-
-  const createRequestMutation = useMutation({
-    mutationFn: async (data) => {
-      return base44.entities.PartRequest.create(data);
-    },
-    onSuccess: () => {
-      setCart([]);
-      setIsCheckoutOpen(false);
-      alert("Request sent successfully!");
-    }
-  });
-
-  const filteredParts = parts.filter(part => 
-    part.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    part.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const addToCart = (part) => {
-    setCart(prev => {
-      const existing = prev.find(p => p.id === part.id);
-      if (existing) {
-        return prev.map(p => p.id === part.id ? {...p, quantity: p.quantity + 1} : p);
-      }
-      return [...prev, {...part, quantity: 1}];
+    const { data: catalogue, isLoading } = useQuery({
+        queryKey: ['catalogue'],
+        queryFn: () => base44.entities.Catalogue.list(null, 1000),
     });
-  };
 
-  const removeFromCart = (partId) => {
-    setCart(prev => prev.filter(p => p.id !== partId));
-  };
-
-  const updateQuantity = (partId, delta) => {
-    setCart(prev => prev.map(p => {
-      if (p.id === partId) {
-        return {...p, quantity: Math.max(1, p.quantity + delta)};
-      }
-      return p;
-    }));
-  };
-
-  const handleCheckout = () => {
-    if (!selectedCar) return;
-    
-    createRequestMutation.mutate({
-      car_profile_id: selectedCar,
-      status: 'open',
-      description: `Request for ${cart.length} items`,
-      requested_parts: cart.map(item => ({
-        part_id: item.id,
-        quantity: item.quantity,
-        notes: ""
-      }))
+    const addToRequestMutation = useMutation({
+        mutationFn: async (part) => {
+            await base44.entities.RequestItem.create({
+                user_email: user.email,
+                catalogue_id: part.id,
+                catalogue_part_number: "SECRET", // Don't expose part number
+                status: 'pending'
+            });
+        },
+        onSuccess: () => {
+            toast.success("Added to your request");
+            queryClient.invalidateQueries(['myRequests']);
+        },
+        onError: () => {
+            toast.error("Failed to add to request");
+        }
     });
-  };
 
-  return (
-    <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Parts Catalogue</h1>
-          <p className="text-muted-foreground">Browse and request components for your vehicles.</p>
-        </div>
-        
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search parts..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          
-          <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#00C600] text-white relative">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Cart
-                {cart.length > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 rounded-full">
-                    {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                  </Badge>
+    const handleImageUpload = async (id, file) => {
+        if (!file) return;
+        const toastId = toast.loading("Uploading image...");
+        try {
+            const { file_url } = await base44.integrations.Core.UploadFile({ file });
+            await base44.entities.Catalogue.update(id, { image_url: file_url });
+            toast.success("Image updated", { id: toastId });
+            queryClient.invalidateQueries(['catalogue']);
+        } catch (e) {
+            console.error(e);
+            toast.error("Failed to upload", { id: toastId });
+        }
+    };
+
+    const filteredItems = catalogue?.filter(item => {
+        // Search by visible attributes only since PN is secret
+        const search = searchTerm.toLowerCase();
+        if (!search) return true;
+        return (
+            (item.colour && item.colour.toLowerCase().includes(search)) ||
+            (item.type && item.type.toLowerCase().includes(search)) ||
+            (item.pins && item.pins.toString().includes(search))
+        );
+    }) || [];
+
+    if (!user) return null;
+
+    return (
+        <div className="space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold">Catalogue</h1>
+                    <p className="text-muted-foreground">Select components for your project.</p>
+                </div>
+                {/* Admin Import Button - Only visible to admins */}
+                {user.role === 'admin' && (
+                     <Button variant="outline" onClick={() => window.location.href = '/AdminImportCatalogue'}>
+                        Import from Google Sheet
+                     </Button>
                 )}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Request Summary</DialogTitle>
-              </DialogHeader>
-              <div className="py-4 space-y-4">
-                {cart.length === 0 ? (
-                  <p className="text-center text-muted-foreground">Your cart is empty.</p>
-                ) : (
-                  <>
-                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                      {cart.map(item => (
-                        <div key={item.id} className="flex justify-between items-center border-b pb-2">
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{item.sku}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, -1)}>
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="text-sm w-4 text-center">{item.quantity}</span>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, 1)}>
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500" onClick={() => removeFromCart(item.id)}>
-                              <Info className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-72">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search by pins, colour, type..." 
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-
-                    <div className="pt-4">
-                      <label className="text-sm font-medium mb-2 block">Select Vehicle</label>
-                      <select 
-                        className="w-full p-2 border rounded-md bg-background"
-                        onChange={(e) => setSelectedCar(e.target.value)}
-                        value={selectedCar || ""}
-                      >
-                        <option value="" disabled>Choose a vehicle...</option>
-                        {myCars.map(car => (
-                          <option key={car.id} value={car.id}>{car.brand} {car.model} ({car.year})</option>
-                        ))}
-                      </select>
-                      {myCars.length === 0 && (
-                        <p className="text-xs text-amber-500 mt-1">Please add a vehicle in your Digital Garage first.</p>
-                      )}
+                    <div className="flex items-center px-3 py-2 bg-white border rounded text-xs font-medium text-gray-500">
+                         {catalogue?.length || 0} Items
                     </div>
-                  </>
-                )}
-              </div>
-              <CardFooter className="px-0 pt-2 justify-between">
-                 <Button variant="outline" onClick={() => setIsCheckoutOpen(false)}>Close</Button>
-                 <Button 
-                   className="bg-[#00C600] text-white" 
-                   onClick={handleCheckout}
-                   disabled={cart.length === 0 || !selectedCar || createRequestMutation.isPending}
-                 >
-                   {createRequestMutation.isPending ? 'Sending...' : 'Submit Request'}
-                 </Button>
-              </CardFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredParts.map(part => (
-          <Card key={part.id} className="overflow-hidden flex flex-col group hover:shadow-lg transition-all">
-            <div className="aspect-square bg-gray-100 dark:bg-[#1a1a1a] relative flex items-center justify-center p-4">
-              {part.image_url ? (
-                <img src={part.image_url} alt={part.name} className="object-contain h-full w-full mix-blend-multiply dark:mix-blend-normal" />
-              ) : (
-                <div className="text-4xl text-gray-300 font-bold">{part.sku?.substring(0,2)}</div>
-              )}
-              <Badge className="absolute top-2 right-2">{part.category}</Badge>
+                    <div className="flex items-center border rounded-md bg-white">
+                        <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className={`h-10 w-10 rounded-none rounded-l-md ${viewMode === 'grid' ? 'bg-gray-100' : ''}`}
+                            onClick={() => setViewMode('grid')}
+                        >
+                            <LayoutGrid className="h-4 w-4" />
+                        </Button>
+                        <div className="w-px h-6 bg-gray-200" />
+                        <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className={`h-10 w-10 rounded-none rounded-r-md ${viewMode === 'list' ? 'bg-gray-100' : ''}`}
+                            onClick={() => setViewMode('list')}
+                        >
+                            <List className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
             </div>
-            <CardHeader className="p-4 pb-2">
-              <CardTitle className="text-lg">{part.name}</CardTitle>
-              <CardDescription className="font-mono text-xs">{part.sku}</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 flex-1">
-              <p className="text-sm text-muted-foreground line-clamp-2">{part.description}</p>
-            </CardContent>
-            <CardFooter className="p-4 pt-0">
-              <Button 
-                variant="outline" 
-                className="w-full hover:bg-[#00C600] hover:text-white transition-colors"
-                onClick={() => addToCart(part)}
-              >
-                Add to Request
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
+
+            {isLoading ? (
+                <div className={`gap-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col'}`}>
+                    {[1,2,3,4,5,6].map(i => <Skeleton key={i} className={viewMode === 'grid' ? "h-48 w-full" : "h-24 w-full"} />)}
+                </div>
+            ) : (
+                <div className={`gap-6 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col'}`}>
+                    {filteredItems.map((item) => (
+                        <Card key={item.id} className={`overflow-hidden hover:shadow-md transition-all relative group ${viewMode === 'grid' ? 'flex h-48' : 'flex items-center p-2'}`}>
+                            {/* Admin Controls */}
+                            {user.role === 'admin' && (
+                                <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                    <label className="cursor-pointer bg-gray-900/10 hover:bg-gray-900/20 p-1.5 rounded-full transition-colors block backdrop-blur-sm" title="Upload new image">
+                                        <input 
+                                            type="file" 
+                                            className="hidden" 
+                                            accept="image/*"
+                                            onChange={(e) => handleImageUpload(item.id, e.target.files[0])}
+                                            onClick={(e) => e.target.value = null} // Allow re-uploading same file
+                                        />
+                                        <Camera className="w-4 h-4 text-gray-700" />
+                                    </label>
+                                    <button 
+                                        onClick={() => setEditingProduct(item)}
+                                        className="bg-gray-900/10 hover:bg-gray-900/20 p-1.5 rounded-full transition-colors backdrop-blur-sm"
+                                        title="Edit details"
+                                    >
+                                        <Pencil className="w-4 h-4 text-gray-700" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Clean Product Image */}
+                            <div className={`${viewMode === 'grid' ? 'w-48 border-r p-4' : 'w-24 h-20 p-2'} bg-white flex items-center justify-center shrink-0 relative`}>
+                                {item.image_url ? (
+                                    <img 
+                                        src={item.image_url} 
+                                        alt="Component" 
+                                        className="w-full h-full object-contain mix-blend-multiply"
+                                    />
+                                ) : (
+                                    <Package className={`${viewMode === 'grid' ? 'w-12 h-12' : 'w-8 h-8'} text-gray-200`} />
+                                )}
+                            </div>
+                            
+                            {/* Details */}
+                            <div className={`flex-1 p-4 flex ${viewMode === 'grid' ? 'flex-col justify-between' : 'flex-row items-center justify-between gap-4'}`}>
+                                <div className={`${viewMode === 'grid' ? 'space-y-3' : 'flex items-center gap-8'}`}>
+                                    {viewMode === 'grid' ? (
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="font-semibold text-gray-500 w-14">Pins:</span>
+                                                <span className="font-bold">{item.pins || '-'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="font-semibold text-gray-500 w-14">Colour:</span>
+                                                <span className="capitalize">{item.colour || '-'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="font-semibold text-gray-500 w-14">Type:</span>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Pins</span>
+                                                <span className="font-bold">{item.pins || '-'}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Colour</span>
+                                                <span className="capitalize">{item.colour || '-'}</span>
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs text-gray-500 uppercase">Type</span>
+                                                <Badge variant="secondary" className="font-normal capitalize">{item.type || 'Other'}</Badge>
+                                            </div>
+                                        </>
+                                    )}
+                                    
+                                    {item.pdf_url && viewMode === 'grid' && (
+                                        <div className="absolute top-4 right-4">
+                                            <a 
+                                                href={item.pdf_url} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="text-gray-400 hover:text-blue-600 transition-colors p-1"
+                                                title="View Datasheet"
+                                            >
+                                                <Paperclip className="w-4 h-4" />
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={`${viewMode === 'grid' ? 'mt-2' : 'flex items-center gap-4'}`}>
+                                    {item.pdf_url && viewMode === 'list' && (
+                                        <a 
+                                            href={item.pdf_url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-gray-400 hover:text-blue-600 transition-colors p-2"
+                                            title="View Datasheet"
+                                        >
+                                            <Paperclip className="w-4 h-4" />
+                                        </a>
+                                    )}
+
+                                    {user?.user_type === 'supplier' ? (
+                                        <div className="text-xs text-gray-400 italic px-2">
+                                            View Only
+                                        </div>
+                                    ) : (
+                                        <Button 
+                                            size="sm"
+                                            className={`${viewMode === 'grid' ? 'w-full' : ''} bg-[#00C600] hover:bg-[#00b300] h-8 text-xs`} 
+                                            onClick={() => addToRequestMutation.mutate(item)}
+                                            disabled={addToRequestMutation.isPending}
+                                        >
+                                            {addToRequestMutation.isPending && <Loader2 className="w-3 h-3 animate-spin mr-2" />}
+                                            {viewMode === 'grid' ? 'Add to request' : 'Add'}
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            )}
+            
+            <EditProductModal 
+                product={editingProduct} 
+                open={!!editingProduct} 
+                onOpenChange={(open) => !open && setEditingProduct(null)} 
+            />
+        </div>
+    );
 }
