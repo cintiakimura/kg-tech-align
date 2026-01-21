@@ -10,7 +10,7 @@ import { Loader2, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
 
-export default function VehicleConnectors() {
+export default function Connectors() {
     const queryClient = useQueryClient();
     const urlParams = new URLSearchParams(window.location.search);
     const vehicleId = urlParams.get('vehicleId');

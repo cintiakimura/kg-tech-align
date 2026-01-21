@@ -120,7 +120,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
             toast.success("Vehicle updated");
-            window.location.assign(createPageUrl('VehicleConnectors') + `?vehicleId=${vehicleId}`);
+            window.location.assign(createPageUrl('Connectors') + `?vehicleId=${vehicleId}`);
         } else {
             const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
             const newVehicle = await base44.entities.Vehicle.create({
@@ -130,7 +130,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 client_email: clientEmail || ""
             });
             toast.success("Vehicle created");
-            window.location.assign(createPageUrl('VehicleConnectors') + `?vehicleId=${newVehicle.id}`);
+            window.location.assign(createPageUrl('Connectors') + `?vehicleId=${newVehicle.id}`);
         }
     };
 
