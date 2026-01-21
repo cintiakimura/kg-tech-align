@@ -119,7 +119,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
-            toast.success("Vehicle updated");
+            toast.success("Saved successfully");
             window.location.assign(createPageUrl('connectors') + `?vehicleId=${vehicleId}`);
         } else {
             const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
@@ -129,7 +129,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 status: 'Open for Quotes',
                 client_email: clientEmail || ""
             });
-            toast.success("Vehicle created");
+            toast.success("Saved successfully");
             window.location.assign(createPageUrl('connectors') + `?vehicleId=${newVehicle.id}`);
         }
     };
@@ -233,121 +233,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Front View</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="image_connector_front"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload Front View" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Side View (Lever)</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="image_lever_side"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload Side View" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> ECU Front View</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="image_ecu_front"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload ECU Front" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> ECU Showing PN</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="image_ecu_part_number"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Upload ECU PN" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><ImageIcon className="w-4 h-4"/> Additional Photos</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <Controller
-                                    name="image_extra_1"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Additional Photo 1" />
-                                    )}
-                                />
-                                <Controller
-                                    name="image_extra_2"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} accept="image/*" label="Additional Photo 2" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><FileText className="w-4 h-4"/> Electrical Scheme</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="file_electrical_scheme"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} label="Upload Scheme" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold uppercase"><FileText className="w-4 h-4"/> List of Functions</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Controller
-                                    name="file_sensors_actuators"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <FileUpload value={field.value} onChange={field.onChange} label="Upload List" />
-                                    )}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
 
 
 
