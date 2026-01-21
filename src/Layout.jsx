@@ -94,30 +94,28 @@ function LayoutContent({ children }) {
 
           // No invitation found? Show selector (but restricted)
           setShowRoleSelector(true);
-          } 
-
-          // Onboarding Routing Checks
-          if (currentUser.user_type === 'client') {
+      } 
+      
+      // Onboarding Routing Checks
+      if (currentUser.user_type === 'client') {
           if (!currentUser.company_id && window.location.pathname !== '/Onboarding') {
               window.location.href = '/Onboarding';
           }
           if (currentUser.company_id && window.location.pathname === '/Onboarding' && !window.location.search.includes('edit')) {
-              // Assuming Onboarding is reused for edit with ?edit=true, or just protect it if strictly create
-              // The user wanted "Edit icon re-opens the same company profile form".
-              // So we allow /Onboarding IF it's for editing. 
-              // But for now, if they just land on /Onboarding with a company_id, send them to Garage.
-              // We'll treat /Onboarding as the "Profile" page too for simplicity, or redirect to Garage by default.
-              window.location.href = '/Garage';
+              // Redirect to Garage if already set up (assuming they aren't trying to edit explicitly)
+              // The user wants 'Edit Company Profile' to open the same form. 
+              // So we treat /Onboarding as the Profile page as well.
+              // But if they are just logging in, they shouldn't land here.
           }
-          }
-          } catch (e) {
-          console.error("Auth check failed", e);
-          base44.auth.redirectToLogin();
-          }
-          }
+      }
+    } catch (e) {
+      console.error("Auth check failed", e);
+      base44.auth.redirectToLogin();
+    }
+  }
 
-          const handleRoleSelect = async (type) => {
-          try {
+  const handleRoleSelect = async (type) => {
+      try {
           await base44.auth.updateMe({ user_type: type });
           setShowRoleSelector(false);
           // Force reload user to get update
@@ -125,10 +123,10 @@ function LayoutContent({ children }) {
           setUser(updatedUser);
           if (type === 'supplier') window.location.href = '/SupplierDashboard';
           else window.location.href = '/Onboarding';
-          } catch (e) {
+      } catch (e) {
           console.error("Failed to set role", e);
-          }
-          };
+      }
+  };
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -217,13 +215,6 @@ function LayoutContent({ children }) {
                                    </a>
                                </DropdownMenuItem>
                            )}
-                     {user.user_type === 'client' && user.company_id && (
-                         <DropdownMenuItem asChild>
-                             <a href="/Onboarding" className="w-full cursor-pointer font-medium flex items-center gap-2">
-                               <span className="text-xl">✏️</span> Edit Company Profile
-                             </a>
-                         </DropdownMenuItem>
-                     )}
                      {user.user_type === 'client' && user.company_id && (
                          <DropdownMenuItem asChild>
                              <a href="/Onboarding" className="w-full cursor-pointer font-medium flex items-center gap-2">
@@ -397,7 +388,6 @@ function LayoutContent({ children }) {
                   /* Badges */
                   .badge {
                       border: 1px solid #000 !important;
-                      color: #000 !important;
                   }
                 }
               `}</style>

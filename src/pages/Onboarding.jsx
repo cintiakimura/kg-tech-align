@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Plus, PlayCircle, Car, Building2, MonitorPlay, Trash2, Edit2, CheckCircle2, AlertCircle, Printer, Settings, Save, X, Download, Loader2 } from 'lucide-react';
+import { Card } from "@/components/ui/card";
+import { Printer, Download, Loader2 } from 'lucide-react';
 import CompanyForm from '../components/onboarding/CompanyForm';
-import FleetManager from '../components/onboarding/fleet/FleetManager';
 import PrintableReport from '../components/onboarding/PrintableReport';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { useLanguage } from '../components/LanguageContext';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -20,31 +15,31 @@ import { toast } from "sonner";
 export default function Onboarding() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("company");
-  const [isAddingCar, setIsAddingCar] = useState(false);
-  const [editingCar, setEditingCar] = useState(null);
   const [isZipping, setIsZipping] = useState(false);
 
+  // Fetch Current User
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
 
-
-  // Fetch Company Profile
+  // Fetch Company Profile based on User's Company ID
   const { data: companyProfileList, isLoading: isLoadingCompany } = useQuery({
-    queryKey: ['companyProfile'],
-    queryFn: () => base44.entities.CompanyProfile.list(undefined, 1),
+    queryKey: ['companyProfile', user?.company_id],
+    queryFn: async () => {
+        // Strict: If no company_id, DO NOT fetch anything. Form must be blank.
+        if (!user?.company_id) return [];
+        return base44.entities.CompanyProfile.list({ id: user.company_id });
+    },
+    enabled: !!user?.company_id, // Only fetch if ID exists
   });
   const companyProfile = companyProfileList?.[0];
 
-  // Fetch Vehicle Profiles
-  const { data: carProfiles, isLoading: isLoadingCars } = useQuery({
-    queryKey: ['vehicles'], // Updated query key
+  // Fetch Vehicle Profiles for export
+  const { data: carProfiles } = useQuery({
+    queryKey: ['vehicles'], 
     queryFn: () => base44.entities.Vehicle.list(),
   });
-
-
-
-  // If user already has a company, this page acts as the "Edit" page
-  // If user does NOT have a company, this is the "Create" page
-  // Logic handled by CompanyForm passing initialData or not
 
   const handlePrint = () => {
     window.print();
@@ -116,11 +111,6 @@ ${connectorDetails}
                 addFileToZip(car.image_ecu_front, "ecu_front.jpg"),
                 addFileToZip(car.image_extra_1, "extra_1.jpg"),
                 addFileToZip(car.image_extra_2, "extra_2.jpg"),
-                // Add docs - try to keep original extension or default to pdf/jpg based on url if possible, 
-                // but for simplicity we'll just download the blob. 
-                // To get correct extension we might need to parse URL or content-type, 
-                // but let's assume they are identifiable files or just save with generic name if unknown.
-                // Actually, let's try to guess extension from URL
                 addFileToZip(car.file_electrical_scheme, `electrical_scheme${car.file_electrical_scheme?.split('.').pop().match(/^[a-z0-9]+$/i) ? '.' + car.file_electrical_scheme.split('.').pop() : '.pdf'}`),
                 addFileToZip(car.file_sensors_actuators, `sensors_actuators${car.file_sensors_actuators?.split('.').pop().match(/^[a-z0-9]+$/i) ? '.' + car.file_sensors_actuators.split('.').pop() : '.pdf'}`)
             ]);
@@ -138,20 +128,6 @@ ${connectorDetails}
     }
   };
 
-  const handleDeleteCar = async (id) => {
-    if (window.confirm(t('delete_car_confirmation'))) {
-        await base44.entities.Vehicle.delete(id);
-        queryClient.invalidateQueries(['vehicles']);
-    }
-  };
-
-  const handleEditCar = (car) => {
-    setEditingCar(car);
-    setIsAddingCar(true);
-  };
-
-
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Printable Report (Hidden by default, visible on print) */}
@@ -167,6 +143,22 @@ ${connectorDetails}
                 <p className="text-muted-foreground mt-1">
                     {companyProfile ? "Manage your company details and settings." : "Please complete your company profile to continue."}
                 </p>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={handlePrint} className="gap-2">
+                        <Printer className="w-4 h-4" /> Export Report
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        onClick={handleDownloadZip}
+                        disabled={isZipping}
+                        className="gap-2"
+                    >
+                        {isZipping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                        {isZipping ? t('preparing_zip') : t('download_zip')}
+                    </Button>
+                </div>
             </div>
           </div>
 
