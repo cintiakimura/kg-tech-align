@@ -33,8 +33,18 @@ export default function ClientDashboard() {
     { id: 'garage', label: 'Digital Garage', icon: Car },
     { id: 'catalogue', label: 'Parts Catalogue', icon: ShoppingCart },
     { id: 'requests', label: 'My Requests', icon: FileText },
-    // { id: 'quotes', label: 'My Quotes', icon: FileText }, // Disabled for now until manager quote generation logic is clear
+    { id: 'quotes', label: 'My Quotes', icon: FileText },
   ];
+
+  const { data: clientQuotes = [], refetch: refetchQuotes } = useQuery({
+    queryKey: ['myClientQuotes'],
+    queryFn: () => base44.entities.ClientQuote.list(),
+  });
+
+  const updateQuoteStatus = useMutation({
+    mutationFn: ({ id, status }) => base44.entities.ClientQuote.update(id, { status }),
+    onSuccess: () => refetchQuotes()
+  });
 
   const carColumns = [
     { key: 'brand', label: 'Brand' },
@@ -50,6 +60,20 @@ export default function ClientDashboard() {
     { key: 'description', label: 'Description' },
     { key: 'status', label: 'Status', render: (row) => <Badge variant="outline" className="uppercase">{row.status}</Badge> },
     { key: 'created_date', label: 'Date', render: (row) => new Date(row.created_date).toLocaleDateString() }
+  ];
+
+  const quoteColumns = [
+    { key: 'id', label: 'Quote ID', render: (row) => <span className="font-mono text-xs">#{row.id.slice(-6)}</span> },
+    { key: 'total_amount', label: 'Total', render: (row) => <span className="font-bold">{row.total_amount} {row.currency}</span> },
+    { key: 'status', label: 'Status', render: (row) => <Badge className={row.status === 'approved' ? 'bg-green-600' : 'bg-yellow-500'}>{row.status}</Badge> },
+    { key: 'actions', label: 'Actions', render: (row) => (
+        row.status === 'pending' && (
+            <div className="flex gap-2">
+                <Button size="sm" onClick={() => updateQuoteStatus.mutate({ id: row.id, status: 'approved' })} className="bg-green-600 h-7 text-xs">Approve</Button>
+                <Button size="sm" variant="destructive" onClick={() => updateQuoteStatus.mutate({ id: row.id, status: 'rejected' })} className="h-7 text-xs">Reject</Button>
+            </div>
+        )
+    )}
   ];
 
   return (
@@ -99,6 +123,14 @@ export default function ClientDashboard() {
             <h1 className="text-2xl font-bold">My Requests</h1>
           </div>
           <SharedDataGrid data={requests} columns={requestColumns} />
+        </div>
+      )}
+
+      {activeTab === 'quotes' && (
+        <div className="space-y-4">
+            <h1 className="text-2xl font-bold">Formal Quotes</h1>
+            <p className="text-muted-foreground">Review and approve quotes for your requests.</p>
+            <SharedDataGrid data={clientQuotes} columns={quoteColumns} />
         </div>
       )}
     </DashboardShell>

@@ -3,17 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import DashboardShell from '../components/DashboardShell';
 import SharedDataGrid from '../components/SharedDataGrid';
-import { Package, FileText, Upload, DollarSign } from 'lucide-react';
+import { Package, FileText, Upload, DollarSign, Truck, Calculator } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from 'lucide-react';
+import { Label } from "@/components/ui/label";
 
 export default function SupplierDashboard() {
   const [activeTab, setActiveTab] = useState('open_requests');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [shippingEst, setShippingEst] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: openRequests = [] } = useQuery({
@@ -71,6 +73,7 @@ export default function SupplierDashboard() {
   const sidebarItems = [
     { id: 'open_requests', label: 'Open Requests', icon: Package },
     { id: 'my_quotes', label: 'My Quotes', icon: DollarSign },
+    { id: 'shipping', label: 'FedEx Shipping', icon: Truck },
     { id: 'invoices', label: 'Invoices', icon: FileText },
   ];
 
@@ -136,6 +139,55 @@ export default function SupplierDashboard() {
         <div className="space-y-4">
             <h1 className="text-2xl font-bold">Invoices</h1>
             <p className="text-muted-foreground">Invoice management coming soon.</p>
+        </div>
+      )}
+
+      {activeTab === 'shipping' && (
+        <div className="space-y-6">
+            <h1 className="text-2xl font-bold flex items-center gap-2"><Truck className="w-6 h-6"/> FedEx Shipping Calculator</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-lg border shadow-sm">
+                    <h3 className="font-semibold mb-4">Estimate Shipping Cost</h3>
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const w = Number(e.target.weight.value);
+                        setShippingEst({
+                            service: "FedEx International Priority",
+                            cost: (w * 12.5) + 45, // Mock calculation
+                            days: 3
+                        });
+                    }} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Weight (kg)</Label>
+                            <Input name="weight" type="number" placeholder="0.0" step="0.1" required />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Dimensions (LxWxH cm)</Label>
+                            <div className="flex gap-2">
+                                <Input name="l" placeholder="L" />
+                                <Input name="w" placeholder="W" />
+                                <Input name="h" placeholder="H" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Destination Country</Label>
+                            <Input name="country" placeholder="e.g. Germany" />
+                        </div>
+                        <Button type="submit" className="w-full"><Calculator className="w-4 h-4 mr-2"/> Calculate Rate</Button>
+                    </form>
+                </div>
+
+                {shippingEst && (
+                    <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-lg border flex flex-col justify-center items-center text-center animate-in fade-in">
+                        <h3 className="text-lg font-medium text-muted-foreground mb-2">Estimated Rate</h3>
+                        <div className="text-4xl font-bold text-[#00C600] mb-1">${shippingEst.cost.toFixed(2)}</div>
+                        <div className="text-sm font-semibold">{shippingEst.service}</div>
+                        <div className="text-sm text-muted-foreground mt-1">Delivery in ~{shippingEst.days} days</div>
+                        <Button className="mt-6 w-full" variant="outline">Print Label</Button>
+                    </div>
+                )}
+            </div>
         </div>
       )}
     </DashboardShell>
