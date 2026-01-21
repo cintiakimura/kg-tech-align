@@ -3,6 +3,8 @@ import Onboarding from './pages/Onboarding';
 import Catalogue from './pages/Catalogue';
 import SupplierPortal from './pages/SupplierPortal';
 import ManagerDashboard from './pages/ManagerDashboard';
+import ClientDashboard from './pages/ClientDashboard';
+import SupplierDashboard from './pages/SupplierDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -12,6 +14,8 @@ export const PAGES = {
     "Catalogue": Catalogue,
     "SupplierPortal": SupplierPortal,
     "ManagerDashboard": ManagerDashboard,
+    "ClientDashboard": ClientDashboard,
+    "SupplierDashboard": SupplierDashboard,
 }
 
 export const pagesConfig = {

@@ -1,150 +1,100 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DashboardShell from '../components/DashboardShell';
+import SharedDataGrid from '../components/SharedDataGrid';
+import { Activity, DollarSign, Package, Users, Truck, AlertTriangle } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { Activity, DollarSign, Package, Users } from 'lucide-react';
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ManagerDashboard() {
-  const { data: stats } = useQuery({
-    queryKey: ['managerStats'],
-    queryFn: async () => {
-        // Parallel fetch for dashboard stats
-        const [requests, quotes, cars, companies] = await Promise.all([
-            base44.entities.PartRequest.list(),
-            base44.entities.Quote.list(),
-            base44.entities.CarProfile.list(),
-            base44.entities.CompanyProfile.list()
-        ]);
-        return { requests, quotes, cars, companies };
-    }
-  });
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const getStatusColor = (status) => {
-    switch(status) {
-        case 'open': return 'bg-blue-500';
-        case 'quoted': return 'bg-yellow-500';
-        case 'ordered': return 'bg-purple-500';
-        case 'shipped': return 'bg-green-500';
-        default: return 'bg-gray-500';
-    }
-  };
+  const { data: requests = [] } = useQuery({ queryKey: ['mgrRequests'], queryFn: () => base44.entities.PartRequest.list() });
+  const { data: quotes = [] } = useQuery({ queryKey: ['mgrQuotes'], queryFn: () => base44.entities.Quote.list() });
+  const { data: companies = [] } = useQuery({ queryKey: ['mgrCompanies'], queryFn: () => base44.entities.CompanyProfile.list() });
+
+  const sidebarItems = [
+    { id: 'overview', label: 'Mission Control', icon: Activity },
+    { id: 'requests', label: 'All Requests', icon: Package },
+    { id: 'quotes', label: 'Quote Review', icon: DollarSign },
+    { id: 'logistics', label: 'Logistics', icon: Truck },
+    { id: 'directory', label: 'Directory', icon: Users },
+  ];
+
+  const requestColumns = [
+    { key: 'id', label: 'ID', render: (row) => <span className="font-mono text-xs">#{row.id.slice(-6)}</span> },
+    { key: 'description', label: 'Description' },
+    { key: 'status', label: 'Status', render: (row) => <Badge className="uppercase">{row.status}</Badge> },
+    { key: 'priority', label: 'Priority', render: (row) => row.priority === 'high' ? <Badge variant="destructive">High</Badge> : <Badge variant="outline">Normal</Badge> },
+    { key: 'created_date', label: 'Date', render: (row) => new Date(row.created_date).toLocaleDateString() }
+  ];
+
+  const quoteColumns = [
+    { key: 'supplier_name', label: 'Supplier' },
+    { key: 'total_amount', label: 'Amount', render: (row) => `${row.total_amount} ${row.currency}` },
+    { key: 'lead_time_days', label: 'Lead Time' },
+    { key: 'status', label: 'Status', render: (row) => <Badge variant={row.status === 'approved' ? 'default' : 'secondary'}>{row.status}</Badge> }
+  ];
+
+  const companyColumns = [
+    { key: 'company_name', label: 'Company Name' },
+    { key: 'type', label: 'Type', render: (row) => <Badge variant="outline">{row.type}</Badge> },
+    { key: 'contact_email', label: 'Email' },
+    { key: 'phone', label: 'Phone' }
+  ];
 
   return (
-    <div className="space-y-8 animate-in fade-in">
-      <div>
-        <h1 className="text-3xl font-bold">Mission Control</h1>
-        <p className="text-muted-foreground">Overview of production, orders, and quotes.</p>
-      </div>
+    <DashboardShell 
+      title="KG Manager" 
+      userRole="Admin" 
+      sidebarItems={sidebarItems} 
+      activeTab={activeTab} 
+      onTabChange={setActiveTab}
+    >
+      {activeTab === 'overview' && (
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-lg border shadow-sm">
+                 <h3 className="text-muted-foreground text-sm font-medium">Pending Requests</h3>
+                 <p className="text-3xl font-bold mt-2">{requests.filter(r => r.status === 'open').length}</p>
+             </div>
+             <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-lg border shadow-sm">
+                 <h3 className="text-muted-foreground text-sm font-medium">Pending Quotes</h3>
+                 <p className="text-3xl font-bold mt-2">{quotes.filter(q => q.status === 'pending').length}</p>
+             </div>
+             <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-lg border shadow-sm">
+                 <h3 className="text-muted-foreground text-sm font-medium">Total Users</h3>
+                 <p className="text-3xl font-bold mt-2">{companies.length}</p>
+             </div>
+         </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{stats?.requests?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">+2 from yesterday</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Quotes</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{stats?.quotes?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">Waiting approval</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Fleet Size</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{stats?.cars?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">Vehicles managed</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Clients & Suppliers</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{stats?.companies?.length || 0}</div>
-                <p className="text-xs text-muted-foreground">Registered entities</p>
-            </CardContent>
-        </Card>
-      </div>
+      {activeTab === 'requests' && (
+        <div className="space-y-4">
+            <h1 className="text-2xl font-bold">All Requests</h1>
+            <SharedDataGrid data={requests} columns={requestColumns} />
+        </div>
+      )}
 
-      <Tabs defaultValue="production" className="w-full">
-        <TabsList>
-            <TabsTrigger value="production">Production Kanban</TabsTrigger>
-            <TabsTrigger value="quotes">Quote Review</TabsTrigger>
-        </TabsList>
-        <TabsContent value="production" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {['open', 'quoted', 'ordered', 'in_production', 'shipped'].map(stage => (
-                    <div key={stage} className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 min-h-[400px]">
-                        <h3 className="font-semibold mb-4 uppercase text-xs text-gray-500 tracking-wider flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${getStatusColor(stage)}`}></span>
-                            {stage.replace('_', ' ')}
-                        </h3>
-                        <div className="space-y-3">
-                            {stats?.requests?.filter(r => r.status === stage).map(req => (
-                                <Card key={req.id} className="cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow">
-                                    <CardHeader className="p-3">
-                                        <div className="flex justify-between items-start">
-                                            <span className="font-mono text-xs text-muted-foreground">#{req.id.slice(-4)}</span>
-                                            {req.priority === 'high' && <Badge variant="destructive" className="h-1.5 w-1.5 p-0 rounded-full" />}
-                                        </div>
-                                        <CardTitle className="text-sm font-medium mt-1 line-clamp-2">{req.description}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-3 pt-0">
-                                        <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-                                            <span>{new Date(req.created_date).toLocaleDateString()}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </TabsContent>
-        <TabsContent value="quotes">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent Supplier Quotes</CardTitle>
-                    <CardDescription>Review AI-parsed data and approve bids.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {stats?.quotes?.map(quote => (
-                            <div key={quote.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                <div>
-                                    <p className="font-medium">{quote.supplier_name}</p>
-                                    <p className="text-sm text-muted-foreground">Bid: {quote.total_amount} {quote.currency}</p>
-                                </div>
-                                <div className="text-right">
-                                    <Badge variant={quote.status === 'approved' ? 'default' : 'outline'}>{quote.status}</Badge>
-                                    <p className="text-xs text-muted-foreground mt-1">Lead time: {quote.lead_time_days} days</p>
-                                </div>
-                            </div>
-                        ))}
-                        {(!stats?.quotes || stats.quotes.length === 0) && (
-                            <p className="text-center text-muted-foreground py-8">No quotes received yet.</p>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+      {activeTab === 'quotes' && (
+        <div className="space-y-4">
+            <h1 className="text-2xl font-bold">Quote Review</h1>
+            <SharedDataGrid data={quotes} columns={quoteColumns} />
+        </div>
+      )}
+
+      {activeTab === 'directory' && (
+        <div className="space-y-4">
+            <h1 className="text-2xl font-bold">Company Directory</h1>
+            <SharedDataGrid data={companies} columns={companyColumns} />
+        </div>
+      )}
+      
+       {activeTab === 'logistics' && (
+        <div className="space-y-4">
+            <h1 className="text-2xl font-bold">Logistics</h1>
+            <p className="text-muted-foreground">Tracking dashboard coming soon.</p>
+        </div>
+      )}
+    </DashboardShell>
   );
 }
