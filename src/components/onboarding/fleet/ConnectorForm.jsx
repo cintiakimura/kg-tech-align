@@ -28,13 +28,9 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
     const onSubmit = async (data) => {
         try {
-            await base44.entities.VehicleConnector.create({
+            const payload = {
                 vehicle_id: vehicle.id,
-                calculator_system: data.calculator_system,
-                connector_color: data.connector_color,
-                pin_quantity: parseInt(data.pin_quantity) || 0,
-                catalogue_id: data.catalogue_id === "none" ? null : data.catalogue_id,
-                quantity: 1, 
+                quantity: 1,
                 image_1: data.image_1,
                 image_2: data.image_2,
                 image_3: data.image_3,
@@ -44,12 +40,19 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
                 file_pinning_list: data.file_pinning_list,
                 file_other_1: data.file_other_1,
                 file_other_2: data.file_other_2
-            });
+            };
+
+            if (data.calculator_system) payload.calculator_system = data.calculator_system;
+            if (data.connector_color) payload.connector_color = data.connector_color;
+            if (data.pin_quantity) payload.pin_quantity = parseInt(data.pin_quantity);
+            if (data.catalogue_id && data.catalogue_id !== "none") payload.catalogue_id = data.catalogue_id;
+
+            await base44.entities.VehicleConnector.create(payload);
             toast.success("Connector added successfully");
             onSuccess();
         } catch (error) {
             console.error(error);
-            toast.error("Failed to add connector");
+            toast.error("Failed to add connector: " + (error.message || "Unknown error"));
         }
     };
 
