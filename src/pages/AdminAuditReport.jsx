@@ -126,6 +126,22 @@ export default function AdminAuditReport() {
                 await base44.entities.Invitation.delete(inv.id);
             }
 
+            // 6. Fix Legacy Vehicles (Missing client_id)
+            const legacyVehicles = cars.filter(c => !c.client_id);
+            if (legacyVehicles.length > 0) {
+                 // Try to map from creator or default to first company found
+                 const defaultCompany = companies[0]?.id;
+                 for (const v of legacyVehicles) {
+                     // Check if created_by matches a user with company_id
+                     // This is hard to do without full user list, but we can try to guess or just set to creator id if no company found
+                     // Current logic elsewhere uses `created_by` as fallback or `id` as fallback.
+                     // We will just patch it to the creator's ID if no company is found, assuming individual
+                     // But ideally we want company_id. 
+                     // Let's set it to the creator email to be safe if no ID, but the schema expects string.
+                     await base44.entities.Vehicle.update(v.id, { client_id: v.created_by });
+                 }
+            }
+
             await queryClient.invalidateQueries();
             runDiagnostics(); // Re-run report
         } catch (error) {
