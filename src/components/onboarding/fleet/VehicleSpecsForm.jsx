@@ -19,6 +19,12 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
     const [isDecoding, setIsDecoding] = React.useState(false);
     const [savedVehicle, setSavedVehicle] = React.useState(initialData || null);
 
+    const { data: connectors } = useQuery({
+        queryKey: ['vehicle-connectors', savedVehicle?.id],
+        queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: savedVehicle.id }),
+        enabled: !!savedVehicle?.id
+    });
+
     const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             transmission_type: "Automatic",
@@ -271,6 +277,42 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
 
 
+
+                    {/* Connectors Section */}
+                    {savedVehicle?.id && connectors?.length > 0 && (
+                        <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t dark:border-gray-700">
+                            <h3 className="text-sm font-bold uppercase flex items-center gap-2">
+                                Linked Connectors
+                                <span className="bg-[#00C600] text-white text-[10px] px-2 py-0.5 rounded-full">{connectors.length}</span>
+                            </h3>
+                            <div className="grid gap-2">
+                                {connectors.map((conn, idx) => (
+                                    <div key={conn.id || idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                                        <div className="grid grid-cols-3 gap-4 text-sm flex-1">
+                                            <div>
+                                                <span className="text-[10px] uppercase text-muted-foreground block">System</span>
+                                                <span className="font-bold">{conn.calculator_system || "-"}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase text-muted-foreground block">Pins</span>
+                                                <span className="font-bold">{conn.pin_quantity || "-"}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] uppercase text-muted-foreground block">Color</span>
+                                                <span className="font-bold">{conn.connector_color || "-"}</span>
+                                            </div>
+                                        </div>
+                                        <a 
+                                            href={createPageUrl(`VehicleConnectors?vehicleId=${savedVehicle.id}`)}
+                                            className="ml-4 text-[#00C600] hover:underline text-xs font-bold uppercase"
+                                        >
+                                            View
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={onCancel}>CANCEL</Button>

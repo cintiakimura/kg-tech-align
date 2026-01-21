@@ -300,7 +300,7 @@ export default function VehicleConnectors() {
                                 className="bg-[#00C600] hover:bg-[#00b300] uppercase font-bold w-full md:w-auto"
                             >
                                 {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                                Add Connector
+                                Save Connector
                             </Button>
                         </div>
                     </form>
