@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from 'react-router-dom';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, ArrowLeft, Image as ImageIcon, FileText, X } from 'lucide-react';
+import { Loader2, Plus, Trash2, ArrowLeft, Image as ImageIcon, FileText, X, Save } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
 import FileUpload from '../components/onboarding/FileUpload';
 
 export default function VehicleConnectors() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const params = new URLSearchParams(window.location.search);
     const vehicleId = params.get('vehicleId');
 
@@ -51,17 +53,7 @@ export default function VehicleConnectors() {
         onSuccess: () => {
             queryClient.invalidateQueries(['connectors', vehicleId]);
             toast.success("Saved");
-            setNewConnector({
-                calculator_system: '',
-                connector_color: '',
-                pin_quantity: '',
-                file_wiring_diagram: '',
-                list_of_functions: '',
-                image_front: '',
-                image_lever: '',
-                ecu_images: [],
-                catalogue_id: 'none'
-            });
+            navigate(createPageUrl('Onboarding') + '?editingVehicleId=' + vehicleId);
         },
         onError: (err) => {
             console.error("Save error", err);
@@ -299,8 +291,8 @@ export default function VehicleConnectors() {
                                 type="submit" 
                                 className="bg-[#00C600] hover:bg-[#00b300] uppercase font-bold w-full md:w-auto"
                             >
-                                {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                                Add Connector
+                                {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                                Save Connector
                             </Button>
                         </div>
                     </form>

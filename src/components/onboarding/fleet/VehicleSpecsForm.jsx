@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { Loader2, ImageIcon, FileText } from 'lucide-react';
+import { Loader2, ImageIcon, FileText, Trash2 } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import FileUpload from '../FileUpload';
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from '@/utils';
@@ -25,6 +26,28 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             fuel: "Diesel",
             year: new Date().getFullYear(),
             ...(initialData || {})
+        }
+    });
+
+    const queryClient = useQueryClient();
+    const activeVehicleId = savedVehicle?.id || initialData?.id;
+
+    const { data: connectors } = useQuery({
+        queryKey: ['connectors', activeVehicleId],
+        queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: activeVehicleId }),
+        enabled: !!activeVehicleId,
+    });
+
+    const { data: catalogueItems } = useQuery({
+        queryKey: ['catalogue'],
+        queryFn: () => base44.entities.Catalogue.list(),
+    });
+
+    const deleteConnectorMutation = useMutation({
+        mutationFn: (id) => base44.entities.VehicleConnector.delete(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['connectors', activeVehicleId]);
+            toast.success("Removed");
         }
     });
 
@@ -299,6 +322,76 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                         </Button>
                     </div>
                 </form>
+
+                {/* Vehicle Connectors Grid */}
+                {activeVehicleId && (
+                    <div className="mt-8 border-t pt-8">
+                        <h3 className="text-lg font-bold uppercase mb-4">Vehicle Connectors</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {connectors?.map((conn) => {
+                                const catalogueItem = catalogueItems?.find(c => c.id === conn.catalogue_id);
+                                return (
+                                    <Card key={conn.id} className="relative group hover:shadow-md transition-all border-l-4 border-l-[#00C600] flex flex-col overflow-hidden">
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10 scale-75"
+                                            onClick={() => deleteConnectorMutation.mutate(conn.id)}
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                        
+                                        <CardContent className="p-3 space-y-2 flex-grow">
+                                            <div className="w-full h-24 mb-2 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
+                                                {catalogueItem?.image_url ? (
+                                                    <img src={catalogueItem.image_url} alt="" className="w-full h-full object-contain" />
+                                                ) : conn.image_1 ? (
+                                                    <img src={conn.image_1} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <ImageIcon className="text-gray-300 w-8 h-8" />
+                                                )}
+                                            </div>
+                                            
+                                            <div>
+                                                <h4 className="font-bold uppercase text-xs truncate" title={conn.calculator_system}>
+                                                    {conn.calculator_system || "Unknown"}
+                                                </h4>
+                                                {catalogueItem && (
+                                                    <div className="text-xs font-semibold text-blue-600 truncate mt-1">
+                                                        {catalogueItem.secret_part_number}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="text-[10px] text-muted-foreground space-y-0.5 mt-2 border-t pt-2">
+                                                <div className="flex justify-between">
+                                                    <span>Color:</span>
+                                                    <span className="font-medium text-foreground truncate ml-1">{conn.connector_color || '-'}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Pins:</span>
+                                                    <span className="font-medium text-foreground">{conn.pin_quantity || '-'}</span>
+                                                </div>
+                                                {conn.file_wiring_diagram && (
+                                                    <div className="flex items-center gap-1 text-[#00C600]">
+                                                        <FileText className="w-3 h-3" />
+                                                        <span>Scheme</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                            {!connectors?.length && (
+                                <div className="col-span-full text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg bg-gray-50/50">
+                                    No connectors added yet.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
