@@ -5,6 +5,7 @@ import VehicleList from './VehicleList';
 import VehicleSpecsForm from './VehicleSpecsForm';
 import { Loader2 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import _ from 'lodash';
 
 export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     const [view, setView] = useState("list"); // list, add-vehicle
@@ -24,7 +25,12 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
             if (isManager) {
                 return base44.entities.Vehicle.list();
             } else if (user.company_id) {
-                return base44.entities.Vehicle.list({ client_id: user.company_id });
+                // Fetch both company vehicles AND personal vehicles to ensure none are lost during transition
+                const [companyVehicles, personalVehicles] = await Promise.all([
+                    base44.entities.Vehicle.list({ client_id: user.company_id }),
+                    base44.entities.Vehicle.list({ client_id: user.id })
+                ]);
+                return _.uniqBy([...companyVehicles, ...personalVehicles], 'id');
             } else {
                 // Fallback for users without company_id (legacy)
                 return base44.entities.Vehicle.list({ client_id: user.id });
