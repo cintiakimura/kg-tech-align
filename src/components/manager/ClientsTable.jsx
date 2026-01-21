@@ -193,30 +193,22 @@ function BuildingIcon({ className }) {
 export default function ClientsTable({ companies, cars: vehicles }) {
     // Alias cars prop to vehicles for internal use, though logic remains same
     const cars = vehicles; // Keep variable name 'cars' to avoid massive refactor of internal logic
-    // Group data by created_by (email)
+    // List organizations directly
     const groupedData = React.useMemo(() => {
-        const groups = {};
-        
-        // Process companies
-        companies.forEach(company => {
-            if (!groups[company.created_by]) {
-                groups[company.created_by] = { company: null, cars: [] };
-            }
-            groups[company.created_by].company = company;
+        // Map companies to their data structure
+        return companies.map(company => {
+            // Find cars belonging to this company (by creator or contact email)
+            const companyCars = cars.filter(car => 
+                car.created_by === company.created_by || 
+                car.client_email === company.contact_email
+            );
+            
+            return {
+                email: company.contact_email || company.created_by,
+                company: company,
+                cars: companyCars
+            };
         });
-
-        // Process cars
-        cars.forEach(car => {
-            if (!groups[car.created_by]) {
-                groups[car.created_by] = { company: null, cars: [] };
-            }
-            groups[car.created_by].cars.push(car);
-        });
-
-        return Object.entries(groups).map(([email, data]) => ({
-            email,
-            ...data
-        }));
     }, [companies, cars]);
 
     const handleExport = () => {
@@ -247,8 +239,8 @@ export default function ClientsTable({ companies, cars: vehicles }) {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[50px]"></TableHead>
-                            <TableHead>Organization</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Organization Name</TableHead>
+                            <TableHead>Tax ID</TableHead>
                             <TableHead>Fleet Size</TableHead>
                             <TableHead className="text-right">Last Update</TableHead>
                         </TableRow>

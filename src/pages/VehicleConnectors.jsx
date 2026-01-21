@@ -119,6 +119,9 @@ export default function VehicleConnectors() {
                     <div>
                         <h2 className="text-xl font-bold uppercase">{vehicle?.brand} {vehicle?.model} - Connectors</h2>
                         <p className="text-sm text-muted-foreground uppercase">{vehicle?.engine_size} {vehicle?.fuel} | {vehicle?.vin}</p>
+                        <div className="mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded inline-block">
+                            ID: {vehicle?.id}
+                        </div>
                     </div>
                 </div>
             </div>
