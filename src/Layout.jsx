@@ -93,14 +93,8 @@ function LayoutContent({ children }) {
 
           // No invitation found? Show selector (but restricted)
           setShowRoleSelector(true);
-      } else {
-          // Handle Redirects on Root if logged in
-          if (window.location.pathname === '/' || window.location.pathname === '/Home') {
-              if (currentUser.role === 'admin' || currentUser.user_type === 'manager') window.location.href = '/ManagerDashboard';
-              else if (currentUser.user_type === 'supplier') window.location.href = '/SupplierDashboard';
-              else if (currentUser.user_type === 'client') window.location.href = '/Onboarding';
-          }
-          }
+      } 
+      // Removed smart routing redirect block
     } catch (e) {
       console.error("Auth check failed", e);
       base44.auth.redirectToLogin();
