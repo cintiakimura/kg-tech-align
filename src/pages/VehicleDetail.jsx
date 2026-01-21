@@ -63,19 +63,8 @@ export default function VehicleDetail() {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;
     }
 
-    if (!vehicleId || !vehicle) {
+    if (!vehicleId || !vehicle || accessDenied) {
         return <div className="flex h-screen items-center justify-center text-red-500 font-bold">Vehicle not found</div>;
-    }
-
-    if (accessDenied) {
-        return (
-            <div className="flex flex-col h-screen items-center justify-center gap-4">
-                <AlertCircle className="h-12 w-12 text-red-500" />
-                <h1 className="text-xl font-bold">Access Denied</h1>
-                <p className="text-muted-foreground">You are not authorized to view this vehicle.</p>
-                <Button onClick={() => window.history.back()}>Go Back</Button>
-            </div>
-        );
     }
 
     return (

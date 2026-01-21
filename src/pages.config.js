@@ -6,6 +6,7 @@ import ClientLogin from './pages/ClientLogin';
 import Clients from './pages/Clients';
 import CreateClientQuote from './pages/CreateClientQuote';
 import FinancialAnalysis from './pages/FinancialAnalysis';
+import Garage from './pages/Garage';
 import Home from './pages/Home';
 import Landing from './pages/Landing';
 import Logistics from './pages/Logistics';
@@ -23,7 +24,6 @@ import VehicleConnectors from './pages/VehicleConnectors';
 import VehicleDetail from './pages/VehicleDetail';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
-import Garage from './pages/Garage';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +36,7 @@ export const PAGES = {
     "Clients": Clients,
     "CreateClientQuote": CreateClientQuote,
     "FinancialAnalysis": FinancialAnalysis,
+    "Garage": Garage,
     "Home": Home,
     "Landing": Landing,
     "Logistics": Logistics,
@@ -53,7 +54,6 @@ export const PAGES = {
     "VehicleDetail": VehicleDetail,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
-    "Garage": Garage,
 }
 
 export const pagesConfig = {
