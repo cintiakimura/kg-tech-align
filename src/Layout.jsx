@@ -84,6 +84,17 @@ function LayoutContent({ children }) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
+              {/* Navigation Links based on assumed role (in real app, check user profile) */}
+              <Link to="/catalogue">
+                <Button variant="ghost" size="sm" className={isDarkMode ? 'text-white' : 'text-gray-900'}>Catalogue</Button>
+              </Link>
+              <Link to="/supplier-portal">
+                <Button variant="ghost" size="sm" className={isDarkMode ? 'text-white' : 'text-gray-900'}>Supplier Portal</Button>
+              </Link>
+               <Link to="/manager-dashboard">
+                <Button variant="ghost" size="sm" className={isDarkMode ? 'text-white' : 'text-gray-900'}>Manager</Button>
+              </Link>
+
               <Button 
                 variant="ghost" 
                 size="icon"
