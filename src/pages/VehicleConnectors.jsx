@@ -14,9 +14,8 @@ import FileUpload from '../components/onboarding/FileUpload';
 
 export default function VehicleConnectors() {
     const queryClient = useQueryClient();
-    const urlParams = new URLSearchParams(window.location.search);
-    // Grab ID from URL or fallback to last saved (No missing ID)
-    const vehicleId = urlParams.get('vehicleId') || localStorage.getItem('lastVehicleId');
+    // Read ID from URL or fallback to last saved (No missing ID)
+    const vehicleId = new URLSearchParams(location.search).get('vehicleId') || localStorage.getItem('lastVehicleId');
 
     const [newConnector, setNewConnector] = useState({
         calculator_system: '',
