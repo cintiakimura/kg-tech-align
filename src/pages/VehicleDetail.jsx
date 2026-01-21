@@ -170,7 +170,16 @@ export default function VehicleDetail() {
                         ].map((img, i) => img.src && (
                             <Card key={i} className="overflow-hidden border-none shadow-sm bg-white dark:bg-[#2a2a2a] group cursor-pointer" onClick={() => window.open(img.src, '_blank')}>
                                 <div className="aspect-square relative">
-                                    <img src={img.src} alt={img.label} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                    <img 
+                                        src={img.src} 
+                                        alt={img.label} 
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.parentElement.classList.add('bg-gray-100', 'flex', 'items-center', 'justify-center');
+                                            e.target.parentElement.innerHTML = '<span class="text-xs text-red-500">Image Error</span>';
+                                        }}
+                                    />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <ImageIcon className="text-white w-6 h-6" />
                                     </div>
@@ -210,9 +219,22 @@ export default function VehicleDetail() {
                                     <CardContent className="p-3 space-y-2 flex-grow">
                                         <div className="w-full h-24 mb-2 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
                                             {catalogueItem?.image_url ? (
-                                                <img src={catalogueItem.image_url} alt="" className="w-full h-full object-contain" />
+                                                <img 
+                                                    src={catalogueItem.image_url} 
+                                                    alt="" 
+                                                    className="w-full h-full object-contain" 
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.parentElement.innerHTML = '<svg class="text-gray-300 w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+                                                    }}
+                                                />
                                             ) : conn.image_1 ? (
-                                                <img src={conn.image_1} alt="" className="w-full h-full object-cover" />
+                                                <img 
+                                                    src={conn.image_1} 
+                                                    alt="" 
+                                                    className="w-full h-full object-cover" 
+                                                    onError={(e) => e.target.style.display = 'none'}
+                                                />
                                             ) : (
                                                 <ImageIcon className="text-gray-300 w-8 h-8" />
                                             )}
