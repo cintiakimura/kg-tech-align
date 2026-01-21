@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from '@/utils';
 
 export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, initialData }) {
+    const navigate = useNavigate();
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
     
     const [isDecoding, setIsDecoding] = React.useState(false);
@@ -124,7 +126,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
             toast.success("Saved successfully");
-            window.location.href = '/VehicleConnectors?vehicleId=' + vehicleId;
+            navigate(`/VehicleConnectors?vehicleId=${vehicleId}`);
         } else {
             const vehicleNumber = `VEH-${Date.now().toString().slice(-6)}`;
             const newVehicle = await base44.entities.Vehicle.create({
@@ -134,7 +136,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 client_email: clientEmail || ""
             });
             toast.success("Saved successfully");
-            window.location.href = '/VehicleConnectors?vehicleId=' + newVehicle.id;
+            navigate(`/VehicleConnectors?vehicleId=${newVehicle.id}`);
         }
     };
 
