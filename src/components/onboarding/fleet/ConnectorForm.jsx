@@ -44,7 +44,8 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
 
             if (data.calculator_system) payload.calculator_system = data.calculator_system;
             if (data.connector_color) payload.connector_color = data.connector_color;
-            if (data.pin_quantity) payload.pin_quantity = parseInt(data.pin_quantity);
+            // Save as string to accept any input
+            if (data.pin_quantity) payload.pin_quantity = String(data.pin_quantity);
             if (data.catalogue_id && data.catalogue_id !== "none") payload.catalogue_id = data.catalogue_id;
 
             await base44.entities.VehicleConnector.create(payload);
