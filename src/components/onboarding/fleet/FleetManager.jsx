@@ -3,8 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import VehicleList from './VehicleList';
 import VehicleSpecsForm from './VehicleSpecsForm';
-import VehicleDetail from './VehicleDetail';
-import ConnectorForm from './ConnectorForm';
 import { Loader2 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
