@@ -372,11 +372,7 @@ export default function VehicleConnectors() {
                 })}
             </div>
             
-            {(!isLoadingConnectors && connectors?.length === 0) && (
-                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg bg-gray-50/50">
-                    No connectors added yet. Use the form above to add one.
-                </div>
-            )}
+
         </div>
     );
 }
