@@ -11,6 +11,7 @@ import FileUpload from '../FileUpload';
 
 export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCancel }) {
     const queryClient = useQueryClient();
+    const [imageErrors, setImageErrors] = useState({});
     const [newConnector, setNewConnector] = useState({
         calculator_system: '',
         connector_color: '',
@@ -129,13 +130,17 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                             {catalogueItems?.map(item => (
                                 <SelectItem key={item.id} value={item.id}>
                                     <div className="flex items-center gap-2 max-w-[300px] overflow-hidden">
-                                        {item.image_url && (
+                                        {item.image_url && !imageErrors[item.id] ? (
                                             <img 
                                                 src={item.image_url} 
                                                 alt="" 
                                                 className="w-6 h-6 object-cover rounded flex-shrink-0" 
-                                                onError={(e) => e.target.style.display = 'none'}
+                                                onError={() => setImageErrors(prev => ({...prev, [item.id]: true}))}
                                             />
+                                        ) : (
+                                            <div className="w-6 h-6 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center">
+                                                <div className="w-2 h-2 bg-gray-300 rounded-full" />
+                                            </div>
                                         )}
                                         <span className="truncate">{item.secret_part_number} ({item.colour})</span>
                                     </div>
@@ -200,17 +205,21 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                             {newConnector.ecu_images.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {newConnector.ecu_images.map((img, idx) => (
-                                        <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden">
+                                        <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden bg-gray-50">
                                             <img 
                                                 src={img} 
                                                 alt="" 
                                                 className="w-full h-full object-cover" 
-                                                onError={(e) => e.target.style.display = 'none'}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                    e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                                                    e.target.parentElement.innerHTML += '<span class="text-[8px] text-gray-400">Error</span>';
+                                                }}
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => removeEcuImage(idx)}
-                                                className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                             >
                                                 <X className="w-3 h-3" />
                                             </button>
