@@ -15,7 +15,8 @@ export default function CompanyForm({ onComplete, initialData }) {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm({
     defaultValues: initialData || {
         company_name: "",
-        payment_terms: "Prepaid"
+        payment_terms: "Prepaid",
+        logo_url: ""
     }
   });
 
@@ -83,14 +84,50 @@ export default function CompanyForm({ onComplete, initialData }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-[#00C600]" /> {t('company_name')}
+                            <Building2 className="w-4 h-4 text-[#00C600]" /> {t('company_name')} <span className="text-red-500">*</span>
                         </label>
                         <Input 
-                            {...register("company_name")} 
+                            {...register("company_name", { required: "Company name is required" })} 
                             placeholder="e.g. KG Mobility Solutions"
                             className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
                         />
                         {errors.company_name && <span className="text-xs text-red-500">{errors.company_name.message}</span>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium flex items-center gap-2">
+                            <ImageIcon className="w-4 h-4 text-[#00C600]" /> Company Logo
+                        </label>
+                        <div className="mt-1">
+                             <FileUpload 
+                                label="Upload Logo"
+                                onUploadComplete={(url) => {
+                                    const event = { target: { name: 'logo_url', value: url } };
+                                    register('logo_url').onChange(event);
+                                }}
+                                accept="image/*"
+                             />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                         <label className="text-sm font-medium flex items-center gap-2">
+                            <CreditCard className="w-4 h-4 text-[#00C600]" /> Payment Terms
+                        </label>
+                        <Select onValueChange={(val) => {
+                            const event = { target: { name: 'payment_terms', value: val } };
+                            register('payment_terms').onChange(event);
+                        }} defaultValue={initialData?.payment_terms || "Prepaid"}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select terms" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Prepaid">Prepaid</SelectItem>
+                                <SelectItem value="Net 30">Net 30</SelectItem>
+                                <SelectItem value="Net 60">Net 60</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {initialData?.client_number && (

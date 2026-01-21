@@ -159,70 +159,54 @@ ${connectorDetails}
 
       {/* Main App Content (Hidden on print) */}
       <div className="print:hidden space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-              {companyProfile ? "Company Profile" : "Create Your Company Profile"}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-              {companyProfile ? "Manage your company details and settings." : "Please complete your company profile to continue."}
-          </p>
-      </div>
-            <div className="flex items-center gap-3">
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={handlePrint} className="gap-2">
-                        <Printer className="w-4 h-4" /> Export Report
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        onClick={handleDownloadZip}
-                        disabled={isZipping}
-                        className="gap-2"
-                    >
-                        {isZipping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                        {isZipping ? t('preparing_zip') : t('download_zip')}
-                    </Button>
-                </div>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                    {companyProfile ? "Company Profile" : "Create Your Company Profile"}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    {companyProfile ? "Manage your company details and settings." : "Please complete your company profile to continue."}
+                </p>
             </div>
           </div>
 
-          <Tabs defaultValue="fleet" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[350px] bg-white dark:bg-[#2a2a2a]">
-        <TabsTrigger value="company" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-          <Building2 className="w-4 h-4 mr-2" /> {t('tab_company')}
-        </TabsTrigger>
-        <TabsTrigger value="fleet" className="data-[state=active]:bg-[#00C600] data-[state=active]:text-white">
-          <Car className="w-4 h-4 mr-2" /> {t('add_vehicle')}
-        </TabsTrigger>
-        </TabsList>
+        {/* Progress Indicator for New Users */}
+        {!companyProfile && (
+            <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-2 text-[#00C600] font-semibold">
+                    <div className="w-8 h-8 rounded-full bg-[#00C600] text-white flex items-center justify-center">1</div>
+                    <span>Company Profile</span>
+                </div>
+                <div className="h-px bg-gray-200 w-16" />
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">2</div>
+                    <span>Add Your First Vehicle</span>
+                </div>
+            </div>
+        )}
 
-        {/* COMPANY TAB */}
-        <TabsContent value="company" className="mt-6">
-            <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg p-6">
-                {isLoadingCompany ? (
-                    <div className="space-y-4">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </div>
-                ) : (
-                    <CompanyForm 
-                        initialData={companyProfile} 
-                        onComplete={() => {
-                            queryClient.invalidateQueries(['companyProfile']);
-                            setActiveTab("fleet");
-                            toast.success("Company profile saved!");
-                        }} 
-                    />
-                )}
-            </Card>
-        </TabsContent>
-
-        {/* FLEET TAB */}
-        <TabsContent value="fleet" className="mt-6">
-            <FleetManager clientEmail={companyProfile?.contact_email} />
-        </TabsContent>
-      </Tabs>
+        {/* Company Form Container */}
+        <Card className="bg-white dark:bg-[#2a2a2a] border-none shadow-lg p-6">
+            {isLoadingCompany ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            ) : (
+                <CompanyForm 
+                    initialData={companyProfile} 
+                    onComplete={(newCompanyId) => {
+                        queryClient.invalidateQueries(['companyProfile']);
+                        queryClient.invalidateQueries(['me']);
+                        if (!companyProfile && newCompanyId) {
+                            // First time creation -> Redirect to Garage
+                            window.location.href = '/Garage';
+                        }
+                    }} 
+                />
+            )}
+        </Card>
       </div>
     </div>
   );

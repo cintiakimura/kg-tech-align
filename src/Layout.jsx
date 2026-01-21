@@ -224,6 +224,13 @@ function LayoutContent({ children }) {
                              </a>
                          </DropdownMenuItem>
                      )}
+                     {user.user_type === 'client' && user.company_id && (
+                         <DropdownMenuItem asChild>
+                             <a href="/Onboarding" className="w-full cursor-pointer font-medium flex items-center gap-2">
+                               <span className="text-xl">✏️</span> Edit Company Profile
+                             </a>
+                         </DropdownMenuItem>
+                     )}
                            {(user.role === 'admin' || user.email === 'georg@kgprotech.com') && (
                                <>
                                    <DropdownMenuItem asChild>
