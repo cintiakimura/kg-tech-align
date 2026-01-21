@@ -17,58 +17,75 @@ export default function AdminAuditReport() {
     const queryClient = useQueryClient();
 
     // Fetch all relevant entities that have audit logs
+    const { data: user } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me(),
+        retry: false
+    });
+
+    const isEnabled = !!user && (user.role === 'admin' || user.user_type === 'manager' || user.email === 'georg@kgprotech.com');
+
     const { data: cars, isLoading: loadingCars } = useQuery({
         queryKey: ['vehicles_audit'],
         queryFn: () => base44.entities.Vehicle.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: companies, isLoading: loadingCompanies } = useQuery({
         queryKey: ['companies_audit'],
         queryFn: () => base44.entities.CompanyProfile.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: quotes, isLoading: loadingQuotes } = useQuery({
         queryKey: ['quotes_audit'],
         queryFn: () => base44.entities.Quote.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: catalogue, isLoading: loadingCatalogue } = useQuery({
         queryKey: ['catalogue_audit'],
         queryFn: () => base44.entities.Catalogue.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: clientQuotes, isLoading: loadingClientQuotes } = useQuery({
         queryKey: ['client_quotes_audit'],
         queryFn: () => base44.entities.ClientQuote.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: vehicleConnectors, isLoading: loadingConnectors } = useQuery({
         queryKey: ['vehicle_connectors_audit'],
         queryFn: () => base44.entities.VehicleConnector.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: quoteItems, isLoading: loadingQuoteItems } = useQuery({
         queryKey: ['quote_items_audit'],
         queryFn: () => base44.entities.QuoteItem.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: purchases, isLoading: loadingPurchases } = useQuery({
         queryKey: ['purchases_audit'],
         queryFn: () => base44.entities.Purchase.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const { data: invitations, isLoading: loadingInvitations } = useQuery({
         queryKey: ['invitations_audit'],
         queryFn: () => base44.entities.Invitation.list(),
-        initialData: []
+        initialData: [],
+        enabled: isEnabled
     });
 
     const fixAllIssues = async () => {

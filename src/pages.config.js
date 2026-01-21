@@ -21,10 +21,10 @@ import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
 import VehicleConnectors from './pages/VehicleConnectors';
+import VehicleCreate from './pages/VehicleCreate';
 import VehicleDetail from './pages/VehicleDetail';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
-import VehicleCreate from './pages/VehicleCreate';
 import __Layout from './Layout.jsx';
 
 
@@ -52,10 +52,10 @@ export const PAGES = {
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
     "VehicleConnectors": VehicleConnectors,
+    "VehicleCreate": VehicleCreate,
     "VehicleDetail": VehicleDetail,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
-    "VehicleCreate": VehicleCreate,
 }
 
 export const pagesConfig = {

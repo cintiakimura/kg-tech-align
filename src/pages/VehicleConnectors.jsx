@@ -121,6 +121,27 @@ export default function VehicleConnectors() {
 
     const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
 
+    const ImageWithFallback = ({ src, alt, className, contain = false }) => {
+        const [error, setError] = useState(false);
+        
+        if (!src || error) {
+            return (
+                <div className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded overflow-hidden ${className}`}>
+                    <ImageIcon className="text-gray-300 w-8 h-8" />
+                </div>
+            );
+        }
+
+        return (
+            <img 
+                src={src} 
+                alt={alt} 
+                className={`${className} ${contain ? 'object-contain' : 'object-cover'}`}
+                onError={() => setError(true)}
+            />
+        );
+    };
+
     if (isLoadingVehicle) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -344,23 +365,9 @@ export default function VehicleConnectors() {
                                 {/* Prefer catalogue image, else uploaded front view */}
                                 <div className="w-full h-24 mb-2 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
                                     {catalogueItem?.image_url ? (
-                                        <img 
-                                            src={catalogueItem.image_url} 
-                                            alt="" 
-                                            className="w-full h-full object-contain" 
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
-                                                // fallback icon
-                                            }}
-                                        />
+                                        <ImageWithFallback src={catalogueItem.image_url} className="w-full h-full" contain={true} />
                                     ) : conn.image_1 ? (
-                                        <img 
-                                            src={conn.image_1} 
-                                            alt="" 
-                                            className="w-full h-full object-cover" 
-                                            onError={(e) => e.target.style.display = 'none'}
-                                        />
+                                        <ImageWithFallback src={conn.image_1} className="w-full h-full" />
                                     ) : (
                                         <ImageIcon className="text-gray-300 w-8 h-8" />
                                     )}
