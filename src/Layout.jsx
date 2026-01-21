@@ -122,26 +122,9 @@ function LayoutContent({ children }) {
 
       {/* CSS Variables for Theme Colors */}
       <style>{`
-        @font-face {
-          font-family: 'Akkurat';
-          src: url('https://db.onlinewebfonts.com/t/55d43328e7512d7c5415bf09945c71a3.woff2') format('woff2'); /* Fallback/Mock URL since Akkurat is licensed */
-          font-weight: normal;
-          font-style: normal;
-        }
-
         :root {
           --primary-green: #00C600;
           --bg-dark: #212121;
-          font-family: 'Akkurat', sans-serif !important;
-        }
-
-        /* Enforce normal weight everywhere as requested */
-        *, h1, h2, h3, h4, h5, h6, strong, b, .font-bold, .font-semibold, .font-medium {
-          font-weight: 400 !important;
-        }
-
-        body {
-           font-family: 'Akkurat', sans-serif !important;
         }
         .text-primary-green { color: var(--primary-green); }
         .bg-primary-green { background-color: var(--primary-green); }
