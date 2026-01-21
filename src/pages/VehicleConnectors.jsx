@@ -153,6 +153,7 @@ export default function VehicleConnectors() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleAddConnector} className="space-y-6">
+                        <input type="hidden" name="vehicle_id" value={vehicleId || ''} />
                         
                         {/* First Section: Basic Info */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
