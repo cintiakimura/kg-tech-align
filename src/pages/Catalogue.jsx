@@ -14,6 +14,7 @@ export default function Catalogue() {
     const [searchTerm, setSearchTerm] = useState("");
     const [viewMode, setViewMode] = useState("list");
     const [editingProduct, setEditingProduct] = useState(null);
+    const [imageErrors, setImageErrors] = useState({});
     const queryClient = useQueryClient();
     const [user, setUser] = useState(null);
 
@@ -155,11 +156,12 @@ export default function Catalogue() {
 
                             {/* Clean Product Image */}
                             <div className={`${viewMode === 'grid' ? 'w-48 border-r p-4' : 'w-24 h-20 p-2'} bg-white flex items-center justify-center shrink-0 relative`}>
-                                {item.image_url ? (
+                                {item.image_url && !imageErrors[item.id] ? (
                                     <img 
                                         src={item.image_url} 
                                         alt="Component" 
                                         className="w-full h-full object-contain mix-blend-multiply"
+                                        onError={() => setImageErrors(prev => ({...prev, [item.id]: true}))}
                                     />
                                 ) : (
                                     <Package className={`${viewMode === 'grid' ? 'w-12 h-12' : 'w-8 h-8'} text-gray-200`} />
