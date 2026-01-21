@@ -255,7 +255,12 @@ export default function VehicleConnectors() {
                                             <div className="flex flex-wrap gap-2 mt-2">
                                                 {newConnector.ecu_images.map((img, idx) => (
                                                     <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden">
-                                                        <img src={img} alt="" className="w-full h-full object-cover" />
+                                                        <img 
+                                                            src={img} 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover" 
+                                                            onError={(e) => e.target.style.display = 'none'}
+                                                        />
                                                         <button
                                                             type="button"
                                                             onClick={() => removeEcuImage(idx)}
@@ -288,7 +293,12 @@ export default function VehicleConnectors() {
                                         <SelectItem key={item.id} value={item.id}>
                                             <div className="flex items-center gap-2">
                                                 {item.image_url && (
-                                                    <img src={item.image_url} alt="" className="w-6 h-6 object-cover rounded" />
+                                                    <img 
+                                                        src={item.image_url} 
+                                                        alt="" 
+                                                        className="w-6 h-6 object-cover rounded" 
+                                                        onError={(e) => e.target.style.display = 'none'}
+                                                    />
                                                 )}
                                                 <span>{item.secret_part_number} ({item.colour})</span>
                                             </div>
@@ -334,9 +344,23 @@ export default function VehicleConnectors() {
                                 {/* Prefer catalogue image, else uploaded front view */}
                                 <div className="w-full h-24 mb-2 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
                                     {catalogueItem?.image_url ? (
-                                        <img src={catalogueItem.image_url} alt="" className="w-full h-full object-contain" />
+                                        <img 
+                                            src={catalogueItem.image_url} 
+                                            alt="" 
+                                            className="w-full h-full object-contain" 
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                                                // fallback icon
+                                            }}
+                                        />
                                     ) : conn.image_1 ? (
-                                        <img src={conn.image_1} alt="" className="w-full h-full object-cover" />
+                                        <img 
+                                            src={conn.image_1} 
+                                            alt="" 
+                                            className="w-full h-full object-cover" 
+                                            onError={(e) => e.target.style.display = 'none'}
+                                        />
                                     ) : (
                                         <ImageIcon className="text-gray-300 w-8 h-8" />
                                     )}
