@@ -73,7 +73,7 @@ export default function CompanyForm({ onComplete, initialData }) {
                             <Building2 className="w-4 h-4 text-[#00C600]" /> {t('company_name')}
                         </label>
                         <Input 
-                            {...register("company_name", { required: "Company name is required" })} 
+                            {...register("company_name")} 
                             placeholder="e.g. KG Mobility Solutions"
                             className="bg-white dark:bg-[#2a2a2a] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]"
                         />
