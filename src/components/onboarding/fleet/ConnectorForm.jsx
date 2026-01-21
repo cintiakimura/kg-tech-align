@@ -19,27 +19,20 @@ export default function ConnectorForm({ vehicle, onCancel, onSuccess }) {
     const onSubmit = async (data) => {
         try {
             console.log("Submitting connector:", { vehicle_id: vehicle.id, ...data });
-            // Clean up payload to remove null/undefined values if they cause issues, 
-            // though schema now supports nulls.
-            const payload = {
+            await base44.entities.VehicleConnector.create({
                 vehicle_id: vehicle.id,
                 calculator_system: data.calculator_system,
                 quantity: 1,
-                image_1: data.image_1 || undefined,
-                image_2: data.image_2 || undefined,
-                image_3: data.image_3 || undefined,
-                image_4: data.image_4 || undefined,
-                image_5: data.image_5 || undefined,
-                file_wiring_diagram: data.file_wiring_diagram || undefined,
-                file_pinning_list: data.file_pinning_list || undefined,
-                file_other_1: data.file_other_1 || undefined,
-                file_other_2: data.file_other_2 || undefined
-            };
-
-            // Remove undefined keys
-            Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
-
-            await base44.entities.VehicleConnector.create(payload);
+                image_1: data.image_1 || null,
+                image_2: data.image_2 || null,
+                image_3: data.image_3 || null,
+                image_4: data.image_4 || null,
+                image_5: data.image_5 || null,
+                file_wiring_diagram: data.file_wiring_diagram || null,
+                file_pinning_list: data.file_pinning_list || null,
+                file_other_1: data.file_other_1 || null,
+                file_other_2: data.file_other_2 || null
+            });
             toast.success("Connector added successfully");
             onSuccess();
         } catch (error) {
