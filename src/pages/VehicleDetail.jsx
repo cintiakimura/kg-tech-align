@@ -150,8 +150,11 @@ export default function VehicleDetail() {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold uppercase tracking-tight">
-                            Vehicle Detail - {vehicle.vehicle_number || 'VEH-XXXXX'}
+                            Vehicle Information
                         </h1>
+                        <div className="text-sm font-mono text-[#00C600] font-bold">
+                            ID: {vehicle.vehicle_number || 'PENDING'}
+                        </div>
                         <div className="flex items-center gap-2 mt-1 text-muted-foreground">
                             <span className="font-bold">{vehicle.brand} {vehicle.model}</span>
                             <span>•</span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle, onEditVehicle }) {
@@ -38,14 +38,17 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                 </p>
                             </div>
                             
-                            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                            <div className="flex items-center gap-1 w-full sm:w-auto justify-end">
                                 <Button 
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-xs"
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                     onClick={() => window.location.href = createPageUrl('VehicleDetail') + `?id=${vehicle.id}`}
+                                    title="View Details"
                                 >
-                                    View Details
+                                    <Eye className="h-5 w-5" />
                                 </Button>
-                                <div className="flex gap-1 border-l pl-3 dark:border-gray-700">
+                                <div className="flex gap-1 border-l pl-2 dark:border-gray-700">
                                     <Button 
                                         variant="ghost" 
                                         size="icon"
