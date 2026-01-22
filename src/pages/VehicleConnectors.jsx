@@ -2,32 +2,17 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Plus, Trash2, ArrowLeft, Image as ImageIcon, FileText, X } from 'lucide-react';
+import { Loader2, Trash2, ArrowLeft, Image as ImageIcon, FileText } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
-import FileUpload from '../components/onboarding/FileUpload';
 import { getProxiedImageUrl } from "@/components/utils/imageUtils";
+import ConnectorForm from '@/components/onboarding/fleet/ConnectorForm';
 
 export default function VehicleConnectors() {
     const queryClient = useQueryClient();
     const params = new URLSearchParams(window.location.search);
     const vehicleId = params.get('vehicleId');
-
-    const [newConnector, setNewConnector] = useState({
-        calculator_system: '',
-        connector_color: '',
-        pin_quantity: '',
-        file_wiring_diagram: '',
-        list_of_functions: '',
-        image_front: '',
-        image_lever: '',
-        ecu_images: []
-    });
 
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
@@ -41,34 +26,6 @@ export default function VehicleConnectors() {
         enabled: !!vehicleId,
     });
 
-
-
-    const createConnectorMutation = useMutation({
-        mutationFn: (data) => base44.entities.VehicleConnector.create(data),
-        onSuccess: (savedConnector) => {
-            // Update local cache immediately to add the new card to the list
-            queryClient.setQueryData(['connectors', vehicleId], (old) => old ? [...old, savedConnector] : [savedConnector]);
-            // Also call getConnectors to ensure consistency with server
-            getConnectors();
-            
-            toast.success("Saved");
-            setNewConnector({
-                calculator_system: '',
-                connector_color: '',
-                pin_quantity: '',
-                file_wiring_diagram: '',
-                list_of_functions: '',
-                image_front: '',
-                image_lever: '',
-                ecu_images: [],
-                catalogue_id: 'none'
-            });
-        },
-        onError: (err) => {
-            console.error("Save error", err);
-        }
-    });
-
     const deleteConnectorMutation = useMutation({
         mutationFn: (id) => base44.entities.VehicleConnector.delete(id),
         onSuccess: () => {
@@ -76,43 +33,6 @@ export default function VehicleConnectors() {
             toast.success("Removed");
         }
     });
-
-    const handleAddConnector = (e) => {
-        e.preventDefault();
-        const payload = {
-            vehicle_id: vehicleId,
-            client_email: vehicle?.client_email || "", // Required for RLS
-            calculator_system: newConnector.calculator_system || "",
-            connector_color: newConnector.connector_color || "",
-            pin_quantity: newConnector.pin_quantity || "",
-            quantity: 1,
-            file_wiring_diagram: newConnector.file_wiring_diagram || "",
-            list_of_functions: newConnector.list_of_functions || "",
-            image_1: newConnector.image_front || "",
-            image_2: newConnector.image_lever || "",
-            ecu_images: newConnector.ecu_images || []
-        };
-
-        createConnectorMutation.mutate(payload);
-    };
-
-    const handleAddEcuImage = (url) => {
-        if (url) {
-            setNewConnector(prev => ({
-                ...prev,
-                ecu_images: [...prev.ecu_images, url]
-            }));
-        }
-    };
-
-    const removeEcuImage = (index) => {
-        setNewConnector(prev => ({
-            ...prev,
-            ecu_images: prev.ecu_images.filter((_, i) => i !== index)
-        }));
-    };
-
-    const InputStyle = "bg-white dark:bg-[#333] border-gray-200 dark:border-gray-700 focus:ring-[#00C600] focus:border-[#00C600]";
 
     const ImageWithFallback = ({ src, alt, className, contain = false }) => {
         const [error, setError] = useState(false);
@@ -153,7 +73,7 @@ export default function VehicleConnectors() {
             {/* Header / Vehicle Info */}
             <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Onboarding')}>
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Garage')}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
@@ -178,130 +98,14 @@ export default function VehicleConnectors() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleAddConnector} className="space-y-6">
-                        <input type="hidden" name="vehicle_id" value={vehicleId || ''} />
-                        
-                        {/* First Section: Basic Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">Calculator System</Label>
-                                <Input 
-                                    value={newConnector.calculator_system}
-                                    onChange={(e) => setNewConnector({...newConnector, calculator_system: e.target.value})}
-                                    placeholder="e.g. ABS"
-                                    className={InputStyle}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">Connector Color</Label>
-                                <Input 
-                                    value={newConnector.connector_color}
-                                    onChange={(e) => setNewConnector({...newConnector, connector_color: e.target.value})}
-                                    placeholder="e.g. Black"
-                                    className={InputStyle}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">Pin Quantity</Label>
-                                <Input 
-                                    type="number"
-                                    value={newConnector.pin_quantity}
-                                    onChange={(e) => setNewConnector({...newConnector, pin_quantity: e.target.value})}
-                                    placeholder="e.g. 16"
-                                    className={InputStyle}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Second Section: Technical Data */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">Electrical Scheme</Label>
-                                <FileUpload 
-                                    value={newConnector.file_wiring_diagram}
-                                    onChange={(url) => setNewConnector({...newConnector, file_wiring_diagram: url})}
-                                    label="Upload Scheme"
-                                    accept="image/*,.pdf"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase font-bold">List of Functions</Label>
-                                <FileUpload 
-                                    value={newConnector.list_of_functions}
-                                    onChange={(url) => setNewConnector({...newConnector, list_of_functions: url})}
-                                    label="Upload Functions List"
-                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Third Section: Images */}
-                        <div className="space-y-4 border-t pt-4 dark:border-gray-700">
-                            <Label className="text-sm font-bold uppercase">Connector Images</Label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase text-muted-foreground">Front View</Label>
-                                    <FileUpload 
-                                        value={newConnector.image_front}
-                                        onChange={(url) => setNewConnector({...newConnector, image_front: url})}
-                                        label="Front View"
-                                        accept="image/*"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase text-muted-foreground">View (Lever)</Label>
-                                    <FileUpload 
-                                        value={newConnector.image_lever}
-                                        onChange={(url) => setNewConnector({...newConnector, image_lever: url})}
-                                        label="View (Lever)"
-                                        accept="image/*"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase text-muted-foreground">ECU Front (Part Number)</Label>
-                                    <div className="space-y-2">
-                                        <FileUpload 
-                                            value=""
-                                            onChange={handleAddEcuImage}
-                                            label="Add ECU Image"
-                                            accept="image/*"
-                                        />
-                                        {newConnector.ecu_images.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {newConnector.ecu_images.map((img, idx) => (
-                                                    <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden bg-gray-50">
-                                                        <ImageWithFallback 
-                                                            src={img} 
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeEcuImage(idx)}
-                                                            className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                                        >
-                                                            <X className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div className="flex justify-end pt-2">
-                            <Button 
-                                type="submit" 
-                                className="bg-[#00C600] hover:bg-[#00b300] uppercase font-bold w-full md:w-auto"
-                            >
-                                {createConnectorMutation.isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                                Save Connector
-                            </Button>
-                        </div>
-                    </form>
+                    <ConnectorForm 
+                        vehicleId={vehicleId}
+                        clientEmail={vehicle?.client_email}
+                        onSuccess={() => {
+                            getConnectors();
+                            queryClient.invalidateQueries(['connectors', vehicleId]);
+                        }}
+                    />
                 </CardContent>
             </Card>
 
