@@ -80,11 +80,30 @@ export default function VehicleDetail() {
     //     }
     // }, [user, vehicle]);
 
+    if (!queryVehicleId) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+                <div className="p-4 bg-yellow-100 dark:bg-yellow-900/20 rounded-full">
+                   <AlertCircle className="w-8 h-8 text-yellow-500" />
+                </div>
+                <div className="space-y-2">
+                   <h3 className="text-lg font-bold">No Vehicle ID</h3>
+                   <p className="text-muted-foreground max-w-sm">
+                       No vehicle identifier was provided.
+                   </p>
+                </div>
+                <Button onClick={() => window.location.href = backLink} variant="outline">
+                    Back to Dashboard
+                </Button>
+            </div>
+        );
+    }
+
     if (isLoadingUser || isLoadingVehicle) {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;
     }
 
-    if (!vehicle && !isLoadingVehicle) {
+    if (!vehicle) {
          return (
              <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
                  <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
@@ -95,6 +114,7 @@ export default function VehicleDetail() {
                     <p className="text-muted-foreground max-w-sm">
                         The requested vehicle could not be found.
                     </p>
+                    <p className="text-xs font-mono text-muted-foreground">ID: {queryVehicleId}</p>
                  </div>
                  <Button onClick={() => window.location.href = backLink} variant="outline">
                      Back to Dashboard
