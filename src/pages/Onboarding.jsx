@@ -192,8 +192,8 @@ ${connectorDetails}
                         queryClient.invalidateQueries(['companyProfile']);
                         queryClient.invalidateQueries(['me']);
                         if (!companyProfile && newCompanyId) {
-                            // First time creation -> Redirect to Client Dashboard
-                            window.location.href = '/ClientDashboard';
+                            // First time creation -> Redirect to Vehicle Creation for the next step
+                            window.location.href = '/VehicleCreate';
                         }
                     }} 
                 />
