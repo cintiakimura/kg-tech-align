@@ -31,7 +31,9 @@ export default function VehicleDetail() {
             const res = await base44.entities.Vehicle.list({ id: queryVehicleId });
             return res[0] || null;
         },
-        enabled: !!queryVehicleId
+        enabled: !!queryVehicleId,
+        staleTime: 1000 * 60 * 5,
+        retry: 3,
     });
 
     const { data: connectors, isLoading: isLoadingConnectors } = useQuery({
@@ -68,8 +70,30 @@ export default function VehicleDetail() {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;
     }
 
-    if (!queryVehicleId || !vehicle) {
-        return <div className="flex h-screen items-center justify-center text-red-500 font-bold">Vehicle not found</div>;
+    // Handle case where vehicleId exists but query returned no data
+    if (!vehicle && !isLoadingVehicle) {
+         return (
+             <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
+                    <Loader2 className="w-8 h-8 text-red-500" />
+                 </div>
+                 <div className="space-y-2">
+                    <h3 className="text-lg font-bold">Vehicle Data Not Found</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                        We couldn't load the vehicle details. This might be due to a network issue or the vehicle was deleted.
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground">ID: {queryVehicleId}</p>
+                 </div>
+                 <div className="flex gap-4">
+                    <Button onClick={() => window.location.reload()} variant="outline">
+                        Retry Loading
+                    </Button>
+                    <Button onClick={() => window.location.href = backLink}>
+                        Back to {user?.user_type === 'client' ? 'Dashboard' : 'Garage'}
+                    </Button>
+                 </div>
+             </div>
+         );
     }
 
     if (accessDenied) {
@@ -102,12 +126,12 @@ export default function VehicleDetail() {
         <div className="max-w-7xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
-                    <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold uppercase tracking-tight">
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold uppercase tracking-tight">
                             Vehicle Detail - {vehicle.vehicle_number || 'VEH-XXXXX'}
                         </h1>
                         <div className="flex items-center gap-2 mt-1 text-muted-foreground">
@@ -116,6 +140,15 @@ export default function VehicleDetail() {
                             <span>{vehicle.year}</span>
                         </div>
                     </div>
+                </div>
+                <div className="flex items-center gap-2">
+                     <Button 
+                        variant="outline" 
+                        onClick={() => window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${vehicle.id}`}
+                        className="gap-2"
+                     >
+                        View Full Connectors Page
+                     </Button>
                 </div>
             </div>
 
