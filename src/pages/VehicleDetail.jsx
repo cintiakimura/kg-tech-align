@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPageUrl } from '@/utils';
 import { toast } from "sonner";
 import ConnectorForm from '../components/onboarding/fleet/ConnectorForm';
+import VehicleSpecsForm from '../components/onboarding/fleet/VehicleSpecsForm';
+import FileUpload from '../components/onboarding/FileUpload';
 import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
 export default function VehicleDetail() {
@@ -52,6 +54,18 @@ export default function VehicleDetail() {
         }
     });
 
+    const updateVehicleMutation = useMutation({
+        mutationFn: (data) => base44.entities.Vehicle.update(vehicle.id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['vehicle', queryVehicleId]);
+            toast.success("Updated");
+        }
+    });
+
+    const handleAssetUpload = (field, url) => {
+        updateVehicleMutation.mutate({ [field]: url });
+    };
+
     // Security checks disabled as requested
     // useEffect(() => {
     //     if (user && vehicle) {
@@ -70,29 +84,33 @@ export default function VehicleDetail() {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;
     }
 
-    // Handle case where vehicleId exists but query returned no data
+    // If no vehicle is found, we should allow creating one or editing.
+    // The user requested: "instead of creating the page with the vehicle or not found... create a page with all the vehicle's details... any data input... automatically registered"
+    // So if vehicle is not found, we render the VehicleSpecsForm to allow creating/registering it immediately.
+    
     if (!vehicle && !isLoadingVehicle) {
          return (
-             <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
-                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
-                    <Loader2 className="w-8 h-8 text-red-500" />
-                 </div>
-                 <div className="space-y-2">
-                    <h3 className="text-lg font-bold">Vehicle Data Not Found</h3>
-                    <p className="text-muted-foreground max-w-sm">
-                        We couldn't load the vehicle details. This might be due to a network issue or the vehicle was deleted.
-                    </p>
-                    <p className="text-xs font-mono text-muted-foreground">ID: {queryVehicleId}</p>
-                 </div>
-                 <div className="flex gap-4">
-                    <Button onClick={() => window.location.reload()} variant="outline">
-                        Retry Loading
+            <div className="max-w-7xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
+                <div className="flex items-center gap-4 border-b pb-6">
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
+                        <ArrowLeft className="w-5 h-5" />
                     </Button>
-                    <Button onClick={() => window.location.href = backLink}>
-                        Back to {user?.user_type === 'client' ? 'Dashboard' : 'Garage'}
-                    </Button>
-                 </div>
-             </div>
+                    <div>
+                        <h1 className="text-3xl font-bold uppercase tracking-tight">New Vehicle Registration</h1>
+                        <p className="text-muted-foreground">Enter vehicle details below. Data is saved automatically.</p>
+                    </div>
+                </div>
+                
+                {/* Embed the form for creating a new vehicle */}
+                <VehicleSpecsForm 
+                    clientEmail={user?.email} 
+                    onSuccess={(newVehicle) => {
+                        // Once created, reload to show the full detail view with assets/connectors
+                        window.location.href = createPageUrl('VehicleDetail') + `?id=${newVehicle.id}`;
+                    }}
+                    onCancel={() => window.location.href = backLink}
+                />
+            </div>
          );
     }
 
@@ -152,83 +170,88 @@ export default function VehicleDetail() {
                 </div>
             </div>
 
-            {/* Vehicle Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="border-none shadow-sm bg-white dark:bg-[#2a2a2a]">
-                    <CardHeader>
-                        <CardTitle className="text-sm font-bold uppercase">Specs</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-y-4 gap-x-8">
-                        <div>
-                            <span className="text-xs uppercase text-muted-foreground block">VIN</span>
-                            <span className="font-bold font-mono">{vehicle.vin || '-'}</span>
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase text-muted-foreground block">Engine Code</span>
-                            <span className="font-bold">{vehicle.engine_code || '-'}</span>
-                        </div>
-                         <div>
-                            <span className="text-xs uppercase text-muted-foreground block">Engine Size/Power</span>
-                            <span className="font-bold">{vehicle.engine_size || '-'} / {vehicle.engine_power || '-'}</span>
-                        </div>
-                         <div>
-                            <span className="text-xs uppercase text-muted-foreground block">Fuel</span>
-                            <span className="font-bold">{vehicle.fuel || '-'}</span>
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase text-muted-foreground block">Transmission</span>
-                            <span className="font-bold">{vehicle.transmission_type || '-'}</span>
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase text-muted-foreground block">Gears</span>
-                            <span className="font-bold">{vehicle.number_gears || '-'}</span>
-                        </div>
-                    </CardContent>
-                </Card>
+            {/* Vehicle Details & Assets */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Specs Form (Editable) */}
+                <div>
+                    <VehicleSpecsForm 
+                        initialData={vehicle}
+                        clientEmail={user?.email}
+                        onSuccess={() => queryClient.invalidateQueries(['vehicle', queryVehicleId])}
+                        onCancel={() => {}} 
+                        // Hide cancel button in this mode if desired, or let it stay
+                    />
+                </div>
 
-                <Card className="border-none shadow-sm bg-white dark:bg-[#2a2a2a]">
+                {/* Right: Assets & Docs (Editable) */}
+                <Card className="border-none shadow-lg bg-white dark:bg-[#2a2a2a] h-fit">
                     <CardHeader>
                         <CardTitle className="text-sm font-bold uppercase">Assets & Docs</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                         {/* Electrical Scheme */}
-                         <div className="flex items-center justify-between p-2 border rounded">
-                             <div className="flex items-center gap-2">
-                                 <FileText className="w-4 h-4 text-[#00C600]" />
-                                 <span className="text-sm font-medium">Electrical Schemes</span>
+                    <CardContent className="space-y-6">
+                         {/* Documents */}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                                 <label className="text-xs font-bold uppercase">Electrical Scheme</label>
+                                 <FileUpload 
+                                    value={vehicle.file_electrical_scheme}
+                                    onChange={(url) => handleAssetUpload('file_electrical_scheme', url)}
+                                    label="Upload Scheme"
+                                    accept="image/*,.pdf"
+                                 />
                              </div>
-                             {vehicle.file_electrical_scheme ? (
-                                 <a href={vehicle.file_electrical_scheme} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline">View PDF/Image</a>
-                             ) : (
-                                 <span className="text-xs text-muted-foreground">Not uploaded</span>
-                             )}
+                             <div className="space-y-2">
+                                 <label className="text-xs font-bold uppercase">Sensors/Actuators List</label>
+                                 <FileUpload 
+                                    value={vehicle.file_sensors_actuators}
+                                    onChange={(url) => handleAssetUpload('file_sensors_actuators', url)}
+                                    label="Upload List"
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                                 />
+                             </div>
                          </div>
 
-                         {/* Sensors List */}
-                         <div className="flex items-center justify-between p-2 border rounded">
-                             <div className="flex items-center gap-2">
-                                 <FileText className="w-4 h-4 text-[#00C600]" />
-                                 <span className="text-sm font-medium">Sensors/Actuators List</span>
-                             </div>
-                             {vehicle.file_sensors_actuators ? (
-                                 <a href={vehicle.file_sensors_actuators} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline">View List</a>
-                             ) : (
-                                 <span className="text-xs text-muted-foreground">Not uploaded</span>
-                             )}
-                         </div>
-
-                         {/* Photos Thumbnails */}
-                         <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
-                            {[
-                                { src: vehicle.image_connector_front, label: "Front" },
-                                { src: vehicle.image_lever_side, label: "Side" },
-                                { src: vehicle.image_ecu_front, label: "ECU" },
-                                { src: vehicle.image_ecu_part_number, label: "Part #" }
-                            ].map((img, i) => img.src && (
-                                <div key={i} className="flex-shrink-0 w-16 h-16 rounded overflow-hidden border cursor-pointer" onClick={() => window.open(img.src, '_blank')}>
-                                    <ImageWithFallback src={img.src} alt={img.label} className="w-full h-full object-cover" />
-                                </div>
-                            ))}
+                         {/* Images */}
+                         <div className="space-y-4">
+                            <label className="text-xs font-bold uppercase border-b block pb-2">Vehicle Photos</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <FileUpload 
+                                    value={vehicle.image_connector_front}
+                                    onChange={(url) => handleAssetUpload('image_connector_front', url)}
+                                    label="Connector Front"
+                                    accept="image/*"
+                                />
+                                <FileUpload 
+                                    value={vehicle.image_lever_side}
+                                    onChange={(url) => handleAssetUpload('image_lever_side', url)}
+                                    label="Lever Side"
+                                    accept="image/*"
+                                />
+                                <FileUpload 
+                                    value={vehicle.image_ecu_front}
+                                    onChange={(url) => handleAssetUpload('image_ecu_front', url)}
+                                    label="ECU Front"
+                                    accept="image/*"
+                                />
+                                <FileUpload 
+                                    value={vehicle.image_ecu_part_number}
+                                    onChange={(url) => handleAssetUpload('image_ecu_part_number', url)}
+                                    label="ECU Part #"
+                                    accept="image/*"
+                                />
+                                <FileUpload 
+                                    value={vehicle.image_extra_1}
+                                    onChange={(url) => handleAssetUpload('image_extra_1', url)}
+                                    label="Extra Photo 1"
+                                    accept="image/*"
+                                />
+                                <FileUpload 
+                                    value={vehicle.image_extra_2}
+                                    onChange={(url) => handleAssetUpload('image_extra_2', url)}
+                                    label="Extra Photo 2"
+                                    accept="image/*"
+                                />
+                            </div>
                          </div>
                     </CardContent>
                 </Card>
