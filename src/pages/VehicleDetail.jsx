@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPageUrl } from '@/utils';
 import { toast } from "sonner";
 import ConnectorForm from '../components/onboarding/fleet/ConnectorForm';
-import VehicleSpecsForm from '../components/onboarding/fleet/VehicleSpecsForm';
+// import VehicleSpecsForm from '../components/onboarding/fleet/VehicleSpecsForm'; // Removed as this page is now read-only specs
 import FileUpload from '../components/onboarding/FileUpload';
 import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
@@ -84,33 +84,22 @@ export default function VehicleDetail() {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;
     }
 
-    // If no vehicle is found, we should allow creating one or editing.
-    // The user requested: "instead of creating the page with the vehicle or not found... create a page with all the vehicle's details... any data input... automatically registered"
-    // So if vehicle is not found, we render the VehicleSpecsForm to allow creating/registering it immediately.
-    
     if (!vehicle && !isLoadingVehicle) {
          return (
-            <div className="max-w-7xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
-                <div className="flex items-center gap-4 border-b pb-6">
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold uppercase tracking-tight">New Vehicle Registration</h1>
-                        <p className="text-muted-foreground">Enter vehicle details below. Data is saved automatically.</p>
-                    </div>
-                </div>
-                
-                {/* Embed the form for creating a new vehicle */}
-                <VehicleSpecsForm 
-                    clientEmail={user?.email} 
-                    onSuccess={(newVehicle) => {
-                        // Once created, reload to show the full detail view with assets/connectors
-                        window.location.href = createPageUrl('VehicleDetail') + `?id=${newVehicle.id}`;
-                    }}
-                    onCancel={() => window.location.href = backLink}
-                />
-            </div>
+             <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
+                    <AlertCircle className="w-8 h-8 text-red-500" />
+                 </div>
+                 <div className="space-y-2">
+                    <h3 className="text-lg font-bold">Vehicle Not Found</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                        The requested vehicle could not be found.
+                    </p>
+                 </div>
+                 <Button onClick={() => window.location.href = backLink} variant="outline">
+                     Back to Dashboard
+                 </Button>
+             </div>
          );
     }
 
@@ -175,16 +164,78 @@ export default function VehicleDetail() {
 
             {/* Vehicle Details & Assets */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left: Specs Form (Editable) */}
-                <div>
-                    <VehicleSpecsForm 
-                        initialData={vehicle}
-                        clientEmail={user?.email}
-                        onSuccess={() => queryClient.invalidateQueries(['vehicle', queryVehicleId])}
-                        onCancel={() => {}} 
-                        // Hide cancel button in this mode if desired, or let it stay
-                    />
-                </div>
+                {/* Left: Specs (Read Only) */}
+                <Card className="border-none shadow-lg bg-white dark:bg-[#2a2a2a] h-fit">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle className="text-sm font-bold uppercase">Vehicle Specifications</CardTitle>
+                        <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="text-[#00C600] hover:text-[#00C600] hover:bg-[#00C600]/10"
+                            onClick={() => window.location.href = createPageUrl('VehicleEdit') + `?vehicleId=${vehicle.id}`}
+                        >
+                            <span className="font-bold text-xs uppercase">Edit</span>
+                        </Button>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Vehicle Number</label>
+                                <div className="font-mono font-medium">{vehicle.vehicle_number || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">VIN</label>
+                                <div className="font-mono font-medium truncate" title={vehicle.vin}>{vehicle.vin || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Brand</label>
+                                <div className="font-medium">{vehicle.brand || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Model</label>
+                                <div className="font-medium">{vehicle.model || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Year</label>
+                                <div className="font-medium">{vehicle.year || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Fuel</label>
+                                <div className="font-medium">{vehicle.fuel || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine</label>
+                                <div className="font-medium">{vehicle.engine_size || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                             <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Transmission</label>
+                                <div className="font-medium">{vehicle.transmission_type || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Gears</label>
+                                <div className="font-medium">{vehicle.number_gears || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="pt-2 border-t">
+                             <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine Code</label>
+                                    <div className="font-medium font-mono text-sm">{vehicle.engine_code || '-'}</div>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine Power</label>
+                                    <div className="font-medium">{vehicle.engine_power || '-'}</div>
+                                </div>
+                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Right: Assets & Docs (Editable) */}
                 <Card className="border-none shadow-lg bg-white dark:bg-[#2a2a2a] h-fit">

@@ -39,9 +39,9 @@ export default function VehicleEdit() {
                 initialData={vehicle}
                 onCancel={() => window.location.href = createPageUrl('Onboarding')} 
                 onSuccess={(savedVehicle) => {
-                    // Redirect to the View page after saving
+                    // Redirect to the Detail page after saving
                     if (savedVehicle?.id) {
-                        window.location.href = createPageUrl('VehicleView') + `?vehicleId=${savedVehicle.id}`;
+                        window.location.href = createPageUrl('VehicleDetail') + `?vehicleId=${savedVehicle.id}`;
                     } else {
                         window.location.href = createPageUrl('Onboarding');
                     }
