@@ -56,7 +56,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                     variant="ghost" 
                                     size="icon"
                                     className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    onClick={() => window.location.href = createPageUrl('VehicleDetail') + `?id=${vehicle.id}`}
+                                    onClick={() => window.location.href = createPageUrl('VehicleView') + `?vehicleId=${vehicle.id}`}
                                     title="View Details"
                                 >
                                     <Eye className="h-5 w-5" />

@@ -78,6 +78,14 @@ export default function VehicleView() {
                         <h3 className="text-sm font-bold uppercase mb-4 border-b pb-2">Technical Specs</h3>
                         <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                              <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Serial Number</span>
+                                <span className="font-bold">{vehicle.serial_number || '-'}</span>
+                            </div>
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Purpose</span>
+                                <span className="font-bold">{vehicle.purpose || '-'}</span>
+                            </div>
+                             <div>
                                 <span className="text-xs uppercase text-muted-foreground block">Version</span>
                                 <span className="font-bold">{vehicle.version || '-'}</span>
                             </div>
@@ -108,6 +116,10 @@ export default function VehicleView() {
                              <div>
                                 <span className="text-xs uppercase text-muted-foreground block">Brakes</span>
                                 <span className="font-bold">{vehicle.brakes_type || '-'}</span>
+                            </div>
+                             <div>
+                                <span className="text-xs uppercase text-muted-foreground block">Status</span>
+                                <span className="font-bold text-[#00C600]">{vehicle.status || '-'}</span>
                             </div>
                         </div>
                     </CardContent>
