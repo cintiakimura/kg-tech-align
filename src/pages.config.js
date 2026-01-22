@@ -1,4 +1,5 @@
 import AdminAuditReport from './pages/AdminAuditReport';
+import ClientDashboard from './pages/ClientDashboard';
 import ClientDetails from './pages/ClientDetails';
 import ClientLogin from './pages/ClientLogin';
 import Clients from './pages/Clients';
@@ -22,12 +23,12 @@ import VehicleCreate from './pages/VehicleCreate';
 import VehicleDetail from './pages/VehicleDetail';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
-import ClientDashboard from './pages/ClientDashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AdminAuditReport": AdminAuditReport,
+    "ClientDashboard": ClientDashboard,
     "ClientDetails": ClientDetails,
     "ClientLogin": ClientLogin,
     "Clients": Clients,
@@ -51,7 +52,6 @@ export const PAGES = {
     "VehicleDetail": VehicleDetail,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
-    "ClientDashboard": ClientDashboard,
 }
 
 export const pagesConfig = {

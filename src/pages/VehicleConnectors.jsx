@@ -126,6 +126,12 @@ export default function VehicleConnectors() {
                         </p>
                     </div>
                 </div>
+                <Button 
+                    onClick={() => window.location.href = createPageUrl('VehicleDetail') + `?id=${vehicleId}`}
+                    className="bg-[#00C600] hover:bg-[#00b300] text-white uppercase font-bold"
+                >
+                    Finish & View Info
+                </Button>
             </div>
 
             {/* Add Connector Form */}

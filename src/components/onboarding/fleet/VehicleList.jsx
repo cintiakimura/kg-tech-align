@@ -23,6 +23,13 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                     <Card key={vehicle.id} className="bg-white dark:bg-[#2a2a2a] border-none shadow-sm hover:shadow-md transition-all">
                         <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                    {vehicle.vehicle_number && (
+                                        <span className="text-xs font-mono font-bold text-[#00C600] bg-[#00C600]/10 px-2 py-0.5 rounded border border-[#00C600]/20">
+                                            {vehicle.vehicle_number}
+                                        </span>
+                                    )}
+                                </div>
                                 <h4 className="text-lg font-bold uppercase">
                                     {vehicle.brand} {vehicle.model} {vehicle.year} {vehicle.fuel}
                                 </h4>
