@@ -24,6 +24,7 @@ export default function VehicleConnectors() {
         queryKey: ['connectors', vehicleId],
         queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: vehicleId }),
         enabled: !!vehicleId,
+        staleTime: 1000 * 60, // Keep data fresh for 1 minute to avoid flickering
     });
 
     const deleteConnectorMutation = useMutation({
@@ -68,24 +69,38 @@ export default function VehicleConnectors() {
         return <div className="p-8 text-center text-red-500">Go back and save a vehicle first</div>;
     }
 
+    // Handle case where vehicleId exists but query returned no data
+    if (!vehicle && !isLoadingVehicle) {
+        return (
+            <div className="flex flex-col items-center justify-center h-screen gap-4">
+                <div className="text-red-500 font-bold">Vehicle not found</div>
+                <Button variant="outline" onClick={() => window.location.href = createPageUrl('Garage')}>
+                    Back to Garage
+                </Button>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-6 animate-in fade-in duration-500">
             {/* Header / Vehicle Info */}
-            <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm border">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Garage')}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
                         <div className="flex items-center gap-3">
-                          <h2 className="text-xl font-bold uppercase">{vehicle?.brand} {vehicle?.model} - Connectors</h2>
-                          {vehicle?.vehicle_number && (
+                          <h2 className="text-xl font-bold uppercase">{vehicle.brand} {vehicle.model} - Connectors</h2>
+                          {vehicle.vehicle_number && (
                               <span className="text-xs bg-[#00C600]/10 text-[#00C600] px-2 py-0.5 rounded border border-[#00C600]/20 font-mono font-bold">
                                   {vehicle.vehicle_number}
                               </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground uppercase">{vehicle?.engine_size} {vehicle?.fuel} | {vehicle?.vin}</p>
+                        <p className="text-sm text-muted-foreground uppercase">
+                            {vehicle.engine_size || '-'} {vehicle.fuel || '-'} | {vehicle.vin || '-'}
+                        </p>
                     </div>
                 </div>
             </div>

@@ -24,11 +24,25 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
         ecu_images: []
     });
 
+    const resetForm = () => {
+        setNewConnector({
+            calculator_system: '',
+            connector_color: '',
+            pin_quantity: '',
+            file_wiring_diagram: '',
+            list_of_functions: '',
+            image_front: '',
+            image_lever: '',
+            ecu_images: []
+        });
+    };
+
     const createConnectorMutation = useMutation({
         mutationFn: (data) => base44.entities.VehicleConnector.create(data),
         onSuccess: (savedConnector) => {
             queryClient.invalidateQueries(['connectors', vehicleId]);
             toast.success("Added successfully");
+            resetForm();
             if (onSuccess) onSuccess(savedConnector);
         },
         onError: (err) => {
