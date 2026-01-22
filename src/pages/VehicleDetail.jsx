@@ -17,6 +17,7 @@ export default function VehicleDetail() {
     const queryVehicleId = params.get('vehicleId') || params.get('id');
     const [accessDenied, setAccessDenied] = useState(false);
     const [showConnectorModal, setShowConnectorModal] = useState(false);
+    const [editingConnector, setEditingConnector] = useState(null);
     const queryClient = useQueryClient();
 
     const { data: user, isLoading: isLoadingUser } = useQuery({
@@ -25,6 +26,8 @@ export default function VehicleDetail() {
     });
 
     const backLink = user?.user_type === 'client' ? createPageUrl('ClientDashboard') : createPageUrl('Garage');
+    // Ensure all users can create/edit/delete
+    const canEdit = true;
 
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', queryVehicleId],
@@ -382,8 +385,16 @@ export default function VehicleDetail() {
                             <ConnectorForm 
                                 vehicleId={vehicle.id} 
                                 clientEmail={vehicle.client_email}
-                                onSuccess={() => setShowConnectorModal(false)}
-                                onCancel={() => setShowConnectorModal(false)}
+                                initialData={editingConnector}
+                                onSuccess={() => {
+                                    setShowConnectorModal(false);
+                                    setEditingConnector(null);
+                                    queryClient.invalidateQueries(['connectors', queryVehicleId]);
+                                }}
+                                onCancel={() => {
+                                    setShowConnectorModal(false);
+                                    setEditingConnector(null);
+                                }}
                             />
                         </DialogContent>
                     </Dialog>
@@ -404,7 +415,18 @@ export default function VehicleDetail() {
                         {connectors.map((conn) => {
                              return (
                                 <Card key={conn.id} className="relative group flex flex-col overflow-hidden hover:shadow-md transition-all border bg-white dark:bg-[#2a2a2a]">
-                                    <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <Button 
+                                            variant="secondary" 
+                                            size="icon" 
+                                            className="h-6 w-6 bg-white shadow-sm"
+                                            onClick={() => {
+                                                setEditingConnector(conn);
+                                                setShowConnectorModal(true);
+                                            }}
+                                        >
+                                            <FileText className="w-3 h-3 text-blue-600" />
+                                        </Button>
                                         <Button 
                                             variant="destructive" 
                                             size="icon" 
@@ -443,6 +465,35 @@ export default function VehicleDetail() {
                                                     <span className="block opacity-70">Pins</span>
                                                     <span className="font-medium text-foreground">{conn.pin_quantity || '-'}</span>
                                                 </div>
+                                            </div>
+
+                                            {/* Documents Links */}
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {conn.file_wiring_diagram && (
+                                                    <a href={conn.file_wiring_diagram} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] text-[#00C600] hover:underline bg-[#00C600]/10 px-1.5 py-0.5 rounded">
+                                                        <FileText className="w-3 h-3" /> Scheme
+                                                    </a>
+                                                )}
+                                                {conn.list_of_functions && (
+                                                    <a href={conn.list_of_functions} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] text-blue-600 hover:underline bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
+                                                        <FileText className="w-3 h-3" /> Functions
+                                                    </a>
+                                                )}
+                                                {conn.file_pinning_list && (
+                                                    <a href={conn.file_pinning_list} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] text-orange-600 hover:underline bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded">
+                                                        <FileText className="w-3 h-3" /> Pinning
+                                                    </a>
+                                                )}
+                                                {conn.file_other_1 && (
+                                                    <a href={conn.file_other_1} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] text-gray-600 hover:underline bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                                                        <FileText className="w-3 h-3" /> Doc 1
+                                                    </a>
+                                                )}
+                                                {conn.file_other_2 && (
+                                                    <a href={conn.file_other_2} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] text-gray-600 hover:underline bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                                                        <FileText className="w-3 h-3" /> Doc 2
+                                                    </a>
+                                                )}
                                             </div>
                                         </div>
 
