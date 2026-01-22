@@ -22,6 +22,7 @@ import VehicleCreate from './pages/VehicleCreate';
 import VehicleDetail from './pages/VehicleDetail';
 import VehicleEdit from './pages/VehicleEdit';
 import VehicleView from './pages/VehicleView';
+import ClientDashboard from './pages/ClientDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "VehicleDetail": VehicleDetail,
     "VehicleEdit": VehicleEdit,
     "VehicleView": VehicleView,
+    "ClientDashboard": ClientDashboard,
 }
 
 export const pagesConfig = {

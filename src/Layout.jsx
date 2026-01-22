@@ -86,7 +86,7 @@ function LayoutContent({ children }) {
                   if (invite.target_user_type === 'manager') window.location.href = '/ManagerDashboard';
                   else if (invite.target_user_type === 'supplier') window.location.href = '/SupplierDashboard';
                   else if (!updated.company_id) window.location.href = '/Onboarding'; // client needing onboarding
-                  else window.location.href = '/Garage';
+                  else window.location.href = '/ClientDashboard';
                   return;
               }
           } catch (e) {
@@ -102,11 +102,9 @@ function LayoutContent({ children }) {
           if (!currentUser.company_id && window.location.pathname !== '/Onboarding') {
               window.location.href = '/Onboarding';
           }
-          if (currentUser.company_id && window.location.pathname === '/Onboarding' && !window.location.search.includes('edit')) {
-              // Redirect to Garage if already set up (assuming they aren't trying to edit explicitly)
-              // The user wants 'Edit Company Profile' to open the same form. 
-              // So we treat /Onboarding as the Profile page as well.
-              // But if they are just logging in, they shouldn't land here.
+          // Redirect to Client Dashboard if they have a company and are at root/login/onboarding(without edit)
+          if (currentUser.company_id && (window.location.pathname === '/Onboarding' && !window.location.search.includes('edit') || window.location.pathname === '/' || window.location.pathname === '/Home')) {
+              window.location.href = '/ClientDashboard';
           }
       }
     } catch (e) {
@@ -116,17 +114,17 @@ function LayoutContent({ children }) {
   }
 
   const handleRoleSelect = async (type) => {
-      try {
-          await base44.auth.updateMe({ user_type: type });
-          setShowRoleSelector(false);
-          // Force reload user to get update
-          const updatedUser = await base44.auth.me();
-          setUser(updatedUser);
-          if (type === 'supplier') window.location.href = '/SupplierDashboard';
-          else window.location.href = '/Onboarding';
-      } catch (e) {
-          console.error("Failed to set role", e);
-      }
+  try {
+      await base44.auth.updateMe({ user_type: type });
+      setShowRoleSelector(false);
+      // Force reload user to get update
+      const updatedUser = await base44.auth.me();
+      setUser(updatedUser);
+      if (type === 'supplier') window.location.href = '/SupplierDashboard';
+      else window.location.href = '/Onboarding'; // New clients start at onboarding
+  } catch (e) {
+      console.error("Failed to set role", e);
+  }
   };
 
   const toggleTheme = () => {
@@ -216,10 +214,10 @@ function LayoutContent({ children }) {
                                    </a>
                                </DropdownMenuItem>
                            )}
-                     {user.user_type === 'client' && user.company_id && (
+                     {user.user_type === 'client' && (
                          <DropdownMenuItem asChild>
-                             <a href="/Onboarding" className="w-full cursor-pointer font-medium flex items-center gap-2">
-                               <span className="text-xl">✏️</span> Edit Company Profile
+                             <a href="/ClientDashboard" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
+                               Client Dashboard
                              </a>
                          </DropdownMenuItem>
                      )}
