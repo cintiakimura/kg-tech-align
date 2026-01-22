@@ -67,6 +67,7 @@ export default function VehicleDetail() {
     });
 
     const handleAssetUpload = (field, url) => {
+        // Force save uploaded asset to DB immediately
         updateVehicleMutation.mutate({ [field]: url });
     };
 
@@ -228,6 +229,16 @@ export default function VehicleDetail() {
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Version</label>
+                                <div className="font-medium">{vehicle.version || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Serial Number</label>
+                                <div className="font-medium">{vehicle.serial_number || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
                              <div>
                                 <label className="text-[10px] text-muted-foreground font-bold uppercase block">Transmission</label>
                                 <div className="font-medium">{vehicle.transmission_type || '-'}</div>
@@ -235,6 +246,16 @@ export default function VehicleDetail() {
                             <div>
                                 <label className="text-[10px] text-muted-foreground font-bold uppercase block">Gears</label>
                                 <div className="font-medium">{vehicle.number_gears || '-'}</div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Brakes Type</label>
+                                <div className="font-medium">{vehicle.brakes_type || '-'}</div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Purpose</label>
+                                <div className="font-medium">{vehicle.purpose || '-'}</div>
                             </div>
                         </div>
                         <div className="pt-2 border-t">
@@ -247,6 +268,20 @@ export default function VehicleDetail() {
                                     <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine Power</label>
                                     <div className="font-medium">{vehicle.engine_power || '-'}</div>
                                 </div>
+                             </div>
+                             <div className="grid grid-cols-2 gap-4 mt-2">
+                                <div>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine Type</label>
+                                    <div className="font-medium">{vehicle.engine_type || '-'}</div>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-muted-foreground font-bold uppercase block">Engine Model</label>
+                                    <div className="font-medium">{vehicle.engine_model || '-'}</div>
+                                </div>
+                             </div>
+                             <div className="mt-2">
+                                <label className="text-[10px] text-muted-foreground font-bold uppercase block">Status</label>
+                                <div className="font-medium text-[#00C600] font-bold">{vehicle.status || '-'}</div>
                              </div>
                         </div>
                     </CardContent>
