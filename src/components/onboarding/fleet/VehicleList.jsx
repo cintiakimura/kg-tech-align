@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, onDeleteVehicle, onEditVehicle }) {
@@ -19,14 +19,14 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                         size="icon"
                         title="Refresh List"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                        <RefreshCw className="w-4 h-4" />
                     </Button>
                     <Button 
                         onClick={() => window.location.href = createPageUrl('VehicleCreate')}
                         className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        create new vehicle
+                        CREATE NEW VEHICLE
                     </Button>
                 </div>
             </div>
@@ -70,21 +70,18 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                 >
                                     <Pencil className="h-5 w-5" />
                                 </Button>
-                                <div className="flex gap-1 border-l pl-2 dark:border-gray-700">
-
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon"
-                                        className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onDeleteVehicle(vehicle.id);
-                                        }}
-                                        title="Delete Vehicle"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteVehicle(vehicle.id);
+                                    }}
+                                    title="Delete Vehicle"
+                                >
+                                    <Trash2 className="h-5 w-5" />
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>
