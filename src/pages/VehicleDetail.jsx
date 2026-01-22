@@ -31,11 +31,15 @@ export default function VehicleDetail() {
         queryFn: async () => {
             if (!queryVehicleId) return null;
             const res = await base44.entities.Vehicle.list({ id: queryVehicleId });
-            return res[0] || null;
+            if (!res || res.length === 0) {
+                throw new Error("Vehicle not found yet");
+            }
+            return res[0];
         },
         enabled: !!queryVehicleId,
         staleTime: 1000 * 60 * 5,
-        retry: 3,
+        retry: 10,
+        retryDelay: 500,
     });
 
     const { data: connectors, isLoading: isLoadingConnectors } = useQuery({
