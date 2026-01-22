@@ -22,6 +22,8 @@ export default function VehicleDetail() {
         queryFn: () => base44.auth.me(),
     });
 
+    const backLink = user?.user_type === 'client' ? createPageUrl('ClientDashboard') : createPageUrl('Garage');
+
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', queryVehicleId],
         queryFn: async () => {
@@ -100,12 +102,12 @@ export default function VehicleDetail() {
         <div className="max-w-7xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold uppercase tracking-tight">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                    <h1 className="text-3xl font-bold uppercase tracking-tight">
                             Vehicle Detail - {vehicle.vehicle_number || 'VEH-XXXXX'}
                         </h1>
                         <div className="flex items-center gap-2 mt-1 text-muted-foreground">
