@@ -114,17 +114,25 @@ function LayoutContent({ children }) {
   }
 
   const handleRoleSelect = async (type) => {
-  try {
-      await base44.auth.updateMe({ user_type: type });
-      setShowRoleSelector(false);
-      // Force reload user to get update
-      const updatedUser = await base44.auth.me();
-      setUser(updatedUser);
-      if (type === 'supplier') window.location.href = '/SupplierDashboard';
-      else window.location.href = '/Onboarding'; // New clients start at onboarding
-  } catch (e) {
-      console.error("Failed to set role", e);
-  }
+      try {
+          await base44.auth.updateMe({ user_type: type });
+          setShowRoleSelector(false);
+          // Force reload user to get update
+          const updatedUser = await base44.auth.me();
+          setUser(updatedUser);
+          if (type === 'supplier') window.location.href = '/SupplierDashboard';
+          else window.location.href = '/Onboarding'; // New clients start at onboarding
+      } catch (e) {
+          console.error("Failed to set role", e);
+      }
+  };
+
+  const getHomeLink = () => {
+      if (!user) return '/';
+      if (user.role === 'admin' || user.user_type === 'manager') return '/ManagerDashboard';
+      if (user.user_type === 'supplier') return '/SupplierDashboard';
+      if (user.user_type === 'client') return '/ClientDashboard';
+      return '/';
   };
 
   const toggleTheme = () => {
@@ -150,7 +158,7 @@ function LayoutContent({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <a href="/ManagerDashboard" className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
+            <a href={getHomeLink()} className="flex-shrink-0 flex items-center gap-4 cursor-pointer">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/user_691ced529360bd8b67161013/ed2352d66_LOGOKG.png" 
                 alt="KG Logo" 
