@@ -21,13 +21,7 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
         list_of_functions: '',
         image_front: '',
         image_lever: '',
-        ecu_images: [],
-        catalogue_id: 'none'
-    });
-
-    const { data: catalogueItems } = useQuery({
-        queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(),
+        ecu_images: []
     });
 
     const createConnectorMutation = useMutation({
@@ -58,12 +52,6 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
             image_2: newConnector.image_lever || "",
             ecu_images: newConnector.ecu_images || []
         };
-        
-        if (newConnector.catalogue_id && newConnector.catalogue_id !== 'none') {
-            payload.catalogue_id = newConnector.catalogue_id;
-        } else {
-            payload.catalogue_id = null; // Ensure we don't send 'none' string or leave it ambiguous
-        }
 
         createConnectorMutation.mutate(payload);
     };
@@ -117,40 +105,7 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                         className={InputStyle}
                     />
                 </div>
-                 <div className="space-y-2">
-                    <Label className="text-xs uppercase font-bold">Catalogue Product</Label>
-                    <Select 
-                        value={newConnector.catalogue_id} 
-                        onValueChange={(val) => setNewConnector({...newConnector, catalogue_id: val})}
-                    >
-                        <SelectTrigger className={InputStyle}>
-                            <SelectValue placeholder="Select..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="none">None</SelectItem>
-                            {catalogueItems?.map(item => (
-                                <SelectItem key={item.id} value={item.id}>
-                                    <div className="flex items-center gap-2 max-w-[300px] overflow-hidden">
-                                        {item.image_url && !imageErrors[item.id] ? (
-                                            <img 
-                                                src={getProxiedImageUrl(item.image_url)} 
-                                                alt="" 
-                                                className="w-6 h-6 object-cover rounded flex-shrink-0" 
-                                                onError={() => setImageErrors(prev => ({...prev, [item.id]: true}))}
-                                                referrerPolicy="no-referrer"
-                                            />
-                                        ) : (
-                                            <div className="w-6 h-6 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center">
-                                                <div className="w-2 h-2 bg-gray-300 rounded-full" />
-                                            </div>
-                                        )}
-                                        <span className="truncate">{item.secret_part_number} ({item.colour})</span>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+ 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
