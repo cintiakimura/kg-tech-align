@@ -78,7 +78,7 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
     };
 
     const handleSelectVehicle = (vehicle) => {
-        window.location.href = createPageUrl('VehicleDetail') + `?id=${vehicle.id}`;
+        window.location.href = createPageUrl('VehicleView') + `?vehicleId=${vehicle.id}`;
     };
 
 
