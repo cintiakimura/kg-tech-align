@@ -10,11 +10,18 @@ export default function VehicleView() {
     const params = new URLSearchParams(window.location.search);
     const vehicleId = params.get('vehicleId');
 
+    const { data: user } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me(),
+    });
+
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
         queryFn: () => base44.entities.Vehicle.list({ id: vehicleId }).then(res => res[0]),
         enabled: !!vehicleId,
     });
+
+    const backLink = user?.user_type === 'client' ? createPageUrl('ClientDashboard') : createPageUrl('Garage');
 
     const { data: connectors, isLoading: isLoadingConnectors } = useQuery({
         queryKey: ['connectors', vehicleId],
@@ -44,7 +51,7 @@ export default function VehicleView() {
             {/* Header / Vehicle Info */}
             <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Onboarding')}>
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
