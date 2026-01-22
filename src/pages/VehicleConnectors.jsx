@@ -85,31 +85,14 @@ export default function VehicleConnectors() {
         return <div className="p-8 text-center text-red-500">Go back and save a vehicle first</div>;
     }
 
-    // Handle case where vehicleId exists but query returned no data
-    if (!vehicle && !isLoadingVehicle) {
-         return (
-             <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
-                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
-                    <Loader2 className="w-8 h-8 text-red-500" />
-                 </div>
-                 <div className="space-y-2">
-                    <h3 className="text-lg font-bold">Vehicle Data Not Found</h3>
-                    <p className="text-muted-foreground max-w-sm">
-                        We couldn't load the vehicle details. This might be due to a network issue or the vehicle was deleted.
-                    </p>
-                    <p className="text-xs font-mono text-muted-foreground">ID: {vehicleId}</p>
-                 </div>
-                 <div className="flex gap-4">
-                    <Button onClick={() => refetchVehicle()} variant="outline">
-                        Retry Loading
-                    </Button>
-                    <Button onClick={() => window.location.href = backLink}>
-                        Back to {user?.user_type === 'client' ? 'Dashboard' : 'Garage'}
-                    </Button>
-                 </div>
-             </div>
-         );
-    }
+    // Non-blocking fallback: if vehicle isn't found, we still allow adding connectors
+    // using the ID from the URL and current user as client.
+    const displayVehicle = vehicle || {
+        brand: 'Vehicle',
+        model: '',
+        vehicle_number: 'PENDING',
+        client_email: user?.email
+    };
 
     return (
         <div className="space-y-6 p-6 animate-in fade-in duration-500">
@@ -121,15 +104,15 @@ export default function VehicleConnectors() {
                     </Button>
                     <div>
                         <div className="flex items-center gap-3">
-                          <h2 className="text-xl font-bold uppercase">{vehicle.brand} {vehicle.model} - Connectors</h2>
-                          {vehicle.vehicle_number && (
+                          <h2 className="text-xl font-bold uppercase">{displayVehicle.brand} {displayVehicle.model} - Connectors</h2>
+                          {displayVehicle.vehicle_number && (
                               <span className="text-xs bg-[#00C600]/10 text-[#00C600] px-2 py-0.5 rounded border border-[#00C600]/20 font-mono font-bold">
-                                  {vehicle.vehicle_number}
+                                  {displayVehicle.vehicle_number}
                               </span>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground uppercase">
-                            {vehicle.engine_size || '-'} {vehicle.fuel || '-'} | {vehicle.vin || '-'}
+                            {displayVehicle.engine_size || '-'} {displayVehicle.fuel || '-'} | {displayVehicle.vin || '-'}
                         </p>
                     </div>
                 </div>
@@ -151,7 +134,7 @@ export default function VehicleConnectors() {
                 <CardContent>
                     <ConnectorForm 
                         vehicleId={vehicleId}
-                        clientEmail={vehicle?.client_email}
+                        clientEmail={displayVehicle?.client_email || user?.email}
                         onSuccess={() => {
                             // Only invalidate, don't force manual fetch to avoid race conditions
                             queryClient.invalidateQueries(['connectors', vehicleId]);
