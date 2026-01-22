@@ -51,7 +51,10 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
             // Deduplicate by ID
             return _.uniqBy(allVehicles, 'id');
         },
-        enabled: !propVehicles && !!user
+        enabled: !propVehicles && !!user,
+        retry: 5,
+        retryDelay: 1000,
+        staleTime: 0, // Ensure we always fetch fresh data when mounting
     });
 
     const vehicles = propVehicles || fetchedVehicles;

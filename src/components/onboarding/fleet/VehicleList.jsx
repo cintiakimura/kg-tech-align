@@ -8,14 +8,27 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm">
-                <h3 className="text-xl font-bold uppercase tracking-wider">Vehicles</h3>
-                <Button 
-                    onClick={() => window.location.href = createPageUrl('VehicleCreate')}
-                    className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    create new vehicle
-                </Button>
+                <h3 className="text-xl font-bold uppercase tracking-wider flex items-center gap-2">
+                    Vehicles
+                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">{vehicles.length}</span>
+                </h3>
+                <div className="flex gap-2">
+                    <Button 
+                        onClick={() => window.location.reload()}
+                        variant="outline"
+                        size="icon"
+                        title="Refresh List"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                    </Button>
+                    <Button 
+                        onClick={() => window.location.href = createPageUrl('VehicleCreate')}
+                        className="bg-[#00C600] hover:bg-[#00b300] text-white font-bold uppercase"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        create new vehicle
+                    </Button>
+                </div>
             </div>
             
             <div className="flex flex-col gap-4">
