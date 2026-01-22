@@ -19,19 +19,16 @@ export default function VehicleConnectors() {
         queryFn: () => base44.auth.me(),
     });
 
-    const { data: vehicle, isLoading: isLoadingVehicle, refetch: refetchVehicle } = useQuery({
+    const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
         queryFn: async () => {
             const res = await base44.entities.Vehicle.list({ id: vehicleId });
-            if (!res || res.length === 0) {
-                throw new Error("Vehicle not found yet");
-            }
-            return res[0];
+            return (res && res.length > 0) ? res[0] : null;
         },
         enabled: !!vehicleId,
-        staleTime: 1000 * 60 * 5,
-        retry: 10, // Retry more times for replication lag
-        retryDelay: 500, // Wait 500ms between retries
+        refetchInterval: (query) => {
+            return !query.state.data ? 1000 : false;
+        },
     });
 
     const backLink = user?.user_type === 'client' ? createPageUrl('ClientDashboard') : createPageUrl('Garage');

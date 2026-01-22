@@ -23,10 +23,7 @@ export default function VehicleCreate() {
                 onSuccess={(savedVehicle) => {
                     // Redirect to the Connectors page after saving
                     if (savedVehicle?.id) {
-                        // Small delay to ensure DB propagation
-                        setTimeout(() => {
-                            window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${savedVehicle.id}`;
-                        }, 1000);
+                        window.location.href = createPageUrl('VehicleConnectors') + `?vehicleId=${savedVehicle.id}`;
                     }
                 }}
             />
