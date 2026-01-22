@@ -33,7 +33,7 @@ export default function VehicleDetail() {
         queryKey: ['vehicle', queryVehicleId],
         queryFn: async () => {
             if (!queryVehicleId) return null;
-            const res = await base44.entities.Vehicle.list({ id: queryVehicleId });
+            const res = await base44.entities.Vehicle.filter({ id: queryVehicleId });
             if (!res || res.length === 0) {
                 throw new Error("Vehicle not found yet");
             }
@@ -47,7 +47,7 @@ export default function VehicleDetail() {
 
     const { data: connectors, isLoading: isLoadingConnectors } = useQuery({
         queryKey: ['connectors', queryVehicleId],
-        queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: queryVehicleId }),
+        queryFn: () => base44.entities.VehicleConnector.filter({ vehicle_id: queryVehicleId }),
         enabled: !!queryVehicleId && !accessDenied
     });
 

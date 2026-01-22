@@ -13,7 +13,7 @@ export default function VehicleEdit() {
     // If we have an ID, fetch the vehicle data
     const { data: vehicle, isLoading } = useQuery({
         queryKey: ['vehicle', vehicleId],
-        queryFn: () => base44.entities.Vehicle.list({ id: vehicleId }).then(res => res[0]),
+        queryFn: () => base44.entities.Vehicle.filter({ id: vehicleId }).then(res => res[0]),
         enabled: !!vehicleId,
     });
 

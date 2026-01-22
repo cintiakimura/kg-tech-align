@@ -22,7 +22,7 @@ export default function VehicleConnectors() {
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
         queryFn: async () => {
-            const res = await base44.entities.Vehicle.list({ id: vehicleId });
+            const res = await base44.entities.Vehicle.filter({ id: vehicleId });
             return (res && res.length > 0) ? res[0] : null;
         },
         enabled: !!vehicleId,
@@ -35,7 +35,7 @@ export default function VehicleConnectors() {
 
     const { data: connectors, isLoading: isLoadingConnectors, refetch: getConnectors } = useQuery({
         queryKey: ['connectors', vehicleId],
-        queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: vehicleId }),
+        queryFn: () => base44.entities.VehicleConnector.filter({ vehicle_id: vehicleId }),
         enabled: !!vehicleId,
         staleTime: 1000 * 60, // Keep data fresh for 1 minute to avoid flickering
     });
