@@ -46,21 +46,29 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                     delete cleanData.created_by;
                     
                     try {
+                        const currentUser = await base44.auth.me();
+                        const finalClientEmail = clientEmail || currentUser?.email || "";
+                        const finalClientId = currentUser?.company_id || currentUser?.id;
+
                         if (savedVehicle?.id) {
-                            await base44.entities.Vehicle.update(savedVehicle.id, cleanData);
+                            const updatePayload = { ...cleanData };
+                            // Ensure client_email is set if missing on existing record
+                            if (!savedVehicle.client_email && finalClientEmail) {
+                                updatePayload.client_email = finalClientEmail;
+                            }
+                            await base44.entities.Vehicle.update(savedVehicle.id, updatePayload);
                             // toast.success("Saved", { duration: 1000 });
                         } else {
                             // Auto-create new vehicle on first input
                             const randomNum = Math.floor(Math.random() * 1000000);
                             const vehicleNumber = `VEH-${randomNum.toString().padStart(6, '0')}`;
-                            const currentUser = await base44.auth.me();
                             
                             const newVehicle = await base44.entities.Vehicle.create({
                                 ...cleanData,
                                 vehicle_number: vehicleNumber,
                                 status: 'Open for Quotes',
-                                client_email: clientEmail || currentUser?.email || "",
-                                client_id: currentUser?.company_id || currentUser?.id 
+                                client_email: finalClientEmail,
+                                client_id: finalClientId
                             });
                             setSavedVehicle(newVehicle);
                             // Do not call onSuccess here to prevent redirect while typing

@@ -51,11 +51,22 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
         }
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        let finalClientEmail = clientEmail;
+        if (!finalClientEmail) {
+            try {
+                const me = await base44.auth.me();
+                finalClientEmail = me?.email || "";
+            } catch (err) {
+                console.error("Failed to fetch user for connector save", err);
+            }
+        }
+
         const payload = {
             vehicle_id: vehicleId,
-            client_email: clientEmail || "", 
+            client_email: finalClientEmail, 
             calculator_system: newConnector.calculator_system || "",
             connector_color: newConnector.connector_color || "",
             pin_quantity: newConnector.pin_quantity || "",
