@@ -14,7 +14,6 @@ import Onboarding from './pages/Onboarding';
 import ProductionControl from './pages/ProductionControl';
 import Purchases from './pages/Purchases';
 import Quotations from './pages/Quotations';
-import StockControl from './pages/StockControl';
 import SupplierDashboard from './pages/SupplierDashboard';
 import SupplierLogin from './pages/SupplierLogin';
 import SupplierQuotations from './pages/SupplierQuotations';
@@ -43,7 +42,6 @@ export const PAGES = {
     "ProductionControl": ProductionControl,
     "Purchases": Purchases,
     "Quotations": Quotations,
-    "StockControl": StockControl,
     "SupplierDashboard": SupplierDashboard,
     "SupplierLogin": SupplierLogin,
     "SupplierQuotations": SupplierQuotations,
