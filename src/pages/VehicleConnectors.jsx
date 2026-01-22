@@ -14,6 +14,11 @@ export default function VehicleConnectors() {
     const params = new URLSearchParams(window.location.search);
     const vehicleId = params.get('vehicleId');
 
+    const { data: user } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me(),
+    });
+
     const { data: vehicle, isLoading: isLoadingVehicle, refetch: refetchVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
         queryFn: () => base44.entities.Vehicle.list({ id: vehicleId }).then(res => res[0]),
@@ -21,6 +26,8 @@ export default function VehicleConnectors() {
         staleTime: 1000 * 60 * 5, // Keep vehicle data fresh for 5 minutes
         retry: 3,
     });
+
+    const backLink = user?.user_type === 'client' ? createPageUrl('ClientDashboard') : createPageUrl('Garage');
 
     const { data: connectors, isLoading: isLoadingConnectors, refetch: getConnectors } = useQuery({
         queryKey: ['connectors', vehicleId],
@@ -89,8 +96,8 @@ export default function VehicleConnectors() {
                     <Button onClick={() => refetchVehicle()} variant="outline">
                         Retry Loading
                     </Button>
-                    <Button onClick={() => window.location.href = createPageUrl('Garage')}>
-                        Back to Garage
+                    <Button onClick={() => window.location.href = backLink}>
+                        Back to {user?.user_type === 'client' ? 'Dashboard' : 'Garage'}
                     </Button>
                  </div>
              </div>
@@ -102,7 +109,7 @@ export default function VehicleConnectors() {
             {/* Header / Vehicle Info */}
             <div className="flex items-center justify-between bg-white dark:bg-[#2a2a2a] p-4 rounded-lg shadow-sm border">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => window.location.href = createPageUrl('Garage')}>
+                    <Button variant="ghost" size="icon" onClick={() => window.location.href = backLink}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
