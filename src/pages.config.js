@@ -1,6 +1,4 @@
 import AdminAuditReport from './pages/AdminAuditReport';
-import AdminImportCatalogue from './pages/AdminImportCatalogue';
-import Catalogue from './pages/Catalogue';
 import ClientDetails from './pages/ClientDetails';
 import ClientLogin from './pages/ClientLogin';
 import Clients from './pages/Clients';
@@ -30,8 +28,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "AdminAuditReport": AdminAuditReport,
-    "AdminImportCatalogue": AdminImportCatalogue,
-    "Catalogue": Catalogue,
     "ClientDetails": ClientDetails,
     "ClientLogin": ClientLogin,
     "Clients": Clients,
