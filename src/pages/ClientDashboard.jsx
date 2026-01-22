@@ -23,10 +23,10 @@ export default function ClientDashboard() {
             if (!user) return [];
             // Try fetch by company_id if set, else by owner
             if (user.company_id) {
-                return base44.entities.CompanyProfile.list({ id: user.company_id });
+                return base44.entities.CompanyProfile.filter({ id: user.company_id });
             }
             // Fallback for just-created users without company_id set yet
-            return base44.entities.CompanyProfile.list({ contact_email: user.email });
+            return base44.entities.CompanyProfile.filter({ contact_email: user.email });
         },
         enabled: !!user
     });
@@ -36,7 +36,7 @@ export default function ClientDashboard() {
     // Fetch Purchases (Products/Licenses)
     const { data: purchases, isLoading: isLoadingPurchases } = useQuery({
         queryKey: ['purchases', user?.email],
-        queryFn: () => base44.entities.Purchase.list({ user_email: user?.email }),
+        queryFn: () => base44.entities.Purchase.filter({ user_email: user?.email }),
         enabled: !!user?.email
     });
 

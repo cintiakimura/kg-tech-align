@@ -34,21 +34,21 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
             const queries = [];
             
             if (user.company_id) {
-                queries.push(base44.entities.Vehicle.list({ client_id: user.company_id }));
+                queries.push(base44.entities.Vehicle.filter({ client_id: user.company_id }));
             }
             
             // Always fetch by personal ID just in case
-            queries.push(base44.entities.Vehicle.list({ client_id: user.id }));
+            queries.push(base44.entities.Vehicle.filter({ client_id: user.id }));
             
             // Safety net: fetch everything created by this user
             if (user.email) {
-                queries.push(base44.entities.Vehicle.list({ created_by: user.email }));
-                queries.push(base44.entities.Vehicle.list({ client_email: user.email }));
+                queries.push(base44.entities.Vehicle.filter({ created_by: user.email }));
+                queries.push(base44.entities.Vehicle.filter({ client_email: user.email }));
             }
 
             // Also fetch by the clientEmail prop if provided (for when manager views a client)
             if (clientEmail) {
-                queries.push(base44.entities.Vehicle.list({ client_email: clientEmail }));
+                queries.push(base44.entities.Vehicle.filter({ client_email: clientEmail }));
             }
 
             const results = await Promise.all(queries);

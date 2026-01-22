@@ -21,7 +21,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
     const { data: connectors } = useQuery({
         queryKey: ['vehicle-connectors', savedVehicle?.id],
-        queryFn: () => base44.entities.VehicleConnector.list({ vehicle_id: savedVehicle.id }),
+        queryFn: () => base44.entities.VehicleConnector.filter({ vehicle_id: savedVehicle.id }),
         enabled: !!savedVehicle?.id
     });
 
