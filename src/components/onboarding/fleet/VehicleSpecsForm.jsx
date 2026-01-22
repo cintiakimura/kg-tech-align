@@ -78,10 +78,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
 
     const decodeVin = async () => {
         const vin = getValues("vin");
-        if (!vin || vin.length < 17) {
-            toast.error("Please enter a valid 17-character VIN");
-            return;
-        }
+        if (!vin) return; // Silent return if empty, allow partial VINs
 
         setIsDecoding(true);
         try {

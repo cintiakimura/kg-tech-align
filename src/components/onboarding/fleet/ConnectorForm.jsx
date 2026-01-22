@@ -67,7 +67,12 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
             ecu_images: newConnector.ecu_images || []
         };
 
-        createConnectorMutation.mutate(payload);
+        // Force save with minimal validation
+        try {
+            createConnectorMutation.mutate(payload);
+        } catch (e) {
+            console.error("Connector save error forced", e);
+        }
     };
 
     const handleAddEcuImage = (url) => {
