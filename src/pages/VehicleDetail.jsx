@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPageUrl } from '@/utils';
 import { toast } from "sonner";
 import ConnectorForm from '../components/onboarding/fleet/ConnectorForm';
+import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
 export default function VehicleDetail() {
     const params = new URLSearchParams(window.location.search);
@@ -89,10 +90,11 @@ export default function VehicleDetail() {
 
         return (
             <img 
-                src={src} 
+                src={getProxiedImageUrl(src)} 
                 alt={alt} 
                 className={className} 
                 onError={() => setError(true)}
+                referrerPolicy="no-referrer"
             />
         );
     };

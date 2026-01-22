@@ -9,6 +9,7 @@ import { Search, Loader2, Package, Paperclip, Camera, LayoutGrid, List, Pencil }
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import EditProductModal from "@/components/catalogue/EditProductModal";
+import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
 export default function Catalogue() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -158,10 +159,11 @@ export default function Catalogue() {
                             <div className={`${viewMode === 'grid' ? 'w-48 border-r p-4' : 'w-24 h-20 p-2'} bg-white flex items-center justify-center shrink-0 relative`}>
                                 {item.image_url && !imageErrors[item.id] ? (
                                     <img 
-                                        src={item.image_url} 
+                                        src={getProxiedImageUrl(item.image_url)} 
                                         alt="Component" 
                                         className="w-full h-full object-contain mix-blend-multiply"
                                         onError={() => setImageErrors(prev => ({...prev, [item.id]: true}))}
+                                        referrerPolicy="no-referrer"
                                     />
                                 ) : (
                                     <Package className={`${viewMode === 'grid' ? 'w-12 h-12' : 'w-8 h-8'} text-gray-200`} />

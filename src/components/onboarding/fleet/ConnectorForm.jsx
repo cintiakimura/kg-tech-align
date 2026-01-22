@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Plus, X } from 'lucide-react';
 import { toast } from "sonner";
 import FileUpload from '../FileUpload';
+import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
 export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCancel }) {
     const queryClient = useQueryClient();
@@ -132,10 +133,11 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                                     <div className="flex items-center gap-2 max-w-[300px] overflow-hidden">
                                         {item.image_url && !imageErrors[item.id] ? (
                                             <img 
-                                                src={item.image_url} 
+                                                src={getProxiedImageUrl(item.image_url)} 
                                                 alt="" 
                                                 className="w-6 h-6 object-cover rounded flex-shrink-0" 
                                                 onError={() => setImageErrors(prev => ({...prev, [item.id]: true}))}
+                                                referrerPolicy="no-referrer"
                                             />
                                         ) : (
                                             <div className="w-6 h-6 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center">
@@ -207,7 +209,7 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                                     {newConnector.ecu_images.map((img, idx) => (
                                         <div key={idx} className="relative group w-16 h-16 border rounded overflow-hidden bg-gray-50">
                                             <img 
-                                                src={img} 
+                                                src={getProxiedImageUrl(img)} 
                                                 alt="" 
                                                 className="w-full h-full object-cover" 
                                                 onError={(e) => {
@@ -215,6 +217,7 @@ export default function ConnectorForm({ vehicleId, clientEmail, onSuccess, onCan
                                                     e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
                                                     e.target.parentElement.innerHTML += '<span class="text-[8px] text-gray-400">Error</span>';
                                                 }}
+                                                referrerPolicy="no-referrer"
                                             />
                                             <button
                                                 type="button"
