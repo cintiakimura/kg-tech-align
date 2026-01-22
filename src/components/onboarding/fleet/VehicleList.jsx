@@ -71,18 +71,7 @@ export default function VehicleList({ vehicles, onAddVehicle, onSelectVehicle, o
                                     <Pencil className="h-5 w-5" />
                                 </Button>
                                 <div className="flex gap-1 border-l pl-2 dark:border-gray-700">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon"
-                                        className="h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            window.location.href = createPageUrl('VehicleEdit') + `?vehicleId=${vehicle.id}`;
-                                        }}
-                                        title="Edit Vehicle"
-                                    >
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
+
                                     <Button 
                                         variant="ghost" 
                                         size="icon"
