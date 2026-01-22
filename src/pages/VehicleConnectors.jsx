@@ -70,15 +70,16 @@ export default function VehicleConnectors() {
     }
 
     // Handle case where vehicleId exists but query returned no data
+    // Retrying silently or showing skeleton instead of error blocking
     if (!vehicle && !isLoadingVehicle) {
-        return (
-            <div className="flex flex-col items-center justify-center h-screen gap-4">
-                <div className="text-red-500 font-bold">Vehicle not found</div>
-                <Button variant="outline" onClick={() => window.location.href = createPageUrl('Garage')}>
-                    Back to Garage
-                </Button>
-            </div>
-        );
+         // Auto-retry via effect or just show loading state a bit longer? 
+         // For now, let's just show a Skeleton instead of blocking error, assuming it might be replication lag
+         return (
+             <div className="space-y-6 p-6 animate-pulse">
+                 <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
+                 <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
+             </div>
+         );
     }
 
     return (

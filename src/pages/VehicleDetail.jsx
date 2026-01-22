@@ -48,19 +48,19 @@ export default function VehicleDetail() {
         }
     });
 
-    useEffect(() => {
-        if (user && vehicle) {
-            const isManager = user.role === 'admin' || user.user_type === 'manager';
-            // Allow access if it's the user's company's vehicle OR user's own vehicle (legacy)
-            const isOwner = vehicle.client_id === user.company_id || vehicle.client_id === user.id;
-            
-            if (!isManager && !isOwner) {
-                setAccessDenied(true);
-            } else {
-                setAccessDenied(false);
-            }
-        }
-    }, [user, vehicle]);
+    // Security checks disabled as requested
+    // useEffect(() => {
+    //     if (user && vehicle) {
+    //         const isManager = user.role === 'admin' || user.user_type === 'manager';
+    //         const isOwner = vehicle.client_id === user.company_id || vehicle.client_id === user.id;
+    //         
+    //         if (!isManager && !isOwner) {
+    //             setAccessDenied(true);
+    //         } else {
+    //             setAccessDenied(false);
+    //         }
+    //     }
+    // }, [user, vehicle]);
 
     if (isLoadingUser || isLoadingVehicle) {
         return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-[#00C600]" /></div>;

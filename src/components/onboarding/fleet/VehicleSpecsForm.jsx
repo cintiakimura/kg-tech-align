@@ -25,7 +25,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         enabled: !!savedVehicle?.id
     });
 
-    const { register, control, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
+    const { register, control, handleSubmit, setValue, getValues, watch, formState: { errors, isSubmitting } } = useForm({
         defaultValues: {
             transmission_type: "Automatic",
             fuel: "Diesel",
@@ -33,6 +33,30 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             ...(initialData || {})
         }
     });
+
+    // Auto-save logic
+    React.useEffect(() => {
+        const subscription = watch((value, { name, type }) => {
+            if (savedVehicle?.id && type === 'change') {
+                const debouncedUpdate = setTimeout(async () => {
+                    const cleanData = { ...value };
+                    delete cleanData.id;
+                    delete cleanData.created_date;
+                    delete cleanData.updated_date;
+                    delete cleanData.created_by;
+                    
+                    try {
+                        await base44.entities.Vehicle.update(savedVehicle.id, cleanData);
+                        toast.success("Saved", { duration: 1000 });
+                    } catch (e) {
+                        console.error("Auto-save failed", e);
+                    }
+                }, 1000);
+                return () => clearTimeout(debouncedUpdate);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, savedVehicle]);
 
     const decodeVin = async () => {
         const vin = getValues("vin");
@@ -124,24 +148,19 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
         // Strip system fields that cannot be updated
         const { id, created_date, updated_date, created_by, updated_by, audit_log, ...cleanData } = data;
         
-        // Ensure numeric fields are valid or undefined
-        if (isNaN(cleanData.year)) delete cleanData.year;
-        if (isNaN(cleanData.number_gears)) delete cleanData.number_gears;
-
         let vehicleId = savedVehicle?.id || initialData?.id;
 
         if (vehicleId) {
             await base44.entities.Vehicle.update(vehicleId, cleanData);
             const updatedVehicle = { ...savedVehicle, ...cleanData, id: vehicleId };
             setSavedVehicle(updatedVehicle);
-            toast.success(`Vehicle saved. Number: ${updatedVehicle.vehicle_number}`);
+            toast.success(`Vehicle saved.`);
             if (onSuccess) onSuccess(updatedVehicle);
         } else {
             // VEH- + padded number
             const randomNum = Math.floor(Math.random() * 1000000);
             const vehicleNumber = `VEH-${randomNum.toString().padStart(6, '0')}`;
             
-            // Get current user ID
             const currentUser = await base44.auth.me();
 
             const newVehicle = await base44.entities.Vehicle.create({
@@ -149,10 +168,10 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                 vehicle_number: vehicleNumber,
                 status: 'Open for Quotes',
                 client_email: clientEmail || "",
-                client_id: currentUser?.company_id || currentUser?.id // Fallback to user ID if no company
+                client_id: currentUser?.company_id || currentUser?.id 
             });
             setSavedVehicle(newVehicle);
-            toast.success(`Vehicle created! Number: ${vehicleNumber}`);
+            toast.success(`Vehicle created!`);
             if (onSuccess) onSuccess(newVehicle);
         }
     };
