@@ -292,7 +292,7 @@ export default function CompanyForm({ onComplete, initialData }) {
                         disabled={isSubmitting}
                         className="bg-[#00C600] hover:bg-[#00b300] text-white min-w-[200px] h-12 text-lg font-semibold shadow-lg shadow-[#00C600]/20"
                     >
-                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (initialData?.id ? "Save Changes" : "Save & Continue to Garage")}
+                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (initialData?.id ? "Save Changes" : "Save & Continue to Dashboard")}
                     </Button>
                 </div>
             </form>
