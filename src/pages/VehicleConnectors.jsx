@@ -14,10 +14,12 @@ export default function VehicleConnectors() {
     const params = new URLSearchParams(window.location.search);
     const vehicleId = params.get('vehicleId');
 
-    const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
+    const { data: vehicle, isLoading: isLoadingVehicle, refetch: refetchVehicle } = useQuery({
         queryKey: ['vehicle', vehicleId],
         queryFn: () => base44.entities.Vehicle.list({ id: vehicleId }).then(res => res[0]),
         enabled: !!vehicleId,
+        staleTime: 1000 * 60 * 5, // Keep vehicle data fresh for 5 minutes
+        retry: 3,
     });
 
     const { data: connectors, isLoading: isLoadingConnectors, refetch: getConnectors } = useQuery({
@@ -70,14 +72,27 @@ export default function VehicleConnectors() {
     }
 
     // Handle case where vehicleId exists but query returned no data
-    // Retrying silently or showing skeleton instead of error blocking
     if (!vehicle && !isLoadingVehicle) {
-         // Auto-retry via effect or just show loading state a bit longer? 
-         // For now, let's just show a Skeleton instead of blocking error, assuming it might be replication lag
          return (
-             <div className="space-y-6 p-6 animate-pulse">
-                 <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
-                 <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
+             <div className="flex flex-col items-center justify-center h-[60vh] gap-6 text-center">
+                 <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
+                    <Loader2 className="w-8 h-8 text-red-500" />
+                 </div>
+                 <div className="space-y-2">
+                    <h3 className="text-lg font-bold">Vehicle Data Not Found</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                        We couldn't load the vehicle details. This might be due to a network issue or the vehicle was deleted.
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground">ID: {vehicleId}</p>
+                 </div>
+                 <div className="flex gap-4">
+                    <Button onClick={() => refetchVehicle()} variant="outline">
+                        Retry Loading
+                    </Button>
+                    <Button onClick={() => window.location.href = createPageUrl('Garage')}>
+                        Back to Garage
+                    </Button>
+                 </div>
              </div>
          );
     }
@@ -118,7 +133,7 @@ export default function VehicleConnectors() {
                         vehicleId={vehicleId}
                         clientEmail={vehicle?.client_email}
                         onSuccess={() => {
-                            getConnectors();
+                            // Only invalidate, don't force manual fetch to avoid race conditions
                             queryClient.invalidateQueries(['connectors', vehicleId]);
                         }}
                     />
