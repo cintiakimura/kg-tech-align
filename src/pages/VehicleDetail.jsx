@@ -38,10 +38,7 @@ export default function VehicleDetail() {
         enabled: !!queryVehicleId && !accessDenied
     });
 
-    const { data: catalogueItems } = useQuery({
-        queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(),
-    });
+
 
     const deleteConnectorMutation = useMutation({
         mutationFn: (id) => base44.entities.VehicleConnector.delete(id),
@@ -243,7 +240,6 @@ export default function VehicleDetail() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                         {connectors.map((conn) => {
-                             const catalogueItem = catalogueItems?.find(c => c.id === conn.catalogue_id);
                              return (
                                 <Card key={conn.id} className="relative group flex flex-col overflow-hidden hover:shadow-md transition-all border bg-white dark:bg-[#2a2a2a]">
                                     <div className="absolute top-1 right-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -264,9 +260,7 @@ export default function VehicleDetail() {
                                     <CardContent className="p-3 space-y-3 flex-grow flex flex-col">
                                         {/* Main Image */}
                                         <div className="w-full h-32 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
-                                            {catalogueItem?.image_url ? (
-                                                <ImageWithFallback src={catalogueItem.image_url} className="w-full h-full object-contain" />
-                                            ) : conn.image_1 ? (
+                                            {conn.image_1 ? (
                                                 <ImageWithFallback src={conn.image_1} className="w-full h-full object-cover" />
                                             ) : (
                                                 <ImageIcon className="text-gray-300 w-8 h-8" />
@@ -278,13 +272,6 @@ export default function VehicleDetail() {
                                                 {conn.calculator_system || "Unknown System"}
                                             </h4>
                                             
-                                            {catalogueItem && (
-                                                <div className="text-[10px] font-bold text-blue-600 truncate flex items-center gap-1">
-                                                    <span>CAT:</span>
-                                                    {catalogueItem.secret_part_number}
-                                                </div>
-                                            )}
-
                                             <div className="grid grid-cols-2 gap-1 text-[10px] text-muted-foreground mt-2">
                                                 <div>
                                                     <span className="block opacity-70">Color</span>
