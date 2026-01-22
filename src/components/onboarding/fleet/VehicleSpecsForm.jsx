@@ -37,7 +37,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
     // Auto-save logic
     React.useEffect(() => {
         const subscription = watch((value, { name, type }) => {
-            if (savedVehicle?.id && type === 'change') {
+            if (type === 'change') {
                 const debouncedUpdate = setTimeout(async () => {
                     const cleanData = { ...value };
                     delete cleanData.id;
@@ -46,8 +46,26 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
                     delete cleanData.created_by;
                     
                     try {
-                        await base44.entities.Vehicle.update(savedVehicle.id, cleanData);
-                        toast.success("Saved", { duration: 1000 });
+                        if (savedVehicle?.id) {
+                            await base44.entities.Vehicle.update(savedVehicle.id, cleanData);
+                            // toast.success("Saved", { duration: 1000 });
+                        } else {
+                            // Auto-create new vehicle on first input
+                            const randomNum = Math.floor(Math.random() * 1000000);
+                            const vehicleNumber = `VEH-${randomNum.toString().padStart(6, '0')}`;
+                            const currentUser = await base44.auth.me();
+                            
+                            const newVehicle = await base44.entities.Vehicle.create({
+                                ...cleanData,
+                                vehicle_number: vehicleNumber,
+                                status: 'Open for Quotes',
+                                client_email: clientEmail || currentUser?.email || "",
+                                client_id: currentUser?.company_id || currentUser?.id 
+                            });
+                            setSavedVehicle(newVehicle);
+                            // Do not call onSuccess here to prevent redirect while typing
+                            toast.success("Draft created");
+                        }
                     } catch (e) {
                         console.error("Auto-save failed", e);
                     }
@@ -56,7 +74,7 @@ export default function VehicleSpecsForm({ onCancel, onSuccess, clientEmail, ini
             }
         });
         return () => subscription.unsubscribe();
-    }, [watch, savedVehicle]);
+    }, [watch, savedVehicle, clientEmail]);
 
     const decodeVin = async () => {
         const vin = getValues("vin");
