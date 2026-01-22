@@ -11,6 +11,7 @@ import { Loader2, Plus, Trash2, ArrowLeft, Image as ImageIcon, FileText, X } fro
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
 import FileUpload from '../components/onboarding/FileUpload';
+import { getProxiedImageUrl } from "@/components/utils/imageUtils";
 
 export default function VehicleConnectors() {
     const queryClient = useQueryClient();
@@ -134,10 +135,11 @@ export default function VehicleConnectors() {
 
         return (
             <img 
-                src={src} 
+                src={getProxiedImageUrl(src)} 
                 alt={alt} 
                 className={`${className} ${contain ? 'object-contain' : 'object-cover'}`}
                 onError={() => setError(true)}
+                referrerPolicy="no-referrer"
             />
         );
     };
