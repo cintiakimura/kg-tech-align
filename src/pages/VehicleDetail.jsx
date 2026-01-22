@@ -70,19 +70,10 @@ export default function VehicleDetail() {
         updateVehicleMutation.mutate({ [field]: url });
     };
 
-    // Security checks disabled as requested
-    // useEffect(() => {
-    //     if (user && vehicle) {
-    //         const isManager = user.role === 'admin' || user.user_type === 'manager';
-    //         const isOwner = vehicle.client_id === user.company_id || vehicle.client_id === user.id;
-    //         
-    //         if (!isManager && !isOwner) {
-    //             setAccessDenied(true);
-    //         } else {
-    //             setAccessDenied(false);
-    //         }
-    //     }
-    // }, [user, vehicle]);
+    // Security checks removed permanently
+    useEffect(() => {
+        setAccessDenied(false);
+    }, []);
 
     if (!queryVehicleId) {
         return (

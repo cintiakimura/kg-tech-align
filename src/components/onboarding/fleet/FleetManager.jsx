@@ -55,7 +55,9 @@ export default function FleetManager({ clientEmail, vehicles: propVehicles }) {
             const allVehicles = results.flat();
             
             // Deduplicate by ID
-            return _.uniqBy(allVehicles, 'id');
+            const uniqueVehicles = _.uniqBy(allVehicles, 'id');
+            // Sort by created_date descending to show newest first
+            return uniqueVehicles.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
         },
         enabled: !propVehicles && !!user,
         retry: 5,
