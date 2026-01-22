@@ -225,11 +225,7 @@ function LayoutContent({ children }) {
                      )}
                            {(user.role === 'admin' || user.email === 'georg@kgprotech.com') && (
                                <>
-                                   <DropdownMenuItem asChild>
-                                       <a href="/AdminImportCatalogue" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
-                                       Import Catalogue
-                                       </a>
-                                   </DropdownMenuItem>
+                                   {/* Catalogue Import Removed */}
                                    <DropdownMenuItem asChild>
                                        <a href="/AdminAuditReport" className="w-full cursor-pointer font-medium text-indigo-600 dark:text-indigo-400">
                                        Audit Report
