@@ -26,8 +26,7 @@ export default function VehicleConnectors() {
         list_of_functions: '',
         image_front: '',
         image_lever: '',
-        ecu_images: [],
-        catalogue_id: 'none'
+        ecu_images: []
     });
 
     const { data: vehicle, isLoading: isLoadingVehicle } = useQuery({
@@ -42,10 +41,7 @@ export default function VehicleConnectors() {
         enabled: !!vehicleId,
     });
 
-    const { data: catalogueItems } = useQuery({
-        queryKey: ['catalogue'],
-        queryFn: () => base44.entities.Catalogue.list(),
-    });
+
 
     const createConnectorMutation = useMutation({
         mutationFn: (data) => base44.entities.VehicleConnector.create(data),
@@ -96,10 +92,6 @@ export default function VehicleConnectors() {
             image_2: newConnector.image_lever || "",
             ecu_images: newConnector.ecu_images || []
         };
-        
-        if (newConnector.catalogue_id && newConnector.catalogue_id !== 'none') {
-            payload.catalogue_id = newConnector.catalogue_id;
-        }
 
         createConnectorMutation.mutate(payload);
     };
@@ -298,41 +290,7 @@ export default function VehicleConnectors() {
                             </div>
                         </div>
 
-                        {/* Fourth Section: Catalogue */}
-                        <div className="space-y-2 border-t pt-4 dark:border-gray-700">
-                            <Label className="text-xs uppercase font-bold">Catalogue Product</Label>
-                            <Select 
-                                value={newConnector.catalogue_id} 
-                                onValueChange={(val) => setNewConnector({...newConnector, catalogue_id: val})}
-                            >
-                                <SelectTrigger className={InputStyle}>
-                                    <SelectValue placeholder="Select from Catalogue..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">None</SelectItem>
-                                    {catalogueItems?.map(item => (
-                                        <SelectItem key={item.id} value={item.id}>
-                                            <div className="flex items-center gap-2 w-full overflow-hidden">
-                                                <div className="w-6 h-6 rounded overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
-                                                    {item.image_url ? (
-                                                        <ImageWithFallback 
-                                                            src={item.image_url} 
-                                                            className="w-full h-full" 
-                                                            contain={true}
-                                                        />
-                                                    ) : (
-                                                        <ImageIcon className="w-3 h-3 text-gray-300" />
-                                                    )}
-                                                </div>
-                                                <span className="truncate max-w-[240px] block" title={`${item.secret_part_number} (${item.colour})`}>
-                                                    {item.secret_part_number} ({item.colour})
-                                                </span>
-                                            </div>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+
 
                         <div className="flex justify-end pt-2">
                             <Button 
@@ -354,7 +312,6 @@ export default function VehicleConnectors() {
                         <Card key={i} className="h-48 animate-pulse bg-gray-100 dark:bg-gray-800"></Card>
                     ))
                 ) : connectors?.map((conn) => {
-                    const catalogueItem = catalogueItems?.find(c => c.id === conn.catalogue_id);
                     return (
                         <Card key={conn.id} className="relative group hover:shadow-md transition-all border-l-4 border-l-[#00C600] flex flex-col overflow-hidden">
                             <Button
@@ -369,9 +326,7 @@ export default function VehicleConnectors() {
                             <CardContent className="p-3 space-y-2 flex-grow">
                                 {/* Prefer catalogue image, else uploaded front view */}
                                 <div className="w-full h-24 mb-2 bg-gray-50 dark:bg-gray-800 rounded overflow-hidden flex items-center justify-center">
-                                    {catalogueItem?.image_url ? (
-                                        <ImageWithFallback src={catalogueItem.image_url} className="w-full h-full" contain={true} />
-                                    ) : conn.image_1 ? (
+                                    {conn.image_1 ? (
                                         <ImageWithFallback src={conn.image_1} className="w-full h-full" />
                                     ) : (
                                         <ImageIcon className="text-gray-300 w-8 h-8" />
@@ -382,12 +337,6 @@ export default function VehicleConnectors() {
                                     <h4 className="font-bold uppercase text-xs truncate" title={conn.calculator_system}>
                                         {conn.calculator_system || "Unknown"}
                                     </h4>
-                                    
-                                    {catalogueItem && (
-                                        <div className="text-xs font-semibold text-blue-600 truncate mt-1">
-                                            {catalogueItem.secret_part_number}
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="text-[10px] text-muted-foreground space-y-0.5 mt-2 border-t pt-2">
