@@ -1,0 +1,57 @@
+{
+  "name": "Purchase",
+  "type": "object",
+  "properties": {
+    "product": {
+      "type": "string",
+      "enum": [
+        "Connectors",
+        "KG-BOX",
+        "KG-TERMINALS",
+        "KG-APP",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "description": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "tracking_number": {
+      "type": "string"
+    },
+    "courier": {
+      "type": "string"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ordered",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "active",
+        "expired"
+      ],
+      "default": "ordered"
+    }
+  },
+  "required": [],
+  "rls": false
+}

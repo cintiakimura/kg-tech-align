@@ -1,0 +1,70 @@
+{
+  "name": "CompanyProfile",
+  "type": "object",
+  "description": "Company Profile Entity - Public",
+  "properties": {
+    "client_number": {
+      "type": "string"
+    },
+    "company_name": {
+      "type": "string"
+    },
+    "tax_id": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "delivery_address": {
+      "type": "string"
+    },
+    "delivery_country": {
+      "type": "string"
+    },
+    "delivery_province": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "contact_person_name": {
+      "type": "string"
+    },
+    "contact_person_first_name": {
+      "type": "string"
+    },
+    "contact_person_last_name": {
+      "type": "string"
+    },
+    "contact_person_position": {
+      "type": "string"
+    },
+    "contact_person_email": {
+      "type": "string"
+    },
+    "contact_person_phone": {
+      "type": "string"
+    },
+    "payment_terms": {
+      "type": "string",
+      "enum": [
+        "Net 30",
+        "Net 60",
+        "Prepaid",
+        "Other"
+      ],
+      "default": "Prepaid"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "audit_log": {
+      "type": "array"
+    }
+  },
+  "required": [],
+  "rls": false
+}

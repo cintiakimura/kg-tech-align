@@ -1,0 +1,20 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "ID of the company this user belongs to"
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "client",
+        "supplier"
+      ],
+      "description": "Type of user"
+    }
+  },
+  "required": []
+}

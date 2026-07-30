@@ -1,0 +1,71 @@
+{
+  "name": "Quote",
+  "type": "object",
+  "description": "Quote Entity - Public",
+  "properties": {
+    "price": {
+      "type": "number"
+    },
+    "shipping_cost": {
+      "type": "number"
+    },
+    "total_gbp": {
+      "type": "number"
+    },
+    "importation_tax": {
+      "type": "number",
+      "default": 0
+    },
+    "lead_time_days": {
+      "type": "integer"
+    },
+    "note": {
+      "type": "string"
+    },
+    "vehicle_id": {
+      "type": "string"
+    },
+    "supplier_email": {
+      "type": "string"
+    },
+    "supplier_id": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "selected",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "is_winner": {
+      "type": "boolean",
+      "default": false
+    },
+    "weight_kg": {
+      "type": "number"
+    },
+    "width_cm": {
+      "type": "number"
+    },
+    "height_cm": {
+      "type": "number"
+    },
+    "depth_cm": {
+      "type": "number"
+    },
+    "pdf_url": {
+      "type": "string"
+    },
+    "audit_log": {
+      "type": "array"
+    }
+  },
+  "required": [],
+  "rls": false
+}

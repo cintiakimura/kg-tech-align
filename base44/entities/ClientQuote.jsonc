@@ -1,0 +1,50 @@
+{
+  "name": "ClientQuote",
+  "type": "object",
+  "properties": {
+    "client_company_id": {
+      "type": "string"
+    },
+    "vehicle_id": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "quote_number": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date"
+    },
+    "items": {
+      "type": "array"
+    },
+    "tva_rate": {
+      "type": "number",
+      "default": 20
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "accepted",
+        "rejected",
+        "sale",
+        "invoiced"
+      ],
+      "default": "draft"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": false
+}

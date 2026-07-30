@@ -1,0 +1,105 @@
+{
+  "name": "Vehicle",
+  "type": "object",
+  "description": "Vehicle Entity - Public",
+  "properties": {
+    "vehicle_number": {
+      "type": "string"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer"
+    },
+    "fuel": {
+      "type": "string"
+    },
+    "engine_size": {
+      "type": "string"
+    },
+    "engine_power": {
+      "type": "string"
+    },
+    "engine_code": {
+      "type": "string"
+    },
+    "engine_type": {
+      "type": "string"
+    },
+    "transmission_type": {
+      "type": "string"
+    },
+    "number_gears": {
+      "type": "integer"
+    },
+    "vin": {
+      "type": "string"
+    },
+    "engine_model": {
+      "type": "string"
+    },
+    "brakes_type": {
+      "type": "string"
+    },
+    "image_connector_front": {
+      "type": "string"
+    },
+    "image_lever_side": {
+      "type": "string"
+    },
+    "image_ecu_part_number": {
+      "type": "string"
+    },
+    "image_ecu_front": {
+      "type": "string"
+    },
+    "image_extra_1": {
+      "type": "string"
+    },
+    "image_extra_2": {
+      "type": "string"
+    },
+    "file_electrical_scheme": {
+      "type": "string"
+    },
+    "file_sensors_actuators": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "tracking_number": {
+      "type": "string"
+    },
+    "label_url": {
+      "type": "string"
+    },
+    "carrier": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string"
+    },
+    "audit_log": {
+      "type": "array"
+    }
+  },
+  "required": [],
+  "rls": false
+}

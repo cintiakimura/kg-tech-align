@@ -1,0 +1,28 @@
+{
+  "name": "Invitation",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "target_user_type": {
+      "type": "string",
+      "enum": [
+        "manager",
+        "supplier",
+        "client"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [],
+  "rls": false
+}

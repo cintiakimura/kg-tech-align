@@ -1,0 +1,60 @@
+{
+  "name": "VehicleConnector",
+  "type": "object",
+  "description": "Vehicle Connector Entity - Public",
+  "properties": {
+    "vehicle_id": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "custom_type_name": {
+      "type": "string"
+    },
+    "calculator_system": {
+      "type": "string"
+    },
+    "connector_color": {
+      "type": "string"
+    },
+    "pin_quantity": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "image_1": {
+      "type": "string"
+    },
+    "image_2": {
+      "type": "string"
+    },
+    "ecu_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "file_wiring_diagram": {
+      "type": "string"
+    },
+    "list_of_functions": {
+      "type": "string"
+    },
+    "file_pinning_list": {
+      "type": "string"
+    },
+    "file_other_1": {
+      "type": "string"
+    },
+    "file_other_2": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": false
+}

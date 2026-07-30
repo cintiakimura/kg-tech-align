@@ -1,0 +1,32 @@
+{
+  "name": "QuoteItem",
+  "type": "object",
+  "properties": {
+    "quote_id": {
+      "type": "string"
+    },
+    "vehicle_connector_id": {
+      "type": "string"
+    },
+    "supplier_email": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "unit_price": {
+      "type": "number"
+    },
+    "lead_time_days": {
+      "type": "integer"
+    },
+    "quoted_quantity": {
+      "type": "integer"
+    },
+    "quoted_part_number": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": false
+}

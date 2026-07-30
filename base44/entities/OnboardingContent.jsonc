@@ -1,0 +1,14 @@
+{
+  "name": "OnboardingContent",
+  "type": "object",
+  "properties": {
+    "demo_video_url": {
+      "type": "string"
+    },
+    "setup_video_url": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": false
+}

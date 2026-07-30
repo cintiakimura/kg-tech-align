@@ -1,0 +1,39 @@
+{
+  "name": "CompanyDocument",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "owner_email": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Invoice",
+        "Contract",
+        "Technical",
+        "Scheme",
+        "List",
+        "Other"
+      ],
+      "default": "Other"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "description": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": false
+}
